@@ -28,6 +28,14 @@ required = [
   "k8s.io/code-generator/cmd/deepcopy-gen",
 ]
 
+[prune]
+  go-tests = true
+  unused-packages = true
+
+  [[prune.project]]
+    name = "sigs.k8s.io/cluster-api"
+    unused-packages = false
+
 [[constraint]]
   name = "sigs.k8s.io/cluster-api"
   branch = "master"
