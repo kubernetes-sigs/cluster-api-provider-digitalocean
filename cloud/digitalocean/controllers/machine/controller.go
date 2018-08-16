@@ -45,7 +45,7 @@ const (
 	controllerName = "digitalocean-machine-controller"
 )
 
-func Start(server *options.Server, shutdown <-chan struct{}) {
+func Start(server *options.Server, recorder record.EventRecorder, shutdown <-chan struct{}) {
 	config, err := controller.GetConfig(server.CommonConfig.Kubeconfig)
 	if err != nil {
 		glog.Fatalf("Could not create Config for talking to the apiserver: %v", err)
@@ -57,9 +57,10 @@ func Start(server *options.Server, shutdown <-chan struct{}) {
 	}
 
 	params := machineactuator.ActuatorParams{
-		ClusterClient: client.ClusterV1alpha1().Clusters(corev1.NamespaceDefault),
+		V1Alpha1Client: client.ClusterV1alpha1(),
+		EventRecorder:  recorder,
 	}
-	actuator, err := machineactuator.NewActuator(params)
+	actuator, err := machineactuator.NewMachineActuator(params)
 	if err != nil {
 		glog.Fatalf("Could not create digitalocean machine actuator: %v", err)
 	}
@@ -94,7 +95,7 @@ func Run(server *options.Server) error {
 
 	// run function will block and never return.
 	run := func(stop <-chan struct{}) {
-		Start(server, stop)
+		Start(server, recorder, stop)
 	}
 
 	leaderElectConfig := config.GetLeaderElectionConfig()
