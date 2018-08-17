@@ -87,14 +87,6 @@
   version = "v1.1.0"
 
 [[projects]]
-  digest = "1:ec863374a64078cc986d9d17a17a3c4418cfd6dbc5c32d0b9b446f7c5cfa6f26"
-  name = "github.com/digitalocean/godo"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "51f18c0e42941703dc13d15bc0ad69aef6a49830"
-  version = "v1.3.0"
-
-[[projects]]
   digest = "1:f4f6279cb37479954644babd8f8ef00584ff9fa63555d2c6718c1c3517170202"
   name = "github.com/elazarl/go-bindata-assetfs"
   packages = ["."]
@@ -219,14 +211,6 @@
   packages = ["."]
   pruneopts = "UT"
   revision = "4030bb1f1f0c35b30ca7009e9ebd06849dd45306"
-
-[[projects]]
-  branch = "master"
-  digest = "1:a63cff6b5d8b95638bfe300385d93b2a6d9d687734b863da8e09dc834510a690"
-  name = "github.com/google/go-querystring"
-  packages = ["query"]
-  pruneopts = "UT"
-  revision = "53e6ce116135b80d037921a7fdd5138cf32d7a8a"
 
 [[projects]]
   branch = "master"
@@ -447,14 +431,6 @@
   version = "v1.0.2"
 
 [[projects]]
-  branch = "master"
-  digest = "1:595e123593925253dd02152777ddb8cd42300c4f61e783e163b053802547c47c"
-  name = "github.com/tent/http-link-go"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "ac974c61c2f990f4115b119354b5e0b47550e888"
-
-[[projects]]
   digest = "1:03aa6e485e528acb119fb32901cf99582c380225fc7d5a02758e08b180cb56c3"
   name = "github.com/ugorji/go"
   packages = ["codec"]
@@ -472,11 +448,10 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:703d1fa745ceeebca24e79c9dddabe4e7e5323aa848fafd6fff238d1fae0396a"
+  digest = "1:62f0b5792e8ec292c873c27e8a25c5563be8f17412725b5d8951589459b310b6"
   name = "golang.org/x/net"
   packages = [
     "context",
-    "context/ctxhttp",
     "html",
     "html/atom",
     "http/httpguts",
@@ -489,17 +464,6 @@
   ]
   pruneopts = "UT"
   revision = "c39426892332e1bb5ec0a434a079bf82f5d30c54"
-
-[[projects]]
-  branch = "master"
-  digest = "1:af19f6e6c369bf51ef226e989034cd88a45083173c02ac4d7ab74c9a90d356b7"
-  name = "golang.org/x/oauth2"
-  packages = [
-    ".",
-    "internal",
-  ]
-  pruneopts = "UT"
-  revision = "3d292e4d0cdc3a0113e6d207bb137145ef1de42f"
 
 [[projects]]
   branch = "master"
@@ -547,22 +511,6 @@
   ]
   pruneopts = "UT"
   revision = "8f8fd1f23985f19c387c894e5597b22d8256a495"
-
-[[projects]]
-  digest = "1:328b5e4f197d928c444a51a75385f4b978915c0e75521f0ad6a3db976c97a7d3"
-  name = "google.golang.org/appengine"
-  packages = [
-    "internal",
-    "internal/base",
-    "internal/datastore",
-    "internal/log",
-    "internal/remote_api",
-    "internal/urlfetch",
-    "urlfetch",
-  ]
-  pruneopts = "UT"
-  revision = "b1f26356af11148e710935ed1ac8a7f5702c7612"
-  version = "v1.1.0"
 
 [[projects]]
   branch = "master"
@@ -1000,13 +948,11 @@
     "pkg/client/informers_generated/externalversions/internalinterfaces",
     "pkg/client/listers_generated/cluster/v1alpha1",
     "pkg/clientcmd",
-    "pkg/cmd-runner",
     "pkg/controller/cluster",
     "pkg/controller/config",
     "pkg/controller/machine",
     "pkg/controller/noderefutil",
     "pkg/controller/sharedinformers",
-    "pkg/kubeadm",
     "pkg/util",
   ]
   pruneopts = "T"
@@ -1016,11 +962,9 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
-    "github.com/digitalocean/godo",
     "github.com/golang/glog",
     "github.com/kubernetes-incubator/apiserver-builder/pkg/controller",
     "github.com/spf13/pflag",
-    "golang.org/x/oauth2",
     "k8s.io/api/core/v1",
     "k8s.io/apimachinery/pkg/apis/meta/v1",
     "k8s.io/apimachinery/pkg/runtime",
@@ -1045,7 +989,6 @@
     "sigs.k8s.io/cluster-api/pkg/controller/config",
     "sigs.k8s.io/cluster-api/pkg/controller/machine",
     "sigs.k8s.io/cluster-api/pkg/controller/sharedinformers",
-    "sigs.k8s.io/cluster-api/pkg/kubeadm",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1
