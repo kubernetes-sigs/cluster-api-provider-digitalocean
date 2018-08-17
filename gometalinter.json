@@ -3,8 +3,9 @@
   "Concurrency": 2,
   "DisableAll": true,
   "Skip": [
-    "pkg/client",
-    "pkg/machines"
+    "cloud/digitalocean/providerconfig",
+    "cmd/cluster-controller",
+    "cmd/machine-controller"
   ],
   "Exclude": [
     "should have comment or be unexported",

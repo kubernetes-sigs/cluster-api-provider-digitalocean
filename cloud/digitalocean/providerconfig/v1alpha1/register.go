@@ -25,6 +25,7 @@ import (
 	"github.com/kubermatic/cluster-api-provider-digitalocean/cloud/digitalocean/providerconfig"
 )
 
+// DigitalOceanProviderConfigCodec is codec for decoding and encoding DigitalOcean ProviderConfig.
 // +k8s:deepcopy-gen=false
 type DigitalOceanProviderConfigCodec struct {
 	encoder runtime.Encoder
