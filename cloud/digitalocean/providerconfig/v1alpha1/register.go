@@ -50,15 +50,6 @@ func addKnownTypes(scheme *runtime.Scheme) error {
 	scheme.AddKnownTypes(SchemeGroupVersion,
 		&DigitalOceanMachineProviderConfig{},
 	)
-	scheme.AddKnownTypes(SchemeGroupVersion,
-		&DigitalOceanClusterProviderConfig{},
-	)
-	scheme.AddKnownTypes(SchemeGroupVersion,
-		&DigitalOceanMachineProviderStatus{},
-	)
-	scheme.AddKnownTypes(SchemeGroupVersion,
-		&DigitalOceanClusterProviderStatus{},
-	)
 	return nil
 }
 

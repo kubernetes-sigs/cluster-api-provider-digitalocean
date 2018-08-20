@@ -21,22 +21,14 @@ import (
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 type DigitalOceanMachineProviderConfig struct {
 	metav1.TypeMeta `json:",inline"`
-}
 
-// DigitalOceanClusterProviderConfig contains Config for DigitalOcean clusters.
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-type DigitalOceanClusterProviderConfig struct {
-	metav1.TypeMeta `json:",inline"`
-}
+	Region string   `json:"region,omitempty"`
+	Size   string   `json:"region,omitempty"`
+	Image  string   `json:"image,omitempty"`
+	Tags   []string `json:"tags,omitempty"`
 
-// DigitalOceanMachineProviderStatus is status of a DigitalOcean Machine.
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-type DigitalOceanMachineProviderStatus struct {
-	metav1.TypeMeta `json:",inline"`
-}
-
-// DigitalOceanClusterProviderStatus is a status of a DigitalOcean cluster.
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-type DigitalOceanClusterProviderStatus struct {
-	metav1.TypeMeta `json:",inline"`
+	PrivateNetworking bool `json:"private_networking,omitempty"`
+	Backups           bool `json:"backups,omitempty"`
+	IPv6              bool `json:"ipv6,omitempty"`
+	Monitoring        bool `json:"monitoring,omitempty"`
 }
