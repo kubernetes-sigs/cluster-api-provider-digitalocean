@@ -3,28 +3,30 @@ package userdata
 import (
 	"errors"
 
+	clusterv1 "sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
+
+	"github.com/kubermatic/cluster-api-provider-digitalocean/cloud/digitalocean/actuators/machine/userdata/ubuntu"
+	doconfigv1 "github.com/kubermatic/cluster-api-provider-digitalocean/cloud/digitalocean/providerconfig/v1alpha1"
 	"github.com/kubermatic/cluster-api-provider-digitalocean/pkg/containerruntime"
 )
 
 var (
 	ErrProviderNotFound = errors.New("no user data provider for the given os found")
 
-	//providers = map[providerconfig.OperatingSystem]Provider{
-	//	//providerconfig.OperatingSystemCoreos: coreos.Provider{},
-	//	//providerconfig.OperatingSystemUbuntu: ubuntu.Provider{},
-	//	//providerconfig.OperatingSystemCentOS: centos.Provider{},
-	//}
+	providers = map[string]Provider{
+		"ubuntu-16-04-x64": ubuntu.Provider{},
+	}
 )
 
-//func ForOS(os providerconfig.OperatingSystem) (Provider, error) {
-//	if p, found := providers[os]; found {
-//		return p, nil
-//	}
-//	return nil, ErrProviderNotFound
-//}
+func ForOS(os string) (Provider, error) {
+	if p, found := providers[os]; found {
+		return p, nil
+	}
+	return nil, ErrProviderNotFound
+}
 
 type Provider interface {
-	MasterUserData() (string, error)
-	NodeUserData() (string, error)
+	MasterUserData(cluster *clusterv1.Cluster, machine *clusterv1.Machine, providerConfig *doconfigv1.DigitalOceanMachineProviderConfig, bootstrapToken string) (string, error)
+	NodeUserData(cluster *clusterv1.Cluster, machine *clusterv1.Machine, providerConfig *doconfigv1.DigitalOceanMachineProviderConfig, bootstrapToken string) (string, error)
 	SupportedContainerRuntimes() []containerruntime.RuntimeInfo
 }

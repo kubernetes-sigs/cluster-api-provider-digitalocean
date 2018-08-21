@@ -3,11 +3,6 @@ package ubuntu
 const userdataNodeTemplate = `#cloud-config
 hostname: {{ .MachineSpec.Name }}
 
-{{- if .OSConfig.DistUpgradeOnBoot }}
-package_upgrade: true
-package_reboot_if_required: true
-{{- end }}
-
 ssh_pwauth: no
 
 {{- if ne (len .ProviderConfig.SSHPublicKeys) 0 }}
@@ -54,14 +49,9 @@ write_files:
   content: |
     KUBELET_DNS_ARGS=
     KUBELET_EXTRA_ARGS=--authentication-token-webhook=true \
-      {{- if .CloudProvider }}
-      --cloud-provider={{ .CloudProvider }} \
-      --cloud-config=/etc/kubernetes/cloud-config \
-      {{- end}}
       --hostname-override={{ .MachineSpec.Name }} \
       --read-only-port=0 \
       --protect-kernel-defaults=true \
-      --cluster-dns={{ ipSliceToCommaSeparatedString .ClusterDNSIPs }} \
       --cluster-domain=cluster.local
 
 {{- if semverCompare "<1.11.0" .KubeletVersion }}
@@ -70,10 +60,6 @@ write_files:
     [Service]
     EnvironmentFile=/etc/sysconfig/kubelet
 {{- end }}
-
-- path: "/etc/kubernetes/cloud-config"
-  content: |
-{{ if ne .CloudConfig "" }}{{ .CloudConfig | indent 4 }}{{ end }}
 
 - path: "/usr/local/bin/setup"
   permissions: "0777"
@@ -107,7 +93,7 @@ write_files:
 
     kubeadm join \
       --token {{ .BoostrapToken }} \
-      --discovery-token-ca-cert-hash sha256:{{ .KubeadmCACertHash }} \
+      -discovery-token-unsafe-skip-ca-verification \
       {{- if semverCompare ">=1.9.X" .KubeletVersion }}
       --ignore-preflight-errors=CRI \
       {{- end }}
