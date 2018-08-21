@@ -6,8 +6,8 @@ GoUtils
 
 GoUtils provides users with utility functions to manipulate strings in various ways. It is a Go implementation of some
 string manipulation libraries of Java Apache Commons. GoUtils includes the following Java Apache Commons classes:
-* WordUtils
-* RandomStringUtils
+* WordUtils    
+* RandomStringUtils  
 * StringUtils (partial implementation)
 
 ## Installation
@@ -29,12 +29,12 @@ The code snippets below show examples of how to use GoUtils. Some functions retu
 
     import (
         "fmt"
-	"github.com/Masterminds/goutils"
+    	"github.com/Masterminds/goutils"
     )
 
     func main() {
 
-	// EXAMPLE 1: A goutils function which returns no errors
+    	// EXAMPLE 1: A goutils function which returns no errors
         fmt.Println (goutils.Initials("John Doe Foo")) // Prints out "JDF"
 
     }
@@ -50,7 +50,7 @@ Some functions return errors mainly due to illegal arguements used as parameters
     func main() {
 
         // EXAMPLE 2: A goutils function which returns an error
-        rand1, err1 := goutils.Random (-1, 0, 0, true, true)
+        rand1, err1 := goutils.Random (-1, 0, 0, true, true)  
 
         if err1 != nil {
 			fmt.Println(err1) // Prints out error message because -1 was entered as the first parameter in goutils.Random(...)
