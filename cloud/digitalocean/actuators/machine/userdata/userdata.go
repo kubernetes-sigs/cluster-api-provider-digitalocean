@@ -7,7 +7,6 @@ import (
 
 	"github.com/kubermatic/cluster-api-provider-digitalocean/cloud/digitalocean/actuators/machine/userdata/ubuntu"
 	doconfigv1 "github.com/kubermatic/cluster-api-provider-digitalocean/cloud/digitalocean/providerconfig/v1alpha1"
-	"github.com/kubermatic/cluster-api-provider-digitalocean/pkg/containerruntime"
 )
 
 var (
@@ -28,5 +27,5 @@ func ForOS(os string) (Provider, error) {
 type Provider interface {
 	MasterUserData(cluster *clusterv1.Cluster, machine *clusterv1.Machine, providerConfig *doconfigv1.DigitalOceanMachineProviderConfig, bootstrapToken string) (string, error)
 	NodeUserData(cluster *clusterv1.Cluster, machine *clusterv1.Machine, providerConfig *doconfigv1.DigitalOceanMachineProviderConfig, bootstrapToken string) (string, error)
-	SupportedContainerRuntimes() []containerruntime.RuntimeInfo
+	GetDockerVersion(kubernetesVersion string) (string, error)
 }

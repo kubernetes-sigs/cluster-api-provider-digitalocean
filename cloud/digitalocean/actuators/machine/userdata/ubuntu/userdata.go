@@ -19,14 +19,33 @@ import (
 type Provider struct{}
 
 // SupportedContainerRuntimes return list of container runtimes
-func (p Provider) SupportedContainerRuntimes() (runtimes []containerruntime.RuntimeInfo) {
+func (p Provider) GetDockerVersion(kubernetesVersion string) (string, error) {
+	defaultVersions, err := docker.GetOfficiallySupportedVersions(kubernetesVersion)
+	if err != nil {
+		return "", fmt.Errorf("failed to get a officially supported docker version for the given kubelet version: %v", err)
+	}
+
+	var runtimes []containerruntime.RuntimeInfo
 	for _, ic := range dockerInstallCandidates {
 		for _, v := range ic.versions {
 			runtimes = append(runtimes, containerruntime.RuntimeInfo{Name: "docker", Version: v})
 		}
 	}
 
-	return runtimes
+	var newVersion string
+	for _, v := range defaultVersions {
+		for _, sv := range runtimes {
+			if sv.Version == v {
+				// we should not return asap as we prefer the highest supported version
+				newVersion = sv.Version
+			}
+		}
+	}
+	if newVersion == "" {
+		return "", fmt.Errorf("no supported versions available for kubelet '%s'", kubernetesVersion)
+	}
+
+	return newVersion, nil
 }
 
 // NodeUserData generates cloud-init file for a Master.
@@ -57,7 +76,7 @@ func (p Provider) NodeUserData(cluster *clusterv1.Cluster, machine *clusterv1.Ma
 	}
 
 	var crPkg, crPkgVersion string
-	crVersion, err := docker.GetDockerVersion(kubeletVersion.String(), p)
+	crVersion, err := p.GetDockerVersion(kubeletVersion.String())
 	if err != nil {
 		return "", fmt.Errorf("failed to get docker install candidate for %s: %v", machine.Spec.Versions.Kubelet, err)
 	}
