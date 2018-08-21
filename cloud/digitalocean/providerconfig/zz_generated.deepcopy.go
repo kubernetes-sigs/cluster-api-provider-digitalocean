@@ -30,6 +30,11 @@ func (in *DigitalOceanMachineProviderConfig) DeepCopyInto(out *DigitalOceanMachi
 		*out = make([]string, len(*in))
 		copy(*out, *in)
 	}
+	if in.SSHPublicKeys != nil {
+		in, out := &in.SSHPublicKeys, &out.SSHPublicKeys
+		*out = make([]string, len(*in))
+		copy(*out, *in)
+	}
 	return
 }
 

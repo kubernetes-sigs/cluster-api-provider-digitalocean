@@ -22,10 +22,11 @@ import (
 type DigitalOceanMachineProviderConfig struct {
 	metav1.TypeMeta `json:",inline"`
 
-	Region string   `json:"region,omitempty"`
-	Size   string   `json:"region,omitempty"`
-	Image  string   `json:"image,omitempty"`
-	Tags   []string `json:"tags,omitempty"`
+	Region        string   `json:"region,omitempty"`
+	Size          string   `json:"region,omitempty"`
+	Image         string   `json:"image,omitempty"`
+	Tags          []string `json:"tags,omitempty"`
+	SSHPublicKeys []string `json:"sshPublicKeys,omitempty"`
 
 	PrivateNetworking bool `json:"private_networking,omitempty"`
 	Backups           bool `json:"backups,omitempty"`
