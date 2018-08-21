@@ -320,13 +320,13 @@ func (do *DOClient) instanceExists(machine *clusterv1.Machine) (*godo.Droplet, e
 }
 
 func (do *DOClient) validateMachine(providerConfig *doconfigv1.DigitalOceanMachineProviderConfig) error {
-	if len(providerConfig.Image) != 0 {
+	if len(providerConfig.Image) == 0 {
 		return fmt.Errorf("image slug must be provided")
 	}
-	if len(providerConfig.Region) != 0 {
+	if len(providerConfig.Region) == 0 {
 		return fmt.Errorf("region must be provided")
 	}
-	if len(providerConfig.Size) != 0 {
+	if len(providerConfig.Size) == 0 {
 		return fmt.Errorf("size must be provided")
 	}
 
