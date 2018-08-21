@@ -45,7 +45,7 @@ const (
 
 	eventReasonCreate = "Create"
 	eventReasonUpdate = "Update"
-	eventReasonDelete = "Create"
+	eventReasonDelete = "Delete"
 
 	NameAnnotationKey   = "droplet-name"
 	IDAnnotationKey     = "droplet-id"
