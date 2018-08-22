@@ -87,7 +87,7 @@ func (p Provider) NodeUserData(cluster *clusterv1.Cluster, machine *clusterv1.Ma
 
 	// TODO: KubeadmCACertHash, CloudProvider, CloudConfig, OSConfig, ClusterDNSIPs.
 	data := struct {
-		MachineSpec           clusterv1.MachineSpec
+		Machine               *clusterv1.Machine
 		ProviderConfig        *doconfigv1.DigitalOceanMachineProviderConfig
 		BoostrapToken         string
 		CRAptPackage          string
@@ -96,7 +96,7 @@ func (p Provider) NodeUserData(cluster *clusterv1.Cluster, machine *clusterv1.Ma
 		KubeadmDropInFilename string
 		ServerAddr            string
 	}{
-		MachineSpec:           machine.Spec,
+		Machine:               machine,
 		ProviderConfig:        providerConfig,
 		BoostrapToken:         bootstrapToken,
 		CRAptPackage:          crPkg,
