@@ -20,7 +20,7 @@ WORKDIR /go/src/github.com/kubermatic/cluster-api-provider-digitalocean
 # e.g. docker build -t <tag> -f <this_Dockerfile> <path_to_cluster-api-digitalocean>
 COPY . . 
 
-RUN CGO_ENABLED=0 GOOS=linux go install -a -ldflags '-extldflags "-static"' github.com/kubermatic/cluster-api-provider-digitalocean/cmd/machine-digitalocean
+RUN CGO_ENABLED=0 GOOS=linux go install -a -ldflags '-extldflags "-static"' github.com/kubermatic/cluster-api-provider-digitalocean/cmd/machine-controller
 
 # Final container
 FROM debian:stretch-slim
