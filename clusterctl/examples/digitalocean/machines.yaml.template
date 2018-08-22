@@ -2,14 +2,45 @@ items:
 - apiVersion: "cluster.k8s.io/v1alpha1"
   kind: Machine
   metadata:
-    generateName: digitalocean-controlplane-
+    generateName: $MASTER_NAME
     labels:
-      set: controlplane
+      set: master
   spec:
+    providerConfig:
+      region: "$REGION"
+      size: "s-2vcpu-2gb"
+      image: "ubuntu-18-04-x64"
+      tags:
+        - "machine-1"
+       sshPublicKeys:
+        - "ssh-rsa AAAA"
+      private_networking: false
+      backups: false
+      ipv6: false
+      # must be disabled for coreos instances.
+      monitoring: true
+    versions:
+      controlPlane: 1.9.4
+      kubelet: 1.9.4
 - apiVersion: "cluster.k8s.io/v1alpha1"
   kind: Machine
   metadata:
-    generateName: digitalocean-node-
+    generateName: $NODE_NAME
     labels:
       set: node
   spec:
+    providerConfig:
+      region: "$REGION"
+      size: "s-2vcpu-2gb"
+      image: "ubuntu-18-04-x64"
+      tags:
+        - "machine-1"
+      sshPublicKeys:
+        - "ssh-rsa AAAA"
+      private_networking: false
+      backups: false
+      ipv6: false
+      # must be disabled for coreos instances.
+      monitoring: true
+    versions:
+      kubelet: 1.9.4
