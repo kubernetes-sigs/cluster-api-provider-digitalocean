@@ -14,9 +14,8 @@
 
 .PHONY: image
 
-GCR_BUCKET = k8s-cluster-api
-PREFIX = gcr.io/$(GCR_BUCKET)
-DEV_PREFIX ?= gcr.io/$(shell gcloud config get-value project)
+QUAY_BUCKET = kubermatic
+PREFIX = quay.io/$(QUAY_BUCKET)
 NAME = digitalocean-cluster-controller
 TAG = 0.0.1
 
@@ -25,14 +24,3 @@ image:
 
 push: image
 	docker push "$(PREFIX)/$(NAME):$(TAG)"
-	$(MAKE) fix_gcs_permissions
-
-fix_gcs_permissions:
-	gsutil acl ch -u AllUsers:READ gs://artifacts.$(GCR_BUCKET).appspot.com
-	gsutil -m acl ch -r -u AllUsers:READ gs://artifacts.$(GCR_BUCKET).appspot.com
-
-dev_image:
-	docker build -t "$(DEV_PREFIX)/$(NAME):$(TAG)-dev" -f ./Dockerfile ../..
-
-dev_push: dev_image
-	docker push "$(DEV_PREFIX)/$(NAME):$(TAG)-dev"
