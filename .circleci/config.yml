@@ -50,6 +50,24 @@ jobs:
         paths:
         - /go/src/github.com/kubermatic/cluster-api-provider-digitalocean
 
+  publish:
+    <<: *defaults
+    docker:
+    - image: docker:stable
+    steps:
+    - restore_cache:
+        key: repo-{{ .Environment.CIRCLE_SHA1 }}
+    - restore_cache:
+        key: cluster-api-provider-digitalocean-{{ .Revision }}
+    - setup_remote_docker
+    - run: apk update && apk add make bash git
+    - run: |
+        set -e
+        export GIT_TAG=$CIRCLE_TAG
+        docker login -u "${DOCKERHUB_USER}" -p "${DOCKERHUB_PASS}"
+        make images-nodep
+        make push-nodep
+
 workflows:
   version: 2
   build:
@@ -82,3 +100,15 @@ workflows:
         filters:
           tags:
             only: /v.*/
+    - publish:
+        requires:
+        - build
+        - test
+        - check-dependencies
+        filters:
+          branches:
+            only:
+            - master
+          tags:
+            only: /v.*/
+

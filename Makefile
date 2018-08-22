@@ -40,7 +40,15 @@ images: depend
 	$(MAKE) -C cmd/cluster-controller image
 	$(MAKE) -C cmd/machine-controller image
 
+images-nodep:
+	$(MAKE) -C cmd/cluster-controller image
+	$(MAKE) -C cmd/machine-controller image
+
 push: depend
+	$(MAKE) -C cmd/cluster-controller push
+	$(MAKE) -C cmd/machine-controller push
+
+push-nodep:
 	$(MAKE) -C cmd/cluster-controller push
 	$(MAKE) -C cmd/machine-controller push
 
