@@ -430,6 +430,14 @@
   version = "v2.0.1"
 
 [[projects]]
+  digest = "1:0028cb19b2e4c3112225cd871870f2d9cf49b9b4276531f03438a88e94be86fe"
+  name = "github.com/pmezard/go-difflib"
+  packages = ["difflib"]
+  pruneopts = "UT"
+  revision = "792786c7400a136282c1664665ae0a8db921c6c2"
+  version = "v1.0.0"
+
+[[projects]]
   digest = "1:b6221ec0f8903b556e127c449e7106b63e6867170c2d10a7c058623d086f2081"
   name = "github.com/prometheus/client_golang"
   packages = ["prometheus"]
@@ -1065,6 +1073,7 @@
     "github.com/digitalocean/godo",
     "github.com/golang/glog",
     "github.com/kubernetes-incubator/apiserver-builder/pkg/controller",
+    "github.com/pmezard/go-difflib/difflib",
     "github.com/spf13/pflag",
     "golang.org/x/oauth2",
     "k8s.io/api/core/v1",
