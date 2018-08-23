@@ -13,8 +13,8 @@ CLUSTER_GENERATED_FILE=${OUTPUT_DIR}/cluster.yaml
 
 REGION=fra1
 CLUSTER_NAME=test-1
-MASTER_NAME=digitalocean-fra1-master-1
-NODE_NAME=digitalocean-fra1-node-1
+MASTER_NAME=digitalocean-fra1-master-
+NODE_NAME=digitalocean-fra1-node-
 
 SCRIPT=$(basename $0)
 while test $# -gt 0; do

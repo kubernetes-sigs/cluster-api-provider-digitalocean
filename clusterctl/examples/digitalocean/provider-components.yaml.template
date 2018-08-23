@@ -76,6 +76,11 @@ spec:
           - name: certs
             mountPath: /etc/ssl/certs
         env:
+        - name: DIGITALOCEAN_ACCESS_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: digitalocean
+              key: token
         - name: NODE_NAME
           valueFrom:
             fieldRef:

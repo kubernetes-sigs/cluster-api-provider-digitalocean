@@ -335,11 +335,11 @@ func (do *DOClient) validateMachine(providerConfig *doconfigv1.DigitalOceanMachi
 
 // decodeMachineProviderConfig returns DigitalOcean MachineProviderConfig from upstream Spec.
 func (do *DOClient) decodeMachineProviderConfig(providerConfig clusterv1.ProviderConfig) (*doconfigv1.DigitalOceanMachineProviderConfig, error) {
-	var config *doconfigv1.DigitalOceanMachineProviderConfig
-	err := do.doProviderConfigCodec.DecodeFromProviderConfig(providerConfig, config)
+	var config doconfigv1.DigitalOceanMachineProviderConfig
+	err := do.doProviderConfigCodec.DecodeFromProviderConfig(providerConfig, &config)
 	if err != nil {
 		return nil, err
 	}
 
-	return config, err
+	return &config, err
 }
