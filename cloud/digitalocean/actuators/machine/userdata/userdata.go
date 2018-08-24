@@ -14,6 +14,7 @@ var (
 
 	providers = map[string]Provider{
 		"ubuntu-16-04-x64": ubuntu.Provider{},
+		"ubuntu-18-04-x64": ubuntu.Provider{},
 	}
 )
 
