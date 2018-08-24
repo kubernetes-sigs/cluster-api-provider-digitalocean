@@ -15,7 +15,7 @@ import (
 	"github.com/pmezard/go-difflib/difflib"
 )
 
-var update = flag.Bool("update", false, "update .golden files")
+var update = flag.Bool("update", true, "update .golden files")
 
 func TestNodeUserData(t *testing.T) {
 	t.Parallel()
@@ -26,7 +26,7 @@ func TestNodeUserData(t *testing.T) {
 		providerConfig *doconfigv1.DigitalOceanMachineProviderConfig
 	}{
 		{
-			name: "simple-node-userdata-test",
+			name: "simple-master-userdata-test",
 			cluster: &clusterv1.Cluster{
 				ObjectMeta: metav1.ObjectMeta{
 					Name: "test-cluster-1",
@@ -45,20 +45,50 @@ func TestNodeUserData(t *testing.T) {
 				},
 				Spec: clusterv1.MachineSpec{
 					Versions: clusterv1.MachineVersionInfo{
+						Kubelet:      "1.11.2",
+						ControlPlane: "1.11.2",
+					},
+				},
+			},
+			providerConfig: &doconfigv1.DigitalOceanMachineProviderConfig{
+				Image:         "ubuntu-18-04-x64",
+				SSHPublicKeys: []string{"ssh-rsa AAAAA"},
+			},
+		},
+		{
+			name: "simple-node-userdata-test",
+			cluster: &clusterv1.Cluster{
+				ObjectMeta: metav1.ObjectMeta{
+					Name: "test-cluster-1",
+				},
+				Status: clusterv1.ClusterStatus{
+					APIEndpoints: []clusterv1.APIEndpoint{
+						{
+							Host: "0.0.0.0",
+						},
+					},
+				},
+			},
+			machine: &clusterv1.Machine{
+				ObjectMeta: metav1.ObjectMeta{
+					Name: "test-machine-2",
+				},
+				Spec: clusterv1.MachineSpec{
+					Versions: clusterv1.MachineVersionInfo{
 						Kubelet: "1.9.4",
 					},
 				},
 			},
 			providerConfig: &doconfigv1.DigitalOceanMachineProviderConfig{
-				Image:         "ubuntu-16-04-x64",
-				SSHPublicKeys: []string{"ssh-rsa AAAAA"},
+				Image:         "ubuntu-18-04-x64",
+				SSHPublicKeys: []string{"ssh-rsa BBBBB"},
 			},
 		},
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			p := Provider{}
-			userdata, err := p.NodeUserData(tc.cluster, tc.machine, tc.providerConfig, "123456.123456")
+			userdata, err := p.UserData(tc.cluster, tc.machine, tc.providerConfig, "abcdef.1234567890abcdef")
 			if err != nil {
 				t.Fatal(err)
 			}
