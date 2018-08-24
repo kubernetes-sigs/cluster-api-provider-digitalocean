@@ -25,7 +25,6 @@ func ForOS(os string) (Provider, error) {
 }
 
 type Provider interface {
-	MasterUserData(cluster *clusterv1.Cluster, machine *clusterv1.Machine, providerConfig *doconfigv1.DigitalOceanMachineProviderConfig, bootstrapToken string) (string, error)
-	NodeUserData(cluster *clusterv1.Cluster, machine *clusterv1.Machine, providerConfig *doconfigv1.DigitalOceanMachineProviderConfig, bootstrapToken string) (string, error)
+	UserData(cluster *clusterv1.Cluster, machine *clusterv1.Machine, providerConfig *doconfigv1.DigitalOceanMachineProviderConfig, bootstrapToken string) (string, error)
 	GetDockerVersion(kubernetesVersion string) (string, error)
 }
