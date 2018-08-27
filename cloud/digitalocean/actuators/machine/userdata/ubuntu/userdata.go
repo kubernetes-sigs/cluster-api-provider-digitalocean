@@ -7,12 +7,12 @@ import (
 
 	clusterv1 "sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
+	"github.com/Masterminds/semver"
 	doconfigv1 "github.com/kubermatic/cluster-api-provider-digitalocean/cloud/digitalocean/providerconfig/v1alpha1"
 	"github.com/kubermatic/cluster-api-provider-digitalocean/pkg/containerruntime"
 	"github.com/kubermatic/cluster-api-provider-digitalocean/pkg/containerruntime/docker"
 	"github.com/kubermatic/cluster-api-provider-digitalocean/pkg/machinetemplate"
-
-	"github.com/Masterminds/semver"
+	"github.com/kubermatic/cluster-api-provider-digitalocean/pkg/util"
 )
 
 // Provider is userdata.Provider implementation.
@@ -48,17 +48,23 @@ func (p Provider) GetDockerVersion(kubernetesVersion string) (string, error) {
 	return newVersion, nil
 }
 
-// NodeUserData generates cloud-init file for a Master.
-func (p Provider) MasterUserData(cluster *clusterv1.Cluster, machine *clusterv1.Machine, providerConfig *doconfigv1.DigitalOceanMachineProviderConfig, bootstrapToken string) (string, error) {
-	return "", fmt.Errorf("TODO: Not yet implemented")
-}
-
-// NodeUserData generates cloud-init file for a Node.
-func (p Provider) NodeUserData(cluster *clusterv1.Cluster, machine *clusterv1.Machine, providerConfig *doconfigv1.DigitalOceanMachineProviderConfig, bootstrapToken string) (string, error) {
+// UserData generates cloud-init file for a Machine.
+func (p Provider) UserData(cluster *clusterv1.Cluster, machine *clusterv1.Machine, providerConfig *doconfigv1.DigitalOceanMachineProviderConfig, bootstrapToken string) (string, error) {
 	// Parse template for machine data
-	tmpl, err := template.New("user-data").Funcs(machinetemplate.TxtFuncMap()).Parse(userdataNodeTemplate)
-	if err != nil {
-		return "", fmt.Errorf("failed to parse user-data template: %v", err)
+	var (
+		tmpl *template.Template
+		err  error
+	)
+	if util.IsMachineMaster(machine) {
+		tmpl, err = template.New("user-data").Funcs(machinetemplate.TxtFuncMap()).Parse(userdataMasterTemplate)
+		if err != nil {
+			return "", fmt.Errorf("failed to parse user-data template: %v", err)
+		}
+	} else {
+		tmpl, err = template.New("user-data").Funcs(machinetemplate.TxtFuncMap()).Parse(userdataNodeTemplate)
+		if err != nil {
+			return "", fmt.Errorf("failed to parse user-data template: %v", err)
+		}
 	}
 
 	// Convert kubeletVersion struct to a semver struct.
