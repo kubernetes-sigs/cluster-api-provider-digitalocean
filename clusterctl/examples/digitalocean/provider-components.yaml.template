@@ -75,6 +75,8 @@ spec:
             mountPath: /etc/kubernetes
           - name: certs
             mountPath: /etc/ssl/certs
+          - name: kubeadm
+            mountPath: /usr/bin/kubeadm
         env:
         - name: DIGITALOCEAN_ACCESS_TOKEN
           valueFrom:
@@ -104,3 +106,6 @@ spec:
       - name: certs
         hostPath:
           path: /etc/ssl/certs
+      - name: kubeadm
+        hostPath:
+          path: /usr/bin/kubeadm

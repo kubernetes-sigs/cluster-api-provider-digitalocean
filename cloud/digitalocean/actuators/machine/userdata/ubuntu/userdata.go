@@ -109,7 +109,9 @@ func (p Provider) UserData(cluster *clusterv1.Cluster, machine *clusterv1.Machin
 		CRAptPackageVersion:   crPkgVersion,
 		KubernetesVersion:     kubeletVersion.String(),
 		KubeadmDropInFilename: kubeadmDropInFilename,
-		ServerAddr:            cluster.Status.APIEndpoints[0].Host,
+	}
+	if len(cluster.Status.APIEndpoints) != 0 {
+		data.ServerAddr = cluster.Status.APIEndpoints[0].Host
 	}
 	b := &bytes.Buffer{}
 	err = tmpl.Execute(b, data)

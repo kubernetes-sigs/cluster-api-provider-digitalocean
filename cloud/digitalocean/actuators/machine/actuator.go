@@ -31,6 +31,7 @@ import (
 	client "sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset/typed/cluster/v1alpha1"
 	"sigs.k8s.io/cluster-api/pkg/kubeadm"
 
+	"github.com/kubermatic/cluster-api-provider-digitalocean/cloud/digitalocean/actuators/machine/userdata"
 	doconfigv1 "github.com/kubermatic/cluster-api-provider-digitalocean/cloud/digitalocean/providerconfig/v1alpha1"
 
 	"github.com/digitalocean/godo"
@@ -125,7 +126,20 @@ func (do *DOClient) Create(cluster *clusterv1.Cluster, machine *clusterv1.Machin
 		return nil
 	}
 
-	// TODO: Handle SSH keys, Tags and Metadata.
+	metadataProvider, err := userdata.ForOS(machineConfig.Image)
+	if err != nil {
+		return err
+	}
+	kubeadmToken, err := do.getKubeadmToken()
+	if err != nil {
+		return err
+	}
+	metadata, err := metadataProvider.UserData(cluster, machine, machineConfig, kubeadmToken)
+	if err != nil {
+		return err
+	}
+
+	// TODO: Handle SSH keys.
 	// Metadata handlers can be ported from the machine-controller.
 	dropletCreateReq := &godo.DropletCreateRequest{
 		Name:   machine.Name,
@@ -138,9 +152,10 @@ func (do *DOClient) Create(cluster *clusterv1.Cluster, machine *clusterv1.Machin
 		IPv6:              machineConfig.IPv6,
 		PrivateNetworking: machineConfig.IPv6,
 		Monitoring:        machineConfig.Monitoring,
-		Tags: []string{
+		Tags: append([]string{
 			string(machine.UID),
-		},
+		}, machineConfig.Tags...),
+		UserData: metadata,
 	}
 
 	droplet, _, err = do.godoClient.Droplets.Create(do.ctx, dropletCreateReq)
@@ -165,7 +180,7 @@ func (do *DOClient) Create(cluster *clusterv1.Cluster, machine *clusterv1.Machin
 		machine.ObjectMeta.Annotations = map[string]string{}
 	}
 	machine.ObjectMeta.Annotations[NameAnnotationKey] = droplet.Name
-	machine.ObjectMeta.Annotations[IDAnnotationKey] = string(droplet.ID)
+	machine.ObjectMeta.Annotations[IDAnnotationKey] = strconv.Itoa(droplet.ID)
 	machine.ObjectMeta.Annotations[RegionAnnotationKey] = droplet.Region.Name
 
 	_, err = do.v1Alpha1Client.Machines(machine.Namespace).Update(machine)
