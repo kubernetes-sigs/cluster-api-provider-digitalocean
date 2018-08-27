@@ -33,6 +33,7 @@ import (
 
 	"github.com/kubermatic/cluster-api-provider-digitalocean/cloud/digitalocean/actuators/machine/userdata"
 	doconfigv1 "github.com/kubermatic/cluster-api-provider-digitalocean/cloud/digitalocean/providerconfig/v1alpha1"
+	"github.com/kubermatic/cluster-api-provider-digitalocean/pkg/ssh"
 
 	"github.com/digitalocean/godo"
 	"github.com/golang/glog"
@@ -139,8 +140,16 @@ func (do *DOClient) Create(cluster *clusterv1.Cluster, machine *clusterv1.Machin
 		return err
 	}
 
-	// TODO: Handle SSH keys.
-	// Metadata handlers can be ported from the machine-controller.
+	// We're generating a temporary SSH key to prevent DigitalOcean from sending password over email.
+	sshkey, err := ssh.NewKey()
+	if err != nil {
+		return err
+	}
+	if err := sshkey.Create(do.ctx, do.godoClient.Keys); err != nil {
+		return err
+	}
+	defer sshkey.Delete(do.ctx, do.godoClient.Keys)
+
 	dropletCreateReq := &godo.DropletCreateRequest{
 		Name:   machine.Name,
 		Region: machineConfig.Region,
@@ -155,6 +164,7 @@ func (do *DOClient) Create(cluster *clusterv1.Cluster, machine *clusterv1.Machin
 		Tags: append([]string{
 			string(machine.UID),
 		}, machineConfig.Tags...),
+		SSHKeys:  []godo.DropletCreateSSHKey{{Fingerprint: sshkey.FingerprintMD5}},
 		UserData: metadata,
 	}
 
