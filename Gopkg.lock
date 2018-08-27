@@ -512,11 +512,18 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:69b3fcb7a41b18436a85471cbdcfc70ad10ba3206f8c87563e1c773610e1bcad"
+  digest = "1:3215a53ddc04bb7dbfab499b3c03d1af414d53382a16b121374ebb2fc40342b3"
   name = "golang.org/x/crypto"
   packages = [
+    "curve25519",
+    "ed25519",
+    "ed25519/internal/edwards25519",
+    "internal/chacha20",
+    "internal/subtle",
     "pbkdf2",
+    "poly1305",
     "scrypt",
+    "ssh",
     "ssh/terminal",
   ]
   pruneopts = "UT"
@@ -1073,8 +1080,10 @@
     "github.com/digitalocean/godo",
     "github.com/golang/glog",
     "github.com/kubernetes-incubator/apiserver-builder/pkg/controller",
+    "github.com/pborman/uuid",
     "github.com/pmezard/go-difflib/difflib",
     "github.com/spf13/pflag",
+    "golang.org/x/crypto/ssh",
     "golang.org/x/oauth2",
     "k8s.io/api/core/v1",
     "k8s.io/apimachinery/pkg/apis/meta/v1",
