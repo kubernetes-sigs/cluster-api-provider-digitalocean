@@ -142,7 +142,6 @@ func Run(server *options.Server) error {
 }
 
 func createRecorder(kubeClient *kubernetes.Clientset) (record.EventRecorder, error) {
-
 	eventsScheme := runtime.NewScheme()
 	if err := corev1.AddToScheme(eventsScheme); err != nil {
 		return nil, err

@@ -18,7 +18,6 @@ package main
 
 import (
 	"flag"
-
 	"github.com/golang/glog"
 	"github.com/spf13/pflag"
 	"k8s.io/apiserver/pkg/util/logs"
@@ -28,19 +27,23 @@ import (
 	"github.com/kubermatic/cluster-api-provider-digitalocean/cloud/digitalocean/controllers/machine/options"
 )
 
-func init() {
-	config.ControllerConfig.AddFlags(pflag.CommandLine)
-}
-
 func main() {
+	var machineSetupConfigPath string
+	fs := pflag.CommandLine
+	fs.StringVar(&machineSetupConfigPath, "config", machineSetupConfigPath, "path to machine setup config file")
+	config.ControllerConfig.AddFlags(pflag.CommandLine)
 	// the following line exists to make glog happy, for more information, see: https://github.com/kubernetes/kubernetes/issues/17162
 	flag.CommandLine.Parse([]string{})
+
+	// Map go flags to pflag
+	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
+
 	pflag.Parse()
 
 	logs.InitLogs()
 	defer logs.FlushLogs()
 
-	machineServer := options.NewServer()
+	machineServer := options.NewServer(machineSetupConfigPath)
 	if err := machine.Run(machineServer); err != nil {
 		glog.Errorf("Failed to start the machine controller. Err: %v", err)
 	}

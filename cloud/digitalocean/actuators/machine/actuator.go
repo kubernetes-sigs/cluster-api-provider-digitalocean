@@ -31,6 +31,7 @@ import (
 	client "sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset/typed/cluster/v1alpha1"
 	"sigs.k8s.io/cluster-api/pkg/kubeadm"
 
+	"github.com/kubermatic/cluster-api-provider-digitalocean/cloud/digitalocean/actuators/machine/machineconfig"
 	"github.com/kubermatic/cluster-api-provider-digitalocean/cloud/digitalocean/actuators/machine/userdata"
 	doconfigv1 "github.com/kubermatic/cluster-api-provider-digitalocean/cloud/digitalocean/providerconfig/v1alpha1"
 	"github.com/kubermatic/cluster-api-provider-digitalocean/pkg/ssh"
@@ -66,6 +67,10 @@ type DOClientKubeadm interface {
 	TokenCreate(params kubeadm.TokenCreateParams) (string, error)
 }
 
+type DOClientMachineSetupConfig interface {
+	GetMachineSetupConfig() (machineconfig.MachineSetupConfig, error)
+}
+
 // DOClient is responsible for performing machine reconciliation
 type DOClient struct {
 	godoClient            *godo.Client
@@ -75,13 +80,15 @@ type DOClient struct {
 	ctx                   context.Context
 	v1Alpha1Client        client.ClusterV1alpha1Interface
 	eventRecorder         record.EventRecorder
+	machineSetupConfig    DOClientMachineSetupConfig
 }
 
 // ActuatorParams holds parameter information for DOClient
 type ActuatorParams struct {
-	Kubeadm        DOClientKubeadm
-	V1Alpha1Client client.ClusterV1alpha1Interface
-	EventRecorder  record.EventRecorder
+	Kubeadm            DOClientKubeadm
+	V1Alpha1Client     client.ClusterV1alpha1Interface
+	EventRecorder      record.EventRecorder
+	MachineSetupConfig DOClientMachineSetupConfig
 }
 
 // NewMachineActuator creates a new DOClient
@@ -104,11 +111,16 @@ func NewMachineActuator(params ActuatorParams) (*DOClient, error) {
 		ctx:                   context.Background(),
 		v1Alpha1Client:        params.V1Alpha1Client,
 		eventRecorder:         params.EventRecorder,
+		machineSetupConfig:    params.MachineSetupConfig,
 	}, nil
 }
 
 // Create creates a machine and is invoked by the Machine Controller
 func (do *DOClient) Create(cluster *clusterv1.Cluster, machine *clusterv1.Machine) error {
+	if do.machineSetupConfig == nil {
+		return fmt.Errorf("machine setup config is required")
+	}
+
 	machineConfig, err := do.decodeMachineProviderConfig(machine.Spec.ProviderConfig)
 	if err != nil {
 		return fmt.Errorf("error decoding provided machineConfig: %v", err)
