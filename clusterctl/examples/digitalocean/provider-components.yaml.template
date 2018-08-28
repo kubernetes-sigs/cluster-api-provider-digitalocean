@@ -77,6 +77,8 @@ spec:
             mountPath: /etc/ssl/certs
           - name: kubeadm
             mountPath: /usr/bin/kubeadm
+          - name: machine-config
+            mountPath: /etc/machineconfig
         env:
         - name: DIGITALOCEAN_ACCESS_TOKEN
           valueFrom:
@@ -92,6 +94,7 @@ spec:
         args:
         - --kubeconfig=/etc/kubernetes/admin.conf
         - --leader-elect
+        - --config=/etc/machineconfig/config.yaml
         resources:
           requests:
             cpu: 200m
@@ -109,3 +112,29 @@ spec:
       - name: kubeadm
         hostPath:
           path: /usr/bin/kubeadm
+      - name: machine-config
+        configMap:
+          name: machine-config
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: machine-config
+data:
+  config.yaml: |-
+    items:
+    - machineParams:
+      - image: ubuntu-18-04-x64
+        versions:
+          kubelet: 1.9.4
+          controlPlane: 1.9.4
+      userdata:
+        echo "Hello World!"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: digitalocean
+type: Opaque
+stringData:
+  token: $DIGITALOCEAN_ACCESS_TOKEN

@@ -38,6 +38,7 @@ import (
 	"sigs.k8s.io/cluster-api/pkg/controller/sharedinformers"
 
 	machineactuator "github.com/kubermatic/cluster-api-provider-digitalocean/cloud/digitalocean/actuators/machine"
+	"github.com/kubermatic/cluster-api-provider-digitalocean/cloud/digitalocean/actuators/machine/machineconfig"
 	"github.com/kubermatic/cluster-api-provider-digitalocean/cloud/digitalocean/controllers/machine/options"
 )
 
@@ -56,9 +57,15 @@ func Start(server *options.Server, recorder record.EventRecorder, shutdown <-cha
 		glog.Fatalf("Could not create client for talking to the apiserver: %v", err)
 	}
 
+	configWatch, err := machineconfig.NewConfigWatch(server.MachineSetupConfigPath)
+	if err != nil {
+		glog.Fatalf("could not create configWatch: %v", err)
+	}
+
 	params := machineactuator.ActuatorParams{
-		V1Alpha1Client: client.ClusterV1alpha1(),
-		EventRecorder:  recorder,
+		V1Alpha1Client:     client.ClusterV1alpha1(),
+		EventRecorder:      recorder,
+		MachineSetupConfig: configWatch,
 	}
 	actuator, err := machineactuator.NewMachineActuator(params)
 	if err != nil {
@@ -143,7 +150,6 @@ func Run(server *options.Server) error {
 }
 
 func createRecorder(kubeClient *kubernetes.Clientset) (record.EventRecorder, error) {
-
 	eventsScheme := runtime.NewScheme()
 	if err := corev1.AddToScheme(eventsScheme); err != nil {
 		return nil, err
