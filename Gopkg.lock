@@ -103,20 +103,20 @@
   version = "v17"
 
 [[projects]]
-  digest = "1:a2c1d0e43bd3baaa071d1b9ed72c27d78169b2b269f71c105ac4ba34b1be4a39"
+  digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
   pruneopts = "UT"
-  revision = "346938d642f2ec3594ed81d874461961cd0faa76"
-  version = "v1.1.0"
+  revision = "8991bc29aa16c548c550c7ff78260e27b9ab7c73"
+  version = "v1.1.1"
 
 [[projects]]
-  digest = "1:ec863374a64078cc986d9d17a17a3c4418cfd6dbc5c32d0b9b446f7c5cfa6f26"
+  digest = "1:2df8429ac25b17e18071d2ec90cf8aa3502adab20daacd7db3d92f79f911d3a8"
   name = "github.com/digitalocean/godo"
   packages = ["."]
   pruneopts = "UT"
-  revision = "51f18c0e42941703dc13d15bc0ad69aef6a49830"
-  version = "v1.3.0"
+  revision = "ddc940d8ef8b736b5cdfc47f24cdf95b9a4b73f6"
+  version = "v1.4.1"
 
 [[projects]]
   digest = "1:f4f6279cb37479954644babd8f8ef00584ff9fa63555d2c6718c1c3517170202"
@@ -223,7 +223,7 @@
   revision = "24b0969c4cb722950103eed87108c8d291a8df00"
 
 [[projects]]
-  digest = "1:17fe264ee908afc795734e8c4e63db2accabaf57326dbf21763a7d6b86096260"
+  digest = "1:4c0989ca0bcd10799064318923b9bc2db6b4d6338dd75f3f2d86c3511aaaf5cf"
   name = "github.com/golang/protobuf"
   packages = [
     "proto",
@@ -233,8 +233,8 @@
     "ptypes/timestamp",
   ]
   pruneopts = "UT"
-  revision = "b4deda0973fb4c70b50d226b1af49f3da59f5265"
-  version = "v1.1.0"
+  revision = "aa810b61a9c79d51363740d207bb46cf8e620ed5"
+  version = "v1.2.0"
 
 [[projects]]
   branch = "master"
@@ -261,12 +261,12 @@
   revision = "24818f796faf91cd76ec7bddd72458fbced7a6c1"
 
 [[projects]]
-  digest = "1:8f8811f9be822914c3a25c6a071e93beb4c805d7b026cbf298bc577bc1cc945b"
+  digest = "1:3a26588bc48b96825977c1b3df964f8fd842cd6860cc26370588d3563433cf11"
   name = "github.com/google/uuid"
   packages = ["."]
   pruneopts = "UT"
-  revision = "064e2069ce9c359c118179501254f67d7d37ba24"
-  version = "0.2"
+  revision = "d460ce9f8df2e77fb1ba55ca87fafed96c607494"
+  version = "v1.0.0"
 
 [[projects]]
   digest = "1:65c4414eeb350c47b8de71110150d0ea8a281835b1f386eacaa3ad7325929c21"
@@ -311,12 +311,12 @@
   revision = "bf9dde6d0d2c004a008c27aaee91170c786f6db8"
 
 [[projects]]
-  digest = "1:6b1e7618931d0ed9a17fec1c1d84271907aa61172c50b8272327f6cd4fafb650"
+  digest = "1:4e0aa2a8f7c5d6e125af6ed331f5389003429e4fb0747f6d4be9715f246800f0"
   name = "github.com/huandu/xstrings"
   packages = ["."]
   pruneopts = "UT"
-  revision = "2bf18b218c51864a87384c06996e40ff9dcff8e1"
-  version = "v1.0.0"
+  revision = "55ae428c2ac4f74d7430952ef528631e656ac92c"
+  version = "v1.1.0"
 
 [[projects]]
   digest = "1:8eb1de8112c9924d59bf1d3e5c26f5eaa2bfc2a5fcbb92dc1c2e4546d695f277"
@@ -371,7 +371,7 @@
     "jwriter",
   ]
   pruneopts = "UT"
-  revision = "03f2033d19d5860aef995fe360ac7d395cd8ce65"
+  revision = "60711f1a8329503b04e1c88535f419d0bb440bff"
 
 [[projects]]
   digest = "1:ff5ebae34cfbf047d505ee150de27e60570e8c394b3b8fdbb720ff6ac71985fc"
@@ -527,11 +527,11 @@
     "ssh/terminal",
   ]
   pruneopts = "UT"
-  revision = "de0752318171da717af4ce24d0a2e8626afaeb11"
+  revision = "614d502a4dac94afa3a6ce146bd1736da82514c6"
 
 [[projects]]
   branch = "master"
-  digest = "1:703d1fa745ceeebca24e79c9dddabe4e7e5323aa848fafd6fff238d1fae0396a"
+  digest = "1:653d56c8c910092b24c8d537fe94c5b8179ea66a843aae374cb60a5e85c1cd57"
   name = "golang.org/x/net"
   packages = [
     "context",
@@ -547,29 +547,29 @@
     "websocket",
   ]
   pruneopts = "UT"
-  revision = "c39426892332e1bb5ec0a434a079bf82f5d30c54"
+  revision = "8a410e7b638dca158bf9e766925842f6651ff828"
 
 [[projects]]
   branch = "master"
-  digest = "1:af19f6e6c369bf51ef226e989034cd88a45083173c02ac4d7ab74c9a90d356b7"
+  digest = "1:363b547c971a2b07474c598b6e9ebcb238d556d8a27f37b3895ad20cd50e7281"
   name = "golang.org/x/oauth2"
   packages = [
     ".",
     "internal",
   ]
   pruneopts = "UT"
-  revision = "3d292e4d0cdc3a0113e6d207bb137145ef1de42f"
+  revision = "d2e6202438beef2727060aa7cabdd924d92ebfd9"
 
 [[projects]]
   branch = "master"
-  digest = "1:26ec91f56010c7c9f74630771a35f12f07f3c1d077455ae6611fe58b21433146"
+  digest = "1:9c99029818a3d4f53bcfd6c0158ca068aeacfecb29283f82a1f9c79b8d2a7da4"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "14742f9018cd6651ec7364dc6ee08af0baaa1031"
+  revision = "d99a578cf41bfccdeaf48b0845c823a4b8b0ad5e"
 
 [[projects]]
   digest = "1:0c56024909189aee3364b7f21a95a27459f718aa7c199a5c111c36cfffd9eaef"
@@ -605,7 +605,7 @@
     "internal/fastwalk",
   ]
   pruneopts = "UT"
-  revision = "8f8fd1f23985f19c387c894e5597b22d8256a495"
+  revision = "6cd1fcedba52a3e8045a1c96970cec308e4a632c"
 
 [[projects]]
   digest = "1:328b5e4f197d928c444a51a75385f4b978915c0e75521f0ad6a3db976c97a7d3"
@@ -629,7 +629,7 @@
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
   pruneopts = "UT"
-  revision = "383e8b2c3b9e36c4076b235b32537292176bae20"
+  revision = "c66870c02cf823ceb633bcd05be3c7cda29976f4"
 
 [[projects]]
   digest = "1:7ccedf0aab474a6aef9d7222cd2429a34fddb996bbd1f60ec0f9fe69d80b36ae"
@@ -786,7 +786,7 @@
 
 [[projects]]
   branch = "release-1.9"
-  digest = "1:9d46906e57906f9fbe0c7a8803c5e533deeeae92ef32af534447723b2307cbef"
+  digest = "1:314a11276694c2935c740ab7df2bff85e8f94afe7d7c83acea8838294d18a26f"
   name = "k8s.io/apiserver"
   packages = [
     "pkg/admission",
@@ -869,7 +869,7 @@
     "plugin/pkg/authorizer/webhook",
   ]
   pruneopts = "UT"
-  revision = "e155c61c2126110d5dae107c33bbfc15031ff933"
+  revision = "5bf8a03d2a15f7495ca6e25c67afc48e10b13f90"
 
 [[projects]]
   branch = "release-6.0"
@@ -1038,12 +1038,12 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:d3a9b68552a53fdec3bc085f41c336e9ff83f80ad4b9cedf340497e3c66e3de3"
+  digest = "1:3bc93e7590e595a1cc928ed19edb10c4b0f4f0858921d1b2c5b2c5db1d28e6e7"
   name = "sigs.k8s.io/cluster-api"
   packages = [
     "clusterctl/clusterdeployer",
-    "clusterctl/clusterdeployer/externalclusterprovisioner",
-    "clusterctl/clusterdeployer/minikube",
+    "clusterctl/clusterdeployer/bootstrap/existing",
+    "clusterctl/clusterdeployer/bootstrap/minikube",
     "clusterctl/cmd",
     "clusterctl/providercomponents",
     "clusterctl/validation",
@@ -1065,11 +1065,12 @@
     "pkg/controller/machine",
     "pkg/controller/noderefutil",
     "pkg/controller/sharedinformers",
+    "pkg/deployer",
     "pkg/kubeadm",
     "pkg/util",
   ]
   pruneopts = "T"
-  revision = "a67bff65fa3387b067c3b973305e403c4829ba3b"
+  revision = "2d1ad4ce4a02270e38fa959f25c7810ece46939d"
 
 [solve-meta]
   analyzer-name = "dep"
