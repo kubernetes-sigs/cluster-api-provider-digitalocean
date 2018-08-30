@@ -249,7 +249,7 @@ func (do *DOClient) Update(cluster *clusterv1.Cluster, machine *clusterv1.Machin
 	if err != nil {
 		return err
 	}
-	if droplet != nil {
+	if droplet == nil {
 		return fmt.Errorf("machine %s doesn't exist", machine.Name)
 	}
 
