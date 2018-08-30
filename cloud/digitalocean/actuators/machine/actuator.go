@@ -253,26 +253,7 @@ func (do *DOClient) Update(cluster *clusterv1.Cluster, machine *clusterv1.Machin
 		return fmt.Errorf("machine %s doesn't exist", machine.Name)
 	}
 
-	// Check is machine a Master
-	if machine.Spec.Versions.ControlPlane != "" {
-		// If machine is a master, we need to do in-place upgrade.
-		// TODO: In-place upgrade implementation.
-		return fmt.Errorf("TODO: Not yet implemented")
-	}
-	// If machine is a node, we can remove it and add a new one.
-	// TODO: This need to work better: drain node, create a new one, delete old one.
-	// TODO: A node must wait successful creation before proceeding. Wait implementation TODO.
-	// TODO: Problem: how we can create machine before we delete it? They are going to have same name.
-	err = do.Delete(cluster, machine)
-	if err != nil {
-		return err
-	}
-	err = do.Create(cluster, machine)
-	if err != nil {
-		return err
-	}
-
-	do.eventRecorder.Eventf(machine, corev1.EventTypeNormal, eventReasonUpdate, "machine %s successfully updated", machine.ObjectMeta.Name)
+	// TODO: implement update logic.
 	return nil
 }
 
