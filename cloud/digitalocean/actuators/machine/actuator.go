@@ -34,7 +34,7 @@ import (
 	"github.com/kubermatic/cluster-api-provider-digitalocean/cloud/digitalocean/actuators/machine/machineconfig"
 	"github.com/kubermatic/cluster-api-provider-digitalocean/cloud/digitalocean/actuators/machine/userdata"
 	doconfigv1 "github.com/kubermatic/cluster-api-provider-digitalocean/cloud/digitalocean/providerconfig/v1alpha1"
-	"github.com/kubermatic/cluster-api-provider-digitalocean/pkg/ssh"
+	"github.com/kubermatic/cluster-api-provider-digitalocean/pkg/sshutil"
 
 	"github.com/digitalocean/godo"
 	"github.com/golang/glog"
@@ -153,7 +153,7 @@ func (do *DOClient) Create(cluster *clusterv1.Cluster, machine *clusterv1.Machin
 	}
 
 	// We're generating a temporary SSH key to prevent DigitalOcean from sending password over email.
-	sshkey, err := ssh.NewKey()
+	sshkey, err := sshutil.NewKey()
 	if err != nil {
 		return err
 	}
