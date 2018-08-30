@@ -292,15 +292,15 @@
   revision = "9cad4c3443a7200dd6400aef47183728de563a38"
 
 [[projects]]
-  branch = "master"
-  digest = "1:cf296baa185baae04a9a7004efee8511d08e2f5f51d4cbe5375da89722d681db"
+  digest = "1:8ec8d88c248041a6df5f6574b87bc00e7e0b493881dad2e7ef47b11dc69093b5"
   name = "github.com/hashicorp/golang-lru"
   packages = [
     ".",
     "simplelru",
   ]
   pruneopts = "UT"
-  revision = "0fb14efe8c47ae851c0034ed7a448854d3d34cf3"
+  revision = "20f1fb78b0740ba8c3cb143a61e86ba5c8669768"
+  version = "v0.5.0"
 
 [[projects]]
   branch = "master"
@@ -1038,7 +1038,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:3bc93e7590e595a1cc928ed19edb10c4b0f4f0858921d1b2c5b2c5db1d28e6e7"
+  digest = "1:e3edbc6b600d33781222ec0592ff59a039bbd3e5760daf6cf10909bf7d431725"
   name = "sigs.k8s.io/cluster-api"
   packages = [
     "clusterctl/clusterdeployer",
@@ -1070,7 +1070,7 @@
     "pkg/util",
   ]
   pruneopts = "T"
-  revision = "2d1ad4ce4a02270e38fa959f25c7810ece46939d"
+  revision = "211cb357ea5f6d249857b3bd1d6dc0acd86df364"
 
 [solve-meta]
   analyzer-name = "dep"
