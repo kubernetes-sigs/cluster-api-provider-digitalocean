@@ -351,6 +351,14 @@
   version = "1.0.1"
 
 [[projects]]
+  digest = "1:9cedee824c21326bd26950bd9e1ffe9dc4e7ca03dc8634d0e6f954ee6a383172"
+  name = "github.com/kr/fs"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "1455def202f6e05b95cc7bfc7e8ae67ae5141eba"
+  version = "v0.1.0"
+
+[[projects]]
   digest = "1:3e0502dcb749b6387865abf8070c5e5762384126c1b82625628480a67034b35d"
   name = "github.com/kubernetes-incubator/apiserver-builder"
   packages = [
@@ -428,6 +436,22 @@
   pruneopts = "UT"
   revision = "5f041e8faa004a95c88a202771f4cc3e991971e6"
   version = "v2.0.1"
+
+[[projects]]
+  digest = "1:40e195917a951a8bf867cd05de2a46aaf1806c50cf92eebf4c16f78cd196f747"
+  name = "github.com/pkg/errors"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
+  version = "v0.8.0"
+
+[[projects]]
+  digest = "1:921c87a7c5089c09fdd33b787b15c321c1401d09c241d999bc336e24d3367a14"
+  name = "github.com/pkg/sftp"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "718e6477175d68cfcef67eb0a19ddcb74563a777"
+  version = "v1.8.2"
 
 [[projects]]
   digest = "1:0028cb19b2e4c3112225cd871870f2d9cf49b9b4276531f03438a88e94be86fe"
@@ -1082,6 +1106,7 @@
     "github.com/golang/glog",
     "github.com/kubernetes-incubator/apiserver-builder/pkg/controller",
     "github.com/pborman/uuid",
+    "github.com/pkg/sftp",
     "github.com/pmezard/go-difflib/difflib",
     "github.com/spf13/pflag",
     "golang.org/x/crypto/ssh",
@@ -1092,6 +1117,7 @@
     "k8s.io/apimachinery/pkg/runtime",
     "k8s.io/apimachinery/pkg/runtime/schema",
     "k8s.io/apimachinery/pkg/runtime/serializer",
+    "k8s.io/apimachinery/pkg/util/runtime",
     "k8s.io/apimachinery/pkg/util/sets",
     "k8s.io/apimachinery/pkg/util/uuid",
     "k8s.io/apimachinery/pkg/util/wait",
