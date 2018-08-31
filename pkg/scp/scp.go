@@ -43,7 +43,7 @@ func (cl *Client) ReadBytes(remotePath string) ([]byte, error) {
 		return nil, err
 	}
 	defer func() {
-		if err := c.Close(); err != nil {
+		if err := r.Close(); err != nil {
 			utilruntime.HandleError(fmt.Errorf("failed to close ssh connection: %v", err))
 		}
 	}()
@@ -77,7 +77,7 @@ func (cl *Client) WriteBytes(remotePath string, content []byte) error {
 		return err
 	}
 	defer func() {
-		if err := c.Close(); err != nil {
+		if err := f.Close(); err != nil {
 			utilruntime.HandleError(fmt.Errorf("failed to close ssh connection: %v", err))
 		}
 	}()

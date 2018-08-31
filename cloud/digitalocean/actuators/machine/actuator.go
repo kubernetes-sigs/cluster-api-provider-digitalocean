@@ -16,6 +16,7 @@ package machine
 import (
 	"context"
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -34,6 +35,8 @@ import (
 	"github.com/kubermatic/cluster-api-provider-digitalocean/cloud/digitalocean/actuators/machine/machineconfig"
 	"github.com/kubermatic/cluster-api-provider-digitalocean/cloud/digitalocean/actuators/machine/userdata"
 	doconfigv1 "github.com/kubermatic/cluster-api-provider-digitalocean/cloud/digitalocean/providerconfig/v1alpha1"
+	"github.com/kubermatic/cluster-api-provider-digitalocean/pkg/scp"
+	"github.com/kubermatic/cluster-api-provider-digitalocean/pkg/ssh"
 	"github.com/kubermatic/cluster-api-provider-digitalocean/pkg/sshutil"
 
 	"github.com/digitalocean/godo"
@@ -71,6 +74,12 @@ type DOClientMachineSetupConfig interface {
 	GetMachineSetupConfig() (machineconfig.MachineSetupConfig, error)
 }
 
+// DOClientSSHCreds has path to the private key and user associated with it.
+type DOClientSSHCreds struct {
+	privateKeyPath string
+	user           string
+}
+
 // DOClient is responsible for performing machine reconciliation
 type DOClient struct {
 	godoClient            *godo.Client
@@ -78,6 +87,7 @@ type DOClient struct {
 	doProviderConfigCodec *doconfigv1.DigitalOceanProviderConfigCodec
 	kubeadm               DOClientKubeadm
 	ctx                   context.Context
+	SSHCreds              DOClientSSHCreds
 	v1Alpha1Client        client.ClusterV1alpha1Interface
 	eventRecorder         record.EventRecorder
 	machineSetupConfig    DOClientMachineSetupConfig
@@ -103,15 +113,27 @@ func NewMachineActuator(params ActuatorParams) (*DOClient, error) {
 		return nil, err
 	}
 
+	var user, privateKeyPath string
+	if _, err := os.Stat("/etc/sshkeys/private"); err == nil {
+		privateKeyPath = "/etc/sshkeys/private"
+
+		// TODO: A PR is coming for this. We will match images to OSes. This will be also needed for userdata.
+		user = "root"
+	}
+
 	return &DOClient{
 		godoClient:            getGodoClient(),
 		scheme:                scheme,
 		doProviderConfigCodec: codec,
 		kubeadm:               getKubeadm(params),
 		ctx:                   context.Background(),
-		v1Alpha1Client:        params.V1Alpha1Client,
-		eventRecorder:         params.EventRecorder,
-		machineSetupConfig:    params.MachineSetupConfig,
+		SSHCreds: DOClientSSHCreds{
+			privateKeyPath: privateKeyPath,
+			user:           user,
+		},
+		v1Alpha1Client:     params.V1Alpha1Client,
+		eventRecorder:      params.EventRecorder,
+		machineSetupConfig: params.MachineSetupConfig,
 	}, nil
 }
 
@@ -283,8 +305,36 @@ func (do *DOClient) GetIP(cluster *clusterv1.Cluster, machine *clusterv1.Machine
 
 // GetKubeConfig returns kubeconfig from the master.
 func (do *DOClient) GetKubeConfig(cluster *clusterv1.Cluster, master *clusterv1.Machine) (string, error) {
-	// TODO: Implement getKubeConfig. Possibly using SSH/SCP.
-	return "", fmt.Errorf("TODO: Not yet implemented")
+	droplet, err := do.instanceExists(master)
+	if err != nil {
+		return "", err
+	}
+	if droplet == nil {
+		return "", fmt.Errorf("instance does not exists")
+	}
+	if len(cluster.Status.APIEndpoints) == 0 {
+		return "", fmt.Errorf("unable to find cluster api endpoint address")
+	}
+
+	sshClient, err := ssh.NewClient(cluster.Status.APIEndpoints[0].Host, "22", do.SSHCreds.user, do.SSHCreds.privateKeyPath)
+	if err != nil {
+		return "", err
+	}
+	err = sshClient.Connect()
+	if err != nil {
+		return "", err
+	}
+	scpClient := scp.NewSCPClient(sshClient)
+	if err != nil {
+		return "", err
+	}
+
+	kubeconfig, err := scpClient.ReadBytes("/etc/kubernetes/admin.conf")
+	if err != nil {
+		return "", err
+	}
+
+	return string(kubeconfig), nil
 }
 
 func getKubeadm(params ActuatorParams) DOClientKubeadm {
