@@ -1,4 +1,4 @@
-package machineconfig
+package machinesetup
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 
 	clusterv1 "sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
-	"gopkg.in/yaml.v2"
+	"github.com/ghodss/yaml"
 )
 
 // MachineSetupConfig interface is used to operate with the machine userdata.

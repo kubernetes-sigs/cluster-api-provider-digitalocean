@@ -128,8 +128,135 @@ data:
         versions:
           kubelet: 1.9.4
           controlPlane: 1.9.4
-      userdata:
-        echo "Hello World!"
+      userdata: |
+        set -e
+        set -x
+        (
+        ARCH=amd64
+
+        # TODO: temp. Remove this!
+        export KUBELET_VERSION=1.9.4
+        export TOKEN="abcdef.1234567890abcdef"
+        export VERSION=1.9.4
+        export PORT=443
+        export MACHINE="default/ubuntu-s-2vcpu-4gb-fra1-01"
+        export CONTROL_PLANE_VERSION=1.9.4
+        export CLUSTER_DNS_DOMAIN=cluster.local
+
+        touch /etc/systemd/system/kubelet.service.d/20-kubenet.conf
+        cat > /etc/systemd/system/kubelet.service.d/20-kubenet.conf <<EOF
+        net.bridge.bridge-nf-call-ip6tables = 1
+        net.bridge.bridge-nf-call-iptables = 1
+        kernel.panic_on_oops = 1
+        kernel.panic = 10
+        vm.overcommit_memory = 1
+        EOF
+
+        # Obtain Droplet IP addresses.
+        HOSTNAME=$(curl -s http://169.254.169.254/metadata/v1/hostname)
+        PRIVATEIP=$(curl -s http://169.254.169.254/metadata/v1/interfaces/private/0/ipv4/address)
+        PUBLICIP=$(curl -s http://169.254.169.254/metadata/v1/interfaces/public/0/ipv4/address)
+
+        curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+        touch /etc/apt/sources.list.d/kubernetes.list
+        sh -c 'echo "deb http://apt.kubernetes.io/ kubernetes-xenial main" > /etc/apt/sources.list.d/kubernetes.list'
+        apt-get update -y
+        apt-get install -y \
+            socat \
+            ebtables \
+            apt-transport-https \
+            cloud-utils \
+            prips
+
+        # If something failed during package installation but one of docker/kubeadm/kubelet was already installed
+        # an apt-mark hold after the install won't do it, which is why we test here if the binaries exist and if
+        # yes put them on hold
+        set +e
+        which docker && apt-mark hold docker docker-ce
+        which kubelet && apt-mark hold kubelet
+        which kubeadm && apt-mark hold kubeadm
+
+        # When docker is started from within the apt installation it fails with a
+        # 'no sockets found via socket activation: make sure the service was started by systemd'
+        # Apparently the package is broken in a way that it gets started without its dependencies, manually starting
+        # it works fine thought
+        which docker && systemctl start docker
+        set -e
+
+        function install_configure_docker () {
+            # prevent docker from auto-starting
+            echo "exit 101" > /usr/sbin/policy-rc.d
+            chmod +x /usr/sbin/policy-rc.d
+            trap "rm /usr/sbin/policy-rc.d" RETURN
+            apt-get install -y docker.io
+            echo 'DOCKER_OPTS="--iptables=false --ip-masq=false"' > /etc/default/docker
+            systemctl daemon-reload
+            systemctl enable docker
+            systemctl start docker
+        }
+        install_configure_docker
+
+        curl -sSL https://dl.k8s.io/release/${VERSION}/bin/linux/${ARCH}/kubeadm > /usr/bin/kubeadm.dl
+        chmod a+rx /usr/bin/kubeadm.dl
+        # kubeadm uses 10th IP as DNS server
+        # CLUSTER_DNS_SERVER=$(prips ${SERVICE_CIDR} | head -n 11 | tail -n 1)
+        # Our Debian packages have versions like "1.8.0-00" or "1.8.0-01". Do a prefix
+        # search based on our SemVer to find the right (newest) package version.
+        function getversion() {
+            name=$1
+            prefix=$2
+            version=$(apt-cache madison $name | awk '{ print $3 }' | grep ^$prefix | head -n1)
+            if [[ -z "$version" ]]; then
+            echo Can\'t find package $name with prefix $prefix
+            exit 1
+            fi
+            echo $version
+        }
+        KUBELET=$(getversion kubelet ${KUBELET_VERSION}-)
+        KUBEADM=$(getversion kubeadm ${KUBELET_VERSION}-)
+        apt-get install -y \
+            kubelet=${KUBELET} \
+            kubeadm=${KUBEADM}
+        mv /usr/bin/kubeadm.dl /usr/bin/kubeadm
+        chmod a+rx /usr/bin/kubeadm
+
+        # Override network args to use kubenet instead of cni, override Kubelet DNS args and
+        # add cloud provider args.
+        # Environment="KUBELET_DNS_ARGS=--cluster-dns=${CLUSTER_DNS_SERVER} --cluster-domain=${CLUSTER_DNS_DOMAIN}"
+        # TODO: get back here.
+        touch /etc/systemd/system/kubelet.service.d/20-kubenet.conf
+        cat > /etc/systemd/system/kubelet.service.d/20-kubenet.conf <<EOF
+        [Service]
+        Environment="KUBELET_NETWORK_ARGS="
+        Environment="KUBELET_EXTRA_ARGS=--authentication-token-webhook=true --read-only-port=0 --protect-kernel-defaults=true --cluster-domain=cluster.local"
+        EOF
+        systemctl daemon-reload
+        systemctl restart kubelet.service
+
+        # Set up kubeadm config file to pass parameters to kubeadm init.
+        touch /etc/kubernetes/kubeadm_config.yaml
+        cat > /etc/kubernetes/kubeadm_config.yaml <<EOF
+        apiVersion: kubeadm.k8s.io/v1alpha1
+        kind: MasterConfiguration
+        api:
+          advertiseAddress: ${PUBLICIP}
+          bindPort: ${PORT}
+        kubernetesVersion: v${CONTROL_PLANE_VERSION}
+        token: ${TOKEN}
+        apiServerCertSANs:
+        - ${PUBLICIP}
+        - ${PRIVATEIP}
+        - ${HOSTNAME}
+        EOF
+
+        kubeadm init --config /etc/kubernetes/kubeadm_config.yaml
+
+        for tries in $(seq 1 60); do
+            kubectl --kubeconfig /etc/kubernetes/kubelet.conf annotate --overwrite node ${HOSTNAME} machine=${MACHINE} && break
+            sleep 1
+        done
+        echo done.
+        ) 2>&1 | tee /var/log/startup.log
 ---
 apiVersion: v1
 kind: Secret
