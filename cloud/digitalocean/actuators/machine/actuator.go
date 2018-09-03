@@ -173,15 +173,18 @@ func (do *DOClient) Create(cluster *clusterv1.Cluster, machine *clusterv1.Machin
 		return err
 	}
 
-	// We're generating a temporary SSH key to prevent DigitalOcean from sending password over email.
-	sshkey, err := sshutil.NewKey()
-	if err != nil {
-		return err
+	dropletSSHKeys := []godo.DropletCreateSSHKey{}
+	for _, k := range machineConfig.SSHPublicKeys {
+		sshkey, err := sshutil.NewKeyFromString(k)
+		if err != nil {
+			return err
+		}
+		// TODO: this fail if key already exists.
+		if err := sshkey.Create(do.ctx, do.godoClient.Keys); err != nil {
+			return err
+		}
+		dropletSSHKeys = append(dropletSSHKeys, godo.DropletCreateSSHKey{Fingerprint: sshkey.FingerprintMD5})
 	}
-	if err := sshkey.Create(do.ctx, do.godoClient.Keys); err != nil {
-		return err
-	}
-	defer sshkey.Delete(do.ctx, do.godoClient.Keys)
 
 	dropletCreateReq := &godo.DropletCreateRequest{
 		Name:   machine.Name,
@@ -197,7 +200,7 @@ func (do *DOClient) Create(cluster *clusterv1.Cluster, machine *clusterv1.Machin
 		Tags: append([]string{
 			string(machine.UID),
 		}, machineConfig.Tags...),
-		SSHKeys:  []godo.DropletCreateSSHKey{{Fingerprint: sshkey.FingerprintMD5}},
+		SSHKeys:  dropletSSHKeys,
 		UserData: metadata,
 	}
 
