@@ -2,8 +2,6 @@ package sshutil
 
 import (
 	"context"
-	"crypto/rand"
-	"crypto/rsa"
 	"fmt"
 	"net/http"
 
@@ -13,8 +11,6 @@ import (
 	"github.com/pborman/uuid"
 )
 
-const privateRSAKeyBitSize = 4096
-
 // PubKey is used to create temporary SSH keypairs. It is used as a way to disable root passwords emails on Droplet creation.
 // The reason for not hardcoding a random public key is that it would look like a backdoor
 type PubKey struct {
@@ -23,26 +19,17 @@ type PubKey struct {
 	FingerprintMD5 string
 }
 
-// NewKey creates a new public key. The private key is discarded.
-func NewKey() (*PubKey, error) {
-	tmpRSAKeyPair, err := rsa.GenerateKey(rand.Reader, privateRSAKeyBitSize)
+// NewKeyFromString converts provided public key string to public key object.
+func NewKeyFromString(publicKey string) (*PubKey, error) {
+	sshKeyPair, _, _, _, err := ssh.ParseAuthorizedKey([]byte(publicKey))
 	if err != nil {
-		return nil, fmt.Errorf("failed to create private RSA key: %v", err)
-	}
-
-	if err := tmpRSAKeyPair.Validate(); err != nil {
-		return nil, fmt.Errorf("failed to validate private RSA key: %v", err)
-	}
-
-	pubKey, err := ssh.NewPublicKey(&tmpRSAKeyPair.PublicKey)
-	if err != nil {
-		return nil, fmt.Errorf("failed to generate ssh public key: %v", err)
+		return nil, err
 	}
 
 	return &PubKey{
 		Name:           uuid.New(),
-		PublicKey:      string(ssh.MarshalAuthorizedKey(pubKey)),
-		FingerprintMD5: ssh.FingerprintLegacyMD5(pubKey),
+		PublicKey:      string(publicKey),
+		FingerprintMD5: ssh.FingerprintLegacyMD5(sshKeyPair),
 	}, nil
 }
 
