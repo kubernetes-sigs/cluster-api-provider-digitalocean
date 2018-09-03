@@ -1,6 +1,6 @@
 defaults: &defaults
   docker:
-  - image: golang:1.10.3
+  - image: golang:1.11
   working_directory: /go/src/github.com/kubermatic/cluster-api-provider-digitalocean
 
 version: 2
@@ -43,7 +43,7 @@ jobs:
     steps:
     - restore_cache:
         key: repo-{{ .Environment.CIRCLE_SHA1 }}
-    - run: DEP_RELEASE_TAG=v0.4.1 curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+    - run: DEP_RELEASE_TAG=v0.5.0 curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
     - run: make compile
     - save_cache:
         key: cluster-api-provider-digitalocean-{{ .Revision }}
