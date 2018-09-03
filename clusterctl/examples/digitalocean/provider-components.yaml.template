@@ -113,7 +113,7 @@ spec:
         hostPath:
           path: /usr/bin/kubeadm
       - name: machine-config
-        configMap:
+        configMap: |
           name: machine-config
 ---
 apiVersion: v1

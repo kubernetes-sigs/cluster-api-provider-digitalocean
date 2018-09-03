@@ -32,8 +32,7 @@ import (
 	client "sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset/typed/cluster/v1alpha1"
 	"sigs.k8s.io/cluster-api/pkg/kubeadm"
 
-	"github.com/kubermatic/cluster-api-provider-digitalocean/cloud/digitalocean/actuators/machine/machineconfig"
-	"github.com/kubermatic/cluster-api-provider-digitalocean/cloud/digitalocean/actuators/machine/userdata"
+	"github.com/kubermatic/cluster-api-provider-digitalocean/cloud/digitalocean/actuators/machine/machinesetup"
 	doconfigv1 "github.com/kubermatic/cluster-api-provider-digitalocean/cloud/digitalocean/providerconfig/v1alpha1"
 	"github.com/kubermatic/cluster-api-provider-digitalocean/pkg/scp"
 	"github.com/kubermatic/cluster-api-provider-digitalocean/pkg/ssh"
@@ -70,8 +69,8 @@ type DOClientKubeadm interface {
 	TokenCreate(params kubeadm.TokenCreateParams) (string, error)
 }
 
-type DOClientMachineSetupConfig interface {
-	GetMachineSetupConfig() (machineconfig.MachineSetupConfig, error)
+type DOClientMachineSetupConfigGetter interface {
+	GetMachineSetupConfig() (machinesetup.MachineSetupConfig, error)
 }
 
 // DOClientSSHCreds has path to the private key and user associated with it.
@@ -82,23 +81,23 @@ type DOClientSSHCreds struct {
 
 // DOClient is responsible for performing machine reconciliation
 type DOClient struct {
-	godoClient            *godo.Client
-	scheme                *runtime.Scheme
-	doProviderConfigCodec *doconfigv1.DigitalOceanProviderConfigCodec
-	kubeadm               DOClientKubeadm
-	ctx                   context.Context
-	SSHCreds              DOClientSSHCreds
-	v1Alpha1Client        client.ClusterV1alpha1Interface
-	eventRecorder         record.EventRecorder
-	machineSetupConfig    DOClientMachineSetupConfig
+	godoClient               *godo.Client
+	scheme                   *runtime.Scheme
+	doProviderConfigCodec    *doconfigv1.DigitalOceanProviderConfigCodec
+	kubeadm                  DOClientKubeadm
+	ctx                      context.Context
+	SSHCreds                 DOClientSSHCreds
+	v1Alpha1Client           client.ClusterV1alpha1Interface
+	eventRecorder            record.EventRecorder
+	machineSetupConfigGetter DOClientMachineSetupConfigGetter
 }
 
 // ActuatorParams holds parameter information for DOClient
 type ActuatorParams struct {
-	Kubeadm            DOClientKubeadm
-	V1Alpha1Client     client.ClusterV1alpha1Interface
-	EventRecorder      record.EventRecorder
-	MachineSetupConfig DOClientMachineSetupConfig
+	Kubeadm                  DOClientKubeadm
+	V1Alpha1Client           client.ClusterV1alpha1Interface
+	EventRecorder            record.EventRecorder
+	MachineSetupConfigGetter DOClientMachineSetupConfigGetter
 }
 
 // NewMachineActuator creates a new DOClient
@@ -131,15 +130,15 @@ func NewMachineActuator(params ActuatorParams) (*DOClient, error) {
 			privateKeyPath: privateKeyPath,
 			user:           user,
 		},
-		v1Alpha1Client:     params.V1Alpha1Client,
-		eventRecorder:      params.EventRecorder,
-		machineSetupConfig: params.MachineSetupConfig,
+		v1Alpha1Client:           params.V1Alpha1Client,
+		eventRecorder:            params.EventRecorder,
+		machineSetupConfigGetter: params.MachineSetupConfigGetter,
 	}, nil
 }
 
 // Create creates a machine and is invoked by the Machine Controller
 func (do *DOClient) Create(cluster *clusterv1.Cluster, machine *clusterv1.Machine) error {
-	if do.machineSetupConfig == nil {
+	if do.machineSetupConfigGetter == nil {
 		return fmt.Errorf("machine setup config is required")
 	}
 
@@ -161,15 +160,15 @@ func (do *DOClient) Create(cluster *clusterv1.Cluster, machine *clusterv1.Machin
 		return nil
 	}
 
-	metadataProvider, err := userdata.ForOS(machineConfig.Image)
+	configParams := &machinesetup.ConfigParams{
+		Image:    machineConfig.Image,
+		Versions: machine.Spec.Versions,
+	}
+	machineSetupConfig, err := do.machineSetupConfigGetter.GetMachineSetupConfig()
 	if err != nil {
 		return err
 	}
-	kubeadmToken, err := do.getKubeadmToken()
-	if err != nil {
-		return err
-	}
-	metadata, err := metadataProvider.UserData(cluster, machine, machineConfig, kubeadmToken)
+	metadata, err := machineSetupConfig.GetUserdata(configParams)
 	if err != nil {
 		return err
 	}
