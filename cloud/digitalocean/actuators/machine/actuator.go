@@ -76,6 +76,7 @@ type DOClientMachineSetupConfigGetter interface {
 // DOClientSSHCreds has path to the private key and user associated with it.
 type DOClientSSHCreds struct {
 	privateKeyPath string
+	publicKeyPath  string
 	user           string
 }
 
@@ -112,12 +113,15 @@ func NewMachineActuator(params ActuatorParams) (*DOClient, error) {
 		return nil, err
 	}
 
-	var user, privateKeyPath string
+	var user, privateKeyPath, publicKeyPath string
 	if _, err := os.Stat("/etc/sshkeys/private"); err == nil {
 		privateKeyPath = "/etc/sshkeys/private"
 
 		// TODO: A PR is coming for this. We will match images to OSes. This will be also needed for userdata.
 		user = "root"
+	}
+	if _, err := os.Stat("/etc/sshkeys/public"); err == nil {
+		publicKeyPath = "/etc/sshkeys/public"
 	}
 
 	return &DOClient{
@@ -128,6 +132,7 @@ func NewMachineActuator(params ActuatorParams) (*DOClient, error) {
 		ctx:                   context.Background(),
 		SSHCreds: DOClientSSHCreds{
 			privateKeyPath: privateKeyPath,
+			publicKeyPath:  publicKeyPath,
 			user:           user,
 		},
 		v1Alpha1Client:           params.V1Alpha1Client,
@@ -174,12 +179,23 @@ func (do *DOClient) Create(cluster *clusterv1.Cluster, machine *clusterv1.Machin
 	}
 
 	dropletSSHKeys := []godo.DropletCreateSSHKey{}
+	// Add machineSpec provided keys.
 	for _, k := range machineConfig.SSHPublicKeys {
 		sshkey, err := sshutil.NewKeyFromString(k)
 		if err != nil {
 			return err
 		}
-		// TODO: this fail if key already exists.
+		if err := sshkey.Create(do.ctx, do.godoClient.Keys); err != nil {
+			return err
+		}
+		dropletSSHKeys = append(dropletSSHKeys, godo.DropletCreateSSHKey{Fingerprint: sshkey.FingerprintMD5})
+	}
+	// Add machineActuator public key.
+	if do.SSHCreds.publicKeyPath != "" {
+		sshkey, err := sshutil.NewKeyFromFile(do.SSHCreds.publicKeyPath)
+		if err != nil {
+			return err
+		}
 		if err := sshkey.Create(do.ctx, do.godoClient.Keys); err != nil {
 			return err
 		}
