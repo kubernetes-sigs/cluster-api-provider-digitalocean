@@ -220,7 +220,7 @@ func (do *DOClient) Create(cluster *clusterv1.Cluster, machine *clusterv1.Machin
 		},
 		Backups:           machineConfig.Backups,
 		IPv6:              machineConfig.IPv6,
-		PrivateNetworking: machineConfig.IPv6,
+		PrivateNetworking: machineConfig.PrivateNetworking,
 		Monitoring:        machineConfig.Monitoring,
 		Tags: append([]string{
 			string(machine.UID),
