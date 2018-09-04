@@ -15,7 +15,7 @@ items:
         - "machine-1"
         sshPublicKeys:
         - "ssh-rsa AAAA"
-        private_networking: false
+        private_networking: true
         backups: false
         ipv6: false
         # must be disabled for coreos instances.
@@ -39,7 +39,7 @@ items:
         - "machine-1"
         sshPublicKeys:
         - "ssh-rsa AAAA"
-        private_networking: false
+        private_networking: true
         backups: false
         ipv6: false
         # must be disabled for coreos instances.

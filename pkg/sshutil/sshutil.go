@@ -3,6 +3,8 @@ package sshutil
 import (
 	"context"
 	"fmt"
+	"github.com/golang/glog"
+	"io/ioutil"
 	"net/http"
 
 	"golang.org/x/crypto/ssh"
@@ -33,11 +35,30 @@ func NewKeyFromString(publicKey string) (*PubKey, error) {
 	}, nil
 }
 
+func NewKeyFromFile(publicKeyPath string) (*PubKey, error) {
+	key, err := ioutil.ReadFile(publicKeyPath)
+	if err != nil {
+		return nil, err
+	}
+
+	sshKeyPair, _, _, _, err := ssh.ParseAuthorizedKey(key)
+	if err != nil {
+		return nil, err
+	}
+
+	return &PubKey{
+		Name:           uuid.New(),
+		PublicKey:      string(key),
+		FingerprintMD5: ssh.FingerprintLegacyMD5(sshKeyPair),
+	}, nil
+}
+
 // Create uploads the public key to DigitalOcean.
 func (p *PubKey) Create(ctx context.Context, keysService godo.KeysService) error {
 	existingkey, res, err := keysService.GetByFingerprint(ctx, p.FingerprintMD5)
 	if err == nil && existingkey != nil && res.StatusCode >= http.StatusOK && res.StatusCode <= http.StatusAccepted {
-		return fmt.Errorf("failed to create ssh public key, the key already exists")
+		glog.Info("failed to create ssh public key, the key already exists")
+		return nil
 	}
 
 	_, _, err = keysService.Create(ctx, &godo.KeyCreateRequest{
