@@ -145,16 +145,6 @@ data:
         PRIVATEIP=$(curl -s http://169.254.169.254/metadata/v1/interfaces/private/0/ipv4/address)
         PUBLICIP=$(curl -s http://169.254.169.254/metadata/v1/interfaces/public/0/ipv4/address)
 
-        # TODO: temp. Remove this!
-        export KUBELET_VERSION=1.9.4
-        export TOKEN="abcdef.1234567890abcdef"
-        export VERSION=1.9.4
-        export PORT=443
-        export MACHINE="default/"
-        export MACHINE+=$HOSTNAME
-        export CONTROL_PLANE_VERSION=1.9.4
-        export CLUSTER_DNS_DOMAIN=cluster.local
-
         curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
         touch /etc/apt/sources.list.d/kubernetes.list
         sh -c 'echo "deb http://apt.kubernetes.io/ kubernetes-xenial main" > /etc/apt/sources.list.d/kubernetes.list'
