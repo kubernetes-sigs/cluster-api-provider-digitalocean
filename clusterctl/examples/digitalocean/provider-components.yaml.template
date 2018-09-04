@@ -79,6 +79,8 @@ spec:
             mountPath: /usr/bin/kubeadm
           - name: machine-config
             mountPath: /etc/machineconfig
+          - name: machine-controller-sshkeys
+            mountPath: /etc/sshkeys
         env:
         - name: DIGITALOCEAN_ACCESS_TOKEN
           valueFrom:
@@ -115,6 +117,10 @@ spec:
       - name: machine-config
         configMap:
           name: machine-config
+      - name: machine-controller-sshkeys
+        secret:
+          secretName: machine-controller-sshkeys
+          defaultMode: 256
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -265,3 +271,13 @@ metadata:
 type: Opaque
 stringData:
   token: $DIGITALOCEAN_ACCESS_TOKEN
+---
+apiVersion: v1
+kind: Secret
+type: Opaque
+metadata:
+  name: machine-controller-sshkeys
+  namespace: default
+data:
+  private: $SSH_PRIVATE_KEY
+  public: $SSH_PUBLIC_KEY
