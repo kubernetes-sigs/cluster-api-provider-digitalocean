@@ -140,28 +140,20 @@ data:
         (
         ARCH=amd64
 
+        # Obtain Droplet IP addresses.
+        HOSTNAME=$(curl -s http://169.254.169.254/metadata/v1/hostname)
+        PRIVATEIP=$(curl -s http://169.254.169.254/metadata/v1/interfaces/private/0/ipv4/address)
+        PUBLICIP=$(curl -s http://169.254.169.254/metadata/v1/interfaces/public/0/ipv4/address)
+
         # TODO: temp. Remove this!
         export KUBELET_VERSION=1.9.4
         export TOKEN="abcdef.1234567890abcdef"
         export VERSION=1.9.4
         export PORT=443
-        export MACHINE="default/ubuntu-s-2vcpu-4gb-fra1-01"
+        export MACHINE="default/"
+        export MACHINE+=$HOSTNAME
         export CONTROL_PLANE_VERSION=1.9.4
         export CLUSTER_DNS_DOMAIN=cluster.local
-
-        touch /etc/systemd/system/kubelet.service.d/20-kubenet.conf
-        cat > /etc/systemd/system/kubelet.service.d/20-kubenet.conf <<EOF
-        net.bridge.bridge-nf-call-ip6tables = 1
-        net.bridge.bridge-nf-call-iptables = 1
-        kernel.panic_on_oops = 1
-        kernel.panic = 10
-        vm.overcommit_memory = 1
-        EOF
-
-        # Obtain Droplet IP addresses.
-        HOSTNAME=$(curl -s http://169.254.169.254/metadata/v1/hostname)
-        PRIVATEIP=$(curl -s http://169.254.169.254/metadata/v1/interfaces/private/0/ipv4/address)
-        PUBLICIP=$(curl -s http://169.254.169.254/metadata/v1/interfaces/public/0/ipv4/address)
 
         curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
         touch /etc/apt/sources.list.d/kubernetes.list
@@ -202,8 +194,6 @@ data:
         }
         install_configure_docker
 
-        curl -sSL https://dl.k8s.io/release/${VERSION}/bin/linux/${ARCH}/kubeadm > /usr/bin/kubeadm.dl
-        chmod a+rx /usr/bin/kubeadm.dl
         # kubeadm uses 10th IP as DNS server
         # CLUSTER_DNS_SERVER=$(prips ${SERVICE_CIDR} | head -n 11 | tail -n 1)
         # Our Debian packages have versions like "1.8.0-00" or "1.8.0-01". Do a prefix
@@ -223,8 +213,6 @@ data:
         apt-get install -y \
             kubelet=${KUBELET} \
             kubeadm=${KUBEADM}
-        mv /usr/bin/kubeadm.dl /usr/bin/kubeadm
-        chmod a+rx /usr/bin/kubeadm
 
         # Override network args to use kubenet instead of cni, override Kubelet DNS args and
         # add cloud provider args.
@@ -234,7 +222,7 @@ data:
         cat > /etc/systemd/system/kubelet.service.d/20-kubenet.conf <<EOF
         [Service]
         Environment="KUBELET_NETWORK_ARGS="
-        Environment="KUBELET_EXTRA_ARGS=--authentication-token-webhook=true --read-only-port=0 --protect-kernel-defaults=true --cluster-domain=cluster.local"
+        Environment="KUBELET_EXTRA_ARGS=--authentication-token-webhook=true --read-only-port=0 --cluster-domain=cluster.local --resolv-conf=/run/systemd/resolve/resolv.conf"
         EOF
         systemctl daemon-reload
         systemctl restart kubelet.service
