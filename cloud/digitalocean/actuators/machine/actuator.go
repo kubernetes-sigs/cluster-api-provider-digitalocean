@@ -37,6 +37,7 @@ import (
 	"github.com/kubermatic/cluster-api-provider-digitalocean/pkg/scp"
 	"github.com/kubermatic/cluster-api-provider-digitalocean/pkg/ssh"
 	"github.com/kubermatic/cluster-api-provider-digitalocean/pkg/sshutil"
+	"github.com/kubermatic/cluster-api-provider-digitalocean/pkg/util"
 
 	"github.com/digitalocean/godo"
 	"github.com/golang/glog"
@@ -170,6 +171,7 @@ func (do *DOClient) Create(cluster *clusterv1.Cluster, machine *clusterv1.Machin
 		return err
 	}
 
+	var parsedMetadata string
 	configParams := &machinesetup.ConfigParams{
 		Image:    machineConfig.Image,
 		Versions: machine.Spec.Versions,
@@ -182,9 +184,16 @@ func (do *DOClient) Create(cluster *clusterv1.Cluster, machine *clusterv1.Machin
 	if err != nil {
 		return err
 	}
-	parsedMetadata, err := masterUserdata(cluster, machine, token, metadata)
-	if err != nil {
-		return err
+	if util.IsMachineMaster(machine) {
+		parsedMetadata, err = masterUserdata(cluster, machine, token, metadata)
+		if err != nil {
+			return err
+		}
+	} else {
+		parsedMetadata, err = nodeUserdata(cluster, machine, token, metadata)
+		if err != nil {
+			return err
+		}
 	}
 
 	dropletSSHKeys := []godo.DropletCreateSSHKey{}
