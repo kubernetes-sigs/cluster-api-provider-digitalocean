@@ -165,6 +165,11 @@ func (do *DOClient) Create(cluster *clusterv1.Cluster, machine *clusterv1.Machin
 		return nil
 	}
 
+	token, err := do.getKubeadmToken()
+	if err != nil {
+		return err
+	}
+
 	configParams := &machinesetup.ConfigParams{
 		Image:    machineConfig.Image,
 		Versions: machine.Spec.Versions,
@@ -174,6 +179,10 @@ func (do *DOClient) Create(cluster *clusterv1.Cluster, machine *clusterv1.Machin
 		return err
 	}
 	metadata, err := machineSetupConfig.GetUserdata(configParams)
+	if err != nil {
+		return err
+	}
+	parsedMetadata, err := masterUserdata(cluster, machine, token, metadata)
 	if err != nil {
 		return err
 	}
@@ -217,7 +226,7 @@ func (do *DOClient) Create(cluster *clusterv1.Cluster, machine *clusterv1.Machin
 			string(machine.UID),
 		}, machineConfig.Tags...),
 		SSHKeys:  dropletSSHKeys,
-		UserData: metadata,
+		UserData: parsedMetadata,
 	}
 
 	droplet, _, err = do.godoClient.Droplets.Create(do.ctx, dropletCreateReq)
