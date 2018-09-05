@@ -2,7 +2,7 @@
 set -e
 
 OVERWRITE=0
-OUTPUT_DIR=out
+OUTPUT_DIR=${OUTPUT_DIR:-out}
 
 PROVIDERCOMPONENT_TEMPLATE_FILE=provider-components.yaml.template
 PROVIDERCOMPONENT_GENERATED_FILE=${OUTPUT_DIR}/provider-components.yaml
@@ -11,10 +11,10 @@ MACHINES_GENERATED_FILE=${OUTPUT_DIR}/machines.yaml
 CLUSTER_TEMPLATE_FILE=cluster.yaml.template
 CLUSTER_GENERATED_FILE=${OUTPUT_DIR}/cluster.yaml
 
-REGION=fra1
-CLUSTER_NAME=test-1
-MASTER_NAME=digitalocean-fra1-master-
-NODE_NAME=digitalocean-fra1-node-
+REGION=${REGION:-fra1}
+CLUSTER_NAME=${CLUSTER_NAME:-test-1}
+MASTER_NAME=${MASTER_NAME:-digitalocean-fra1-master-}
+NODE_NAME=${NODE_NAME:-digitalocean-fra1-node-}
 DIGITALOCEAN_ACCESS_TOKEN=${DIGITALOCEAN_ACCESS_TOKEN}
 
 SSH_KEY_GENERATED_FILE=${OUTPUT_DIR}/${CLUSTER_NAME}_rsa
