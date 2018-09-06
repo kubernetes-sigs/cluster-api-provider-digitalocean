@@ -267,6 +267,10 @@ func (do *DOClient) Create(cluster *clusterv1.Cluster, machine *clusterv1.Machin
 	if err != nil {
 		return err
 	}
+	err = do.updateInstanceStatus(machine)
+	if err != nil {
+		return err
+	}
 
 	do.eventRecorder.Eventf(machine, corev1.EventTypeNormal, eventReasonCreate, "machine %s successfully created", machine.ObjectMeta.Name)
 	return nil
