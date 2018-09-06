@@ -16,6 +16,7 @@ package machine
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"os"
 	"strconv"
 	"strings"
@@ -404,8 +405,12 @@ func (do *DOClient) instanceExists(machine *clusterv1.Machine) (*godo.Droplet, e
 		if err != nil {
 			return nil, err
 		}
-		droplet, _, err := do.godoClient.Droplets.Get(do.ctx, id)
+		droplet, resp, err := do.godoClient.Droplets.Get(do.ctx, id)
 		if err != nil {
+			if resp != nil && resp.StatusCode == http.StatusNotFound {
+				// Machine exists as an object, but Droplet is already deleted.
+				return nil, nil
+			}
 			return nil, err
 		}
 		if droplet != nil {
