@@ -52,9 +52,9 @@ push-nodep:
 	$(MAKE) -C cmd/cluster-controller push
 	$(MAKE) -C cmd/machine-controller push
 
-check: depend fmt vet
+check: depend fmt vet gometalinter
 
-test:
+test-unit:
 	go test -race -cover ./cmd/... ./cloud/...
 
 fmt:
@@ -62,6 +62,11 @@ fmt:
 
 vet:
 	go vet ./...
+
+gometalinter:
+	gometalinter --version || go get -u gopkg.in/alecthomas/gometalinter.v2
+	gometalinter --install
+	gometalinter --config gometalinter.json ./...
 
 compile:
 	mkdir -p ./bin
