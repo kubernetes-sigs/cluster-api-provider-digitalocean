@@ -211,7 +211,6 @@ data:
         touch /etc/systemd/system/kubelet.service.d/20-kubenet.conf
         cat > /etc/systemd/system/kubelet.service.d/20-kubenet.conf <<EOF
         [Service]
-        Environment="KUBELET_NETWORK_ARGS="
         Environment="KUBELET_EXTRA_ARGS=--authentication-token-webhook=true --read-only-port=0 --cluster-domain=cluster.local --resolv-conf=/run/systemd/resolve/resolv.conf"
         EOF
         systemctl daemon-reload
@@ -231,14 +230,21 @@ data:
         - ${PUBLICIP}
         - ${PRIVATEIP}
         - ${HOSTNAME}
+        networking:
+          podSubnet: ${POD_CIDR}
         EOF
 
         kubeadm init --config /etc/kubernetes/kubeadm_config.yaml
 
         for tries in $(seq 1 60); do
+            # Annotate node.
             kubectl --kubeconfig /etc/kubernetes/kubelet.conf annotate --overwrite node ${HOSTNAME} machine=${MACHINE} && break
             sleep 1
         done
+
+        # Apply Flannel CNI
+        kubectl --kubeconfig /etc/kubernetes/kubelet.conf create -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+
         echo done.
         ) 2>&1 | tee /var/log/startup.log
     - machineParams:
@@ -337,7 +343,6 @@ data:
         touch /etc/systemd/system/kubelet.service.d/20-kubenet.conf
         cat > /etc/systemd/system/kubelet.service.d/20-kubenet.conf <<EOF
         [Service]
-        Environment="KUBELET_NETWORK_ARGS="
         Environment="KUBELET_EXTRA_ARGS=--read-only-port=0 --cluster-domain=cluster.local --resolv-conf=/run/systemd/resolve/resolv.conf"
         EOF
         systemctl daemon-reload
