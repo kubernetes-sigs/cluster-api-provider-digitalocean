@@ -36,7 +36,7 @@ items:
         size: "s-2vcpu-2gb"
         image: "ubuntu-18-04-x64"
         tags:
-        - "machine-1"
+        - "machine-2"
         sshPublicKeys:
         - "ssh-rsa AAAA"
         private_networking: true

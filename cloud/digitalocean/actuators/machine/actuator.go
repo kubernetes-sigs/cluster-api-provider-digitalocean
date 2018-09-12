@@ -387,7 +387,7 @@ func getKubeadm(params ActuatorParams) DOClientKubeadm {
 
 func (do *DOClient) getKubeadmToken() (string, error) {
 	tokenParams := kubeadm.TokenCreateParams{
-		Ttl: time.Duration(10) * time.Minute,
+		Ttl: time.Duration(30) * time.Minute,
 	}
 
 	token, err := do.kubeadm.TokenCreate(tokenParams)
