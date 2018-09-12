@@ -23,6 +23,7 @@ import (
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/apimachinery/pkg/util/wait"
@@ -298,25 +299,55 @@ func (do *DOClient) Delete(cluster *clusterv1.Cluster, machine *clusterv1.Machin
 }
 
 // Update updates a machine and is invoked by the Machine Controller
-func (do *DOClient) Update(cluster *clusterv1.Cluster, machine *clusterv1.Machine) error {
-	machineConfig, err := do.decodeMachineProviderConfig(machine.Spec.ProviderConfig)
+func (do *DOClient) Update(cluster *clusterv1.Cluster, goalMachine *clusterv1.Machine) error {
+	goalMachineConfig, err := do.decodeMachineProviderConfig(goalMachine.Spec.ProviderConfig)
 	if err != nil {
 		return fmt.Errorf("error decoding provided machineConfig: %v", err)
 	}
 
-	if err := do.validateMachine(machineConfig); err != nil {
+	if err := do.validateMachine(goalMachineConfig); err != nil {
 		return fmt.Errorf("error validating provided machineConfig: %v", err)
 	}
 
-	droplet, err := do.instanceExists(machine)
+	droplet, err := do.instanceExists(goalMachine)
 	if err != nil {
 		return err
 	}
 	if droplet == nil {
-		return fmt.Errorf("machine %s doesn't exist", machine.Name)
+		return fmt.Errorf("machine %s doesn't exist", goalMachine.Name)
 	}
 
-	// TODO: implement update logic.
+	status, err := do.instanceStatus(goalMachine)
+	if err != nil {
+		return err
+	}
+
+	currentMachine := (*clusterv1.Machine)(status)
+	if currentMachine == nil {
+		return fmt.Errorf("status annotation not set")
+	}
+
+	if !do.requiresUpdate(currentMachine, goalMachine) {
+		return nil
+	}
+
+	if util.IsMachineMaster(currentMachine) {
+		glog.Info("TODO: master update not implemented")
+		return nil
+	} else {
+		glog.Infof("re-creating node %s for update", currentMachine.Name)
+		err = do.Delete(cluster, currentMachine)
+		if err != nil {
+			return err
+		}
+
+		goalMachine.Annotations[IDAnnotationKey] = ""
+		err = do.Create(cluster, goalMachine)
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -401,6 +432,9 @@ func (do *DOClient) getKubeadmToken() (string, error) {
 // instanceExists returns instance with provided name if it already exists in the cloud.
 func (do *DOClient) instanceExists(machine *clusterv1.Machine) (*godo.Droplet, error) {
 	if strID, ok := machine.ObjectMeta.Annotations[IDAnnotationKey]; ok {
+		if strID == "" {
+			return nil, nil
+		}
 		id, err := strconv.Atoi(strID)
 		if err != nil {
 			return nil, err
@@ -430,6 +464,14 @@ func (do *DOClient) instanceExists(machine *clusterv1.Machine) (*godo.Droplet, e
 		}
 	}
 	return nil, nil
+}
+
+// requiresUpdate compares ObjectMeta, ProviderConfig and Versions object of two machines.
+func (do *DOClient) requiresUpdate(a *clusterv1.Machine, b *clusterv1.Machine) bool {
+	// Do not want status changes. Do want changes that impact machine provisioning
+	return !equality.Semantic.DeepEqual(a.Spec.ObjectMeta, b.Spec.ObjectMeta) ||
+		!equality.Semantic.DeepEqual(a.Spec.ProviderConfig, b.Spec.ProviderConfig) ||
+		!equality.Semantic.DeepEqual(a.Spec.Versions, b.Spec.Versions)
 }
 
 func (do *DOClient) validateMachine(providerConfig *doconfigv1.DigitalOceanMachineProviderConfig) error {
