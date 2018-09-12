@@ -21,8 +21,8 @@ items:
         # must be disabled for coreos instances.
         monitoring: true
     versions:
-      controlPlane: 1.9.4
-      kubelet: 1.9.4
+      controlPlane: 1.11.3
+      kubelet: 1.11.3
 - apiVersion: "cluster.k8s.io/v1alpha1"
   kind: Machine
   metadata:
@@ -45,4 +45,4 @@ items:
         # must be disabled for coreos instances.
         monitoring: true
     versions:
-      kubelet: 1.9.4
+      kubelet: 1.11.3

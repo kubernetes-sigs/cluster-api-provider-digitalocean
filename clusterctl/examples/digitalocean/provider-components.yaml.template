@@ -132,8 +132,8 @@ data:
     - machineParams:
       - image: ubuntu-18-04-x64
         versions:
-          kubelet: 1.9.4
-          controlPlane: 1.9.4
+          kubelet: 1.11.3
+          controlPlane: 1.11.3
       userdata: |
         set -e
         set -x
@@ -243,14 +243,14 @@ data:
         done
 
         # Apply Flannel CNI
-        kubectl --kubeconfig /etc/kubernetes/kubelet.conf create -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+        kubectl --kubeconfig /etc/kubernetes/admin.conf create -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
 
         echo done.
         ) 2>&1 | tee /var/log/startup.log
     - machineParams:
       - image: ubuntu-18-04-x64
         versions:
-          kubelet: 1.9.4
+          kubelet: 1.11.3
       userdata: |
         set -e
         set -x
