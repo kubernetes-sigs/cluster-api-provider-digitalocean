@@ -101,7 +101,6 @@ The core of the machine-controller is fully implemented and can be used to manag
 The following features are to be implemented soon:
 * Cluster Controller - currently `cluster-controller` does nothing. Follow the issue [#31](https://github.com/kubermatic/cluster-api-provider-digitalocean/issues/31) for more details,
 * Master upgrades - updating master instances have no effect. Follow the issue [#32](https://github.com/kubermatic/cluster-api-provider-digitalocean/issues/32) for more details,
-* Node upgrades - updating node instances have no effect. Follow the issue [#33](https://github.com/kubermatic/cluster-api-provider-digitalocean/issues/33) for more details,
 
 Follow [the issue tracker](https://github.com/kubermatic/cluster-api-provider-digitalocean/issues) for details about other upcoming features.
 
