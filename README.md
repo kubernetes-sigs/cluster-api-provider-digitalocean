@@ -88,12 +88,127 @@ The `clusterctl`'s workflow is:
 * Deploy addon components ([`digitalocean-cloud-controller-manager`](https://github.com/digitalocean/digitalocean-cloud-controller-manager) and [`csi-digitalocean`](https://github.com/digitalocean/csi-digitalocean)),
 * Remove the local Minikube cluster.
 
+To learn more about the process and how each component work, check out the [diagram in `cluster-api` repostiory](https://github.com/kubernetes-sigs/cluster-api#what-is-the-cluster-api).
+
 ### Interacting With Your New Cluster
 
 `clusterctl` downloads the `kubeconfig` file in your current directory from the cluster automatically. You can use it with `kubectl` to interact with your cluster:
 ```bash
 kubectl --kubeconfig kubeconfig get nodes
 kubectl --kubeconfig kubeconfig get all --all-namespaces
+```
+
+## Upgrading the Cluster
+
+Upgrading Master is currently not possible automatically (by updating the Machine object) as Update method is not fully implemented. More details can be found in [issue #32](https://github.com/kubermatic/cluster-api-provider-digitalocean/issues/32).
+
+Workers can be upgraded by updating the appropriate Machine object for that node. Workers are upgraded by replacing nodes—first the old node is removed and then a new one with new properties is created.
+
+To ensure non-disturbing maintenance we recommend having at least 2+ worker nodes at the time of upgrading, so another node can take tasks from the node being upgraded. The node that is going to be upgraded should be marked unschedulable and drained, so there are no pods running and scheduled.
+
+```bash
+# Make node unschedulable.
+kubectl --kubeconfig kubeconfig cordon <node-name>
+# Drain all pods from the node.
+kubectl --kubeconfig kubeconfig drain <node-name>
+```
+
+Now that you prepared node for upgrading, you can proceed with editing the Machine object:
+```bash
+kubectl --kubeconfig kubeconfig edit machine <node-name>
+```
+
+This opens the Machine manifest such as the following one, in your default text editor. You can choose editor by setting the `EDITOR` environment variable.
+
+There you can change machine properties, including Kubernetes (`kubelet`) version.
+
+```yaml
+apiVersion: cluster.k8s.io/v1alpha1
+kind: Machine
+metadata:  
+  creationTimestamp: 2018-09-14T11:02:16Z
+  finalizers:
+  - machine.cluster.k8s.io
+  generateName: digitalocean-fra1-node-
+  generation: 3
+  labels:
+    set: node
+  name: digitalocean-fra1-node-tzzgm
+  namespace: default
+  resourceVersion: "5"
+  selfLink: /apis/cluster.k8s.io/v1alpha1/namespaces/default/machines/digitalocean-fra1-node-tzzgm
+  uid: a41f83ad-b80d-11e8-aeef-0242ac110003
+spec:
+  metadata:
+    creationTimestamp: null
+  providerConfig:
+    ValueFrom: null
+    value:
+      backups: false
+      image: ubuntu-18-04-x64
+      ipv6: false
+      monitoring: true
+      private_networking: true
+      region: fra1
+      size: s-2vcpu-2gb
+      sshPublicKeys:
+      - ssh-rsa AAAA
+      tags:
+      - machine-2
+  versions:
+    kubelet: 1.11.3
+status:
+  lastUpdated: null
+  providerStatus: null
+```
+
+Saving changes to the Machine object deletes the old machine and then creates a new one. After some time, a new machine will be part of your Kubernetes cluster. You can track progress by watching list of nodes. Once new node appears and is Ready, upgrade has finished.
+
+```bash
+watch -n1 kubectl get nodes
+```
+
+## Deleting the Cluster
+
+To delete Master and confirm all relevant resources are deleted from the cloud, we're going to use [`doctl`—DigitalOcean CLI](https://github.com/digitalocean/doctl). You can also use DigitalOcean Cloud Control Panel or API instead of `doctl.
+
+First, save the Droplet ID of Master, as we'll use it later to delete the control plane machine:
+
+```bash
+export MASTER_ID=$(kubectl --kubeconfig=kubeconfig get machines -l set=master -o jsonpath='{.items[0].metadata.annotations.droplet-id}')
+```
+
+Now, delete all Workers in the cluster by removing all Machine object with label `set=node`:
+
+```
+kubectl --kubeconfig=kubeconfig delete machines -l set=node
+```
+
+You can confirm are nodes deleted by checking list of nodes. After some time, only Master should be present:
+
+```bash
+kubectl --kubeconfig=kubeconfig get nodes
+```
+
+Then, delete all Services and PersistentVolumeClaims, so all Load Balancers and Volumes in the cloud are deleted:
+
+```bash
+kubectl --kubeconfig=kubeconfig delete svc --all
+kubectl --kubeconfig=kubeconfig delete pvc --all
+```
+
+Finally, we can delete the Master using `doctl` and `$MASTER_ID` environment variable we set earlier:
+
+```bash
+doctl compute droplet delete $MASTER_ID
+```
+
+You can use `doctl` to confirm that Droplets, Load Balancers and Volumes relevant to the cluster are deleted:
+
+```bash
+doctl compute droplet list
+doctl compute load-balancer list
+doctl compute volume list
 ```
 
 ## Features
