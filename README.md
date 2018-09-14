@@ -88,6 +88,8 @@ The `clusterctl`'s workflow is:
 * Deploy addon components ([`digitalocean-cloud-controller-manager`](https://github.com/digitalocean/digitalocean-cloud-controller-manager) and [`csi-digitalocean`](https://github.com/digitalocean/csi-digitalocean)),
 * Remove the local Minikube cluster.
 
+To learn more about the process and how each component work, check out the [diagram in `cluster-api` repostiory](https://github.com/kubernetes-sigs/cluster-api#what-is-the-cluster-api).
+
 ### Interacting With Your New Cluster
 
 `clusterctl` downloads the `kubeconfig` file in your current directory from the cluster automatically. You can use it with `kubectl` to interact with your cluster:
