@@ -46,7 +46,7 @@ To create your first cluster using `cluster-api-provider-digitalocean`, you need
 * `cluster.yaml` - defines Cluster properties, such as Pod and Services CIDR, Services Domain, etc.
 * `machines.yaml` - defines Machine properties, such as machine size, image, tags, SSH keys, enabled features, as well as what Kubernetes version will be used for each machine.
 * `provider-components.yaml` - contains deployment manifest for controllers, userdata used to bootstrap machines, a secret with SSH key for the `machine-controller` and a secret with DigitalOcean API Access Token.
-* [Optional] `addons.yaml` - used to deploy additional components once the cluster is bootstrapped, such as an ingress controller.
+* [Optional] `addons.yaml` - used to deploy additional components once the cluster is bootstrapped, such as [DigitalOcean CSI plugin](https://github.com/digitalocean/csi-digitalocean).
 
 The manifests can be generated automatically by using the [`generate-yaml.sh`](./clusterctl/examples/digitalocean/generate-yaml.sh) script, located in the `clusterctl/examples/digitalocean` directory:
 ```bash
@@ -71,7 +71,8 @@ Once you have manifests generated, you can create a cluster using the following 
     --vm-driver kvm2 \
     -c ./clusterctl/examples/digitalocean/out/cluster.yaml \
     -m ./clusterctl/examples/digitalocean/out/machines.yaml \
-    -p ./clusterctl/examples/digitalocean/out/provider-components.yaml
+    -p ./clusterctl/examples/digitalocean/out/provider-components.yaml \
+    -a ./clusterctl/examples/digitalocean/out/addons.yaml
 ```
 
 More details about the `create cluster` command can be found by invoking help:
@@ -84,6 +85,7 @@ The `clusterctl`'s workflow is:
 * Deploy the `cluster-api-controller`, `digitalocean-machine-controller` and `digitalocean-cluster-controller`, on the bootstrap cluster,
 * Create a Master, download `kubeconfig` file, and deploy controllers on the Master,
 * Create other specified machines (nodes),
+* Deploy addon components (currently only `csi-digitalocean`),
 * Remove the local Minikube cluster.
 
 ### Interacting With Your New Cluster

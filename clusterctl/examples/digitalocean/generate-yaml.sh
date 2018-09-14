@@ -10,6 +10,8 @@ MACHINES_TEMPLATE_FILE=machines.yaml.template
 MACHINES_GENERATED_FILE=${OUTPUT_DIR}/machines.yaml
 CLUSTER_TEMPLATE_FILE=cluster.yaml.template
 CLUSTER_GENERATED_FILE=${OUTPUT_DIR}/cluster.yaml
+ADDONS_TEMPLATE_FILE=addons.yaml.template
+ADDONS_GENERATED_FILE=${OUTPUT_DIR}/addons.yaml
 
 REGION=${REGION:-fra1}
 CLUSTER_NAME=${CLUSTER_NAME:-test-1}
@@ -61,6 +63,11 @@ if [ $OVERWRITE -ne 1 ] && [ -f $CLUSTER_GENERATED_FILE ]; then
   exit 1
 fi
 
+if [ $OVERWRITE -ne 1 ] && [ -f $ADDONS_GENERATED_FILE ]; then
+  echo "File $ADDONS_GENERATED_FILE already exists. Delete it manually before running this script."
+  exit 1
+fi
+
 if [ $OVERWRITE -ne 1 ] && [ -f $SSH_KEY_GENERATED_FILE ]; then
   echo "File $SSH_KEY_GENERATED_FILE already exists. Delete it manually before running this script."
   exit 1
@@ -96,3 +103,7 @@ cat $CLUSTER_TEMPLATE_FILE \
   > $CLUSTER_GENERATED_FILE
 echo "Done generating $CLUSTER_GENERATED_FILE"
 
+cat $ADDONS_TEMPLATE_FILE \
+    | sed -e "s/\$DIGITALOCEAN_ACCESS_TOKEN/$DIGITALOCEAN_ACCESS_TOKEN/" \
+  > $ADDONS_GENERATED_FILE
+echo "Done generating $ADDONS_GENERATED_FILE"
