@@ -211,7 +211,7 @@ data:
         touch /etc/systemd/system/kubelet.service.d/20-kubenet.conf
         cat > /etc/systemd/system/kubelet.service.d/20-kubenet.conf <<EOF
         [Service]
-        Environment="KUBELET_EXTRA_ARGS=--authentication-token-webhook=true --read-only-port=0 --cluster-domain=cluster.local --resolv-conf=/run/systemd/resolve/resolv.conf"
+        Environment="KUBELET_EXTRA_ARGS=--allow-privileged=true --cloud-provider=external --authentication-token-webhook=true --read-only-port=0 --cluster-domain=cluster.local --resolv-conf=/run/systemd/resolve/resolv.conf"
         EOF
         systemctl daemon-reload
         systemctl restart kubelet.service
@@ -230,6 +230,7 @@ data:
         - ${PUBLICIP}
         - ${PRIVATEIP}
         - ${HOSTNAME}
+        - 127.0.0.1
         networking:
           podSubnet: ${POD_CIDR}
         EOF
@@ -343,7 +344,7 @@ data:
         touch /etc/systemd/system/kubelet.service.d/20-kubenet.conf
         cat > /etc/systemd/system/kubelet.service.d/20-kubenet.conf <<EOF
         [Service]
-        Environment="KUBELET_EXTRA_ARGS=--read-only-port=0 --cluster-domain=cluster.local --resolv-conf=/run/systemd/resolve/resolv.conf"
+        Environment="KUBELET_EXTRA_ARGS=--allow-privileged=true --read-only-port=0 --cluster-domain=cluster.local --resolv-conf=/run/systemd/resolve/resolv.conf"
         EOF
         systemctl daemon-reload
         systemctl restart kubelet.service
