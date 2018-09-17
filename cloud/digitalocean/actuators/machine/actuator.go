@@ -332,8 +332,68 @@ func (do *DOClient) Update(cluster *clusterv1.Cluster, goalMachine *clusterv1.Ma
 	}
 
 	if util.IsMachineMaster(currentMachine) {
-		glog.Info("TODO: master update not implemented")
-		return nil
+		if currentMachine.Spec.Versions.ControlPlane != goalMachine.Spec.Versions.ControlPlane {
+			cmd, err := do.upgradeCommandMasterControlPlane(goalMachine)
+			if err != nil {
+				return err
+			}
+
+			sshClient, err := ssh.NewClient(cluster.Status.APIEndpoints[0].Host, "22", do.SSHCreds.user, do.SSHCreds.privateKeyPath)
+			if err != nil {
+				return err
+			}
+			err = sshClient.Connect()
+			if err != nil {
+				return err
+			}
+
+			for _, c := range cmd {
+				_, err = sshClient.Execute(c)
+				if err != nil {
+					return err
+				}
+			}
+			err = do.updateInstanceStatus(goalMachine)
+			if err != nil {
+				return err
+			}
+			err = sshClient.Close()
+			if err != nil {
+				return err
+			}
+		}
+
+		if currentMachine.Spec.Versions.Kubelet != goalMachine.Spec.Versions.Kubelet {
+			cmd, err := do.upgradeCommandMasterKubelet(goalMachine)
+			if err != nil {
+				return err
+			}
+
+			sshClient, err := ssh.NewClient(cluster.Status.APIEndpoints[0].Host, "22", do.SSHCreds.user, do.SSHCreds.privateKeyPath)
+			if err != nil {
+				return err
+			}
+			err = sshClient.Connect()
+			if err != nil {
+				return err
+			}
+
+			for _, c := range cmd {
+				_, err = sshClient.Execute(c)
+				if err != nil {
+					return err
+				}
+			}
+
+			err = do.updateInstanceStatus(goalMachine)
+			if err != nil {
+				return err
+			}
+			err = sshClient.Close()
+			if err != nil {
+				return err
+			}
+		}
 	} else {
 		glog.Infof("re-creating node %s for update", currentMachine.Name)
 		err = do.Delete(cluster, currentMachine)
