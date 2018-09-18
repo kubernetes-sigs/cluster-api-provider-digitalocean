@@ -44,30 +44,6 @@ spec:
           limits:
             cpu: 100m
             memory: 30Mi
-      - name: digitalocean-cluster-controller
-        image: quay.io/kubermatic/digitalocean-cluster-controller:0.0.1
-        volumeMounts:
-          - name: config
-            mountPath: /etc/kubernetes
-          - name: certs
-            mountPath: /etc/ssl/certs
-        env:
-        - name: NODE_NAME
-          valueFrom:
-            fieldRef:
-              fieldPath: spec.nodeName
-        command:
-        - "./cluster-controller"
-        args:
-        - --kubeconfig=/etc/kubernetes/admin.conf
-        - --leader-elect
-        resources:
-          requests:
-            cpu: 200m
-            memory: 200Mi
-          limits:
-            cpu: 400m
-            memory: 500Mi
       - name: digitalocean-machine-controller
         image: quay.io/kubermatic/digitalocean-machine-controller:0.0.1
         volumeMounts:
