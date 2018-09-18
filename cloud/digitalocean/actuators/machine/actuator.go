@@ -187,12 +187,12 @@ func (do *DOClient) Create(cluster *clusterv1.Cluster, machine *clusterv1.Machin
 		return err
 	}
 	if util.IsMachineMaster(machine) {
-		parsedMetadata, err = masterUserdata(cluster, machine, token, metadata)
+		parsedMetadata, err = masterUserdata(cluster, machine, machineConfig.Image, token, metadata)
 		if err != nil {
 			return err
 		}
 	} else {
-		parsedMetadata, err = nodeUserdata(cluster, machine, token, metadata)
+		parsedMetadata, err = nodeUserdata(cluster, machine, machineConfig.Image, token, metadata)
 		if err != nil {
 			return err
 		}
