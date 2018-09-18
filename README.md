@@ -211,16 +211,6 @@ doctl compute load-balancer list
 doctl compute volume list
 ```
 
-## Features
-
-The core of the machine-controller is fully implemented and can be used to manage machines. The `clusterctl` can be used to bootstrap the cluster.
-
-The following features are to be implemented soon:
-* Cluster Controller - currently `cluster-controller` does nothing. Follow the issue [#31](https://github.com/kubermatic/cluster-api-provider-digitalocean/issues/31) for more details,
-* Master upgrades - updating master instances have no effect. Follow the issue [#32](https://github.com/kubermatic/cluster-api-provider-digitalocean/issues/32) for more details,
-
-Follow [the issue tracker](https://github.com/kubermatic/cluster-api-provider-digitalocean/issues) for details about other upcoming features.
-
 ## Development
 
 This portion of the README file contains information about the development process.
