@@ -33,10 +33,10 @@ import (
 	clusterv1 "sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 	client "sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset/typed/cluster/v1alpha1"
 	"sigs.k8s.io/cluster-api/pkg/kubeadm"
+	apiutil "sigs.k8s.io/cluster-api/pkg/util"
 
 	"github.com/kubermatic/cluster-api-provider-digitalocean/cloud/digitalocean/actuators/machine/machinesetup"
 	doconfigv1 "github.com/kubermatic/cluster-api-provider-digitalocean/cloud/digitalocean/providerconfig/v1alpha1"
-	"github.com/kubermatic/cluster-api-provider-digitalocean/pkg/scp"
 	"github.com/kubermatic/cluster-api-provider-digitalocean/pkg/ssh"
 	"github.com/kubermatic/cluster-api-provider-digitalocean/pkg/sshutil"
 	"github.com/kubermatic/cluster-api-provider-digitalocean/pkg/util"
@@ -432,6 +432,9 @@ func (do *DOClient) GetIP(cluster *clusterv1.Cluster, machine *clusterv1.Machine
 	if droplet == nil {
 		return "", fmt.Errorf("instance %s doesn't exist", droplet.Name)
 	}
+	if len(droplet.Networks.V4) == 0 {
+		return "", fmt.Errorf("instance %s doesn't have IP address assigned", droplet.Name)
+	}
 	return droplet.Networks.V4[0].IPAddress, nil
 }
 
@@ -448,25 +451,23 @@ func (do *DOClient) GetKubeConfig(cluster *clusterv1.Cluster, master *clusterv1.
 		return "", fmt.Errorf("unable to find cluster api endpoint address")
 	}
 
-	sshClient, err := ssh.NewClient(cluster.Status.APIEndpoints[0].Host, "22", do.SSHCreds.user, do.SSHCreds.privateKeyPath)
-	if err != nil {
-		return "", err
-	}
-	err = sshClient.Connect()
-	if err != nil {
-		return "", err
-	}
-	scpClient := scp.NewSCPClient(sshClient)
-	if err != nil {
-		return "", err
-	}
+	// We're using system SSH to download kubeconfig file from master.
+	// The reasons for that are:
+	//   * GetKubeConfig is executed by clusterctl on local machine. We don't know location of SSH key used for
+	//     authentication and we can't add clusterctl flag for SSH key path, as it may not be possible to pass it to
+	//     machine-controller and GetKubeConfig function.
+	//   * Because we don't have SSH key, we can't use Go SSH implementation here.
+	//   * Using Go SSH implementation and SSH agent together misbehaves, so is not an option.
+	// Therefore, we're using system SSH here, so it correctly handles keys and authentication.
+	result := strings.TrimSpace(apiutil.ExecCommand(
+		"ssh", "-q",
+		"-o", "StrictHostKeyChecking no",
+		"-o", "UserKnownHostsFile /dev/null",
+		fmt.Sprintf("%s@%s", "root", cluster.Status.APIEndpoints[0].Host),
+		"echo STARTFILE; sudo cat /etc/kubernetes/admin.conf"))
+	kubeconfig := strings.Split(result, "STARTFILE")
 
-	kubeconfig, err := scpClient.ReadBytes("/etc/kubernetes/admin.conf")
-	if err != nil {
-		return "", err
-	}
-
-	return string(kubeconfig), nil
+	return strings.TrimSpace(kubeconfig[1]), nil
 }
 
 func getKubeadm(params ActuatorParams) DOClientKubeadm {
