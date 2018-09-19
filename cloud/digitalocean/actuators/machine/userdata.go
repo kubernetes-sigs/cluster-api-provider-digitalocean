@@ -6,6 +6,10 @@ import (
 	"text/template"
 
 	clusterv1 "sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
+
+	"github.com/kubermatic/cluster-api-provider-digitalocean/pkg/docker"
+
+	"github.com/golang/glog"
 )
 
 // userdataParams are parameters used to parse the environment variables for bootstrap scripts.
@@ -16,21 +20,36 @@ type userdataParams struct {
 	MasterEndpoint string
 	PodCIDR        string
 	ServiceCIDR    string
+	CRPackage      string
+	CRVersion      string
 }
 
 // masterUserdata builds master bootstrap script based on script provided in providerConfig and based on environment template.
-func masterUserdata(cluster *clusterv1.Cluster, machine *clusterv1.Machine, token, metadata string) (string, error) {
+func masterUserdata(cluster *clusterv1.Cluster, machine *clusterv1.Machine, osImage, token, metadata string) (string, error) {
+	var crPkg, crPkgVersion string
+	dockerVersion, err := docker.ForOS(osImage)
+	if err == nil {
+		crPkg, crPkgVersion, err = dockerVersion.GetDockerInstallCandidate(machine.Spec.Versions.Kubelet)
+		if err != nil {
+			return "", fmt.Errorf("failed to get docker install candidate for %s: %v", machine.Spec.Versions.Kubelet, err)
+		}
+	} else {
+		glog.Info(err)
+	}
+
 	params := userdataParams{
 		Cluster:     cluster,
 		Machine:     machine,
 		Token:       token,
 		PodCIDR:     subnet(cluster.Spec.ClusterNetwork.Pods),
 		ServiceCIDR: subnet(cluster.Spec.ClusterNetwork.Services),
+		CRPackage:   crPkg,
+		CRVersion:   crPkgVersion,
 	}
 	tmpl := template.Must(template.New("masterEnvironment").Parse(masterEnvironmentVariables))
 
 	b := &bytes.Buffer{}
-	err := tmpl.Execute(b, params)
+	err = tmpl.Execute(b, params)
 	if err != nil {
 		return "", fmt.Errorf("failed to execute user-data template: %v", err)
 	}
@@ -40,7 +59,18 @@ func masterUserdata(cluster *clusterv1.Cluster, machine *clusterv1.Machine, toke
 }
 
 // nodeUserdata builds node bootstrap script based on script provided in providerConfig and based on environment template.
-func nodeUserdata(cluster *clusterv1.Cluster, machine *clusterv1.Machine, token, metadata string) (string, error) {
+func nodeUserdata(cluster *clusterv1.Cluster, machine *clusterv1.Machine, osImage, token, metadata string) (string, error) {
+	var crPkg, crPkgVersion string
+	dockerVersion, err := docker.ForOS(osImage)
+	if err == nil {
+		crPkg, crPkgVersion, err = dockerVersion.GetDockerInstallCandidate(machine.Spec.Versions.Kubelet)
+		if err != nil {
+			return "", fmt.Errorf("failed to get docker install candidate for %s: %v", machine.Spec.Versions.Kubelet, err)
+		}
+	} else {
+		glog.Info(err)
+	}
+
 	params := userdataParams{
 		Cluster:        cluster,
 		Machine:        machine,
@@ -48,11 +78,13 @@ func nodeUserdata(cluster *clusterv1.Cluster, machine *clusterv1.Machine, token,
 		MasterEndpoint: endpoint(cluster.Status.APIEndpoints[0]),
 		PodCIDR:        subnet(cluster.Spec.ClusterNetwork.Pods),
 		ServiceCIDR:    subnet(cluster.Spec.ClusterNetwork.Services),
+		CRPackage:      crPkg,
+		CRVersion:      crPkgVersion,
 	}
 	tmpl := template.Must(template.New("nodeEnvironment").Parse(nodeEnvironmentVariables))
 
 	b := &bytes.Buffer{}
-	err := tmpl.Execute(b, params)
+	err = tmpl.Execute(b, params)
 	if err != nil {
 		return "", fmt.Errorf("failed to execute user-data template: %v", err)
 	}
@@ -87,6 +119,8 @@ CONTROL_PLANE_VERSION={{ .Machine.Spec.Versions.ControlPlane }}
 CLUSTER_DNS_DOMAIN={{ .Cluster.Spec.ClusterNetwork.ServiceDomain }}
 POD_CIDR={{ .PodCIDR }}
 SERVICE_CIDR={{ .ServiceCIDR }}
+CR_PACKAGE={{ .CRPackage }}
+CR_VERSION={{ .CRVersion }}
 `
 	nodeEnvironmentVariables = `#!/bin/bash
 KUBELET_VERSION={{ .Machine.Spec.Versions.Kubelet }}
@@ -99,5 +133,7 @@ MACHINE+={{ .Machine.ObjectMeta.Name }}
 CLUSTER_DNS_DOMAIN={{ .Cluster.Spec.ClusterNetwork.ServiceDomain }}
 POD_CIDR={{ .PodCIDR }}
 SERVICE_CIDR={{ .ServiceCIDR }}
+CR_PACKAGE={{ .CRPackage }}
+CR_VERSION={{ .CRVersion }}
 `
 )

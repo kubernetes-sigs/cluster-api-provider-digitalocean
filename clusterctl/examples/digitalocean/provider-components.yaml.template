@@ -152,7 +152,21 @@ data:
             echo "exit 101" > /usr/sbin/policy-rc.d
             chmod +x /usr/sbin/policy-rc.d
             trap "rm /usr/sbin/policy-rc.d" RETURN
-            apt-get install -y docker.io
+
+            curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+            sudo add-apt-repository \
+               "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+               $(lsb_release -cs) \
+               stable"
+
+            export CR_PKG=''
+            if [ -n "$CR_VERSION" ]; then
+                export CR_PKG="$CR_PACKAGE=$CR_VERSION"
+            else
+                export CR_PKG="$CR_PACKAGE"
+            fi
+
+            apt-get install -y ${CR_PKG}
             echo 'DOCKER_OPTS="--iptables=false --ip-masq=false"' > /etc/default/docker
             systemctl daemon-reload
             systemctl enable docker
@@ -285,7 +299,21 @@ data:
             echo "exit 101" > /usr/sbin/policy-rc.d
             chmod +x /usr/sbin/policy-rc.d
             trap "rm /usr/sbin/policy-rc.d" RETURN
-            apt-get install -y docker.io
+
+            curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+            sudo add-apt-repository \
+               "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+               $(lsb_release -cs) \
+               stable"
+
+            export CR_PKG=''
+            if [ -n "$CR_VERSION" ]; then
+                export CR_PKG="$CR_PACKAGE=$CR_VERSION"
+            else
+                export CR_PKG="$CR_PACKAGE"
+            fi
+
+            apt-get install -y ${CR_PKG}
             echo 'DOCKER_OPTS="--iptables=false --ip-masq=false"' > /etc/default/docker
             systemctl daemon-reload
             systemctl enable docker
