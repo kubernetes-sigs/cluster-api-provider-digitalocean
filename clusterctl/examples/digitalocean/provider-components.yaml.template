@@ -174,8 +174,6 @@ data:
         }
         install_configure_docker
 
-        # kubeadm uses 10th IP as DNS server
-        # CLUSTER_DNS_SERVER=$(prips ${SERVICE_CIDR} | head -n 11 | tail -n 1)
         # Our Debian packages have versions like "1.8.0-00" or "1.8.0-01". Do a prefix
         # search based on our SemVer to find the right (newest) package version.
         function getversion() {
@@ -194,14 +192,19 @@ data:
             kubelet=${KUBELET} \
             kubeadm=${KUBEADM}
 
+        # kubeadm uses 10th IP as DNS server
+        CLUSTER_DNS_SERVER=$(prips ${SERVICE_CIDR} | head -n 11 | tail -n 1)
+
         # Override network args to use kubenet instead of cni, override Kubelet DNS args and
         # add cloud provider args.
         # Environment="KUBELET_DNS_ARGS=--cluster-dns=${CLUSTER_DNS_SERVER} --cluster-domain=${CLUSTER_DNS_DOMAIN}"
         # TODO: get back here.
-        touch /etc/systemd/system/kubelet.service.d/20-kubenet.conf
-        cat > /etc/systemd/system/kubelet.service.d/20-kubenet.conf <<EOF
+        touch /etc/systemd/system/kubelet.service.d/20-kubelet.conf
+        cat > /etc/systemd/system/kubelet.service.d/20-kubelet.conf <<EOF
         [Service]
-        Environment="KUBELET_EXTRA_ARGS=--allow-privileged=true --cloud-provider=external --authentication-token-webhook=true --read-only-port=0 --cluster-domain=cluster.local --resolv-conf=/run/systemd/resolve/resolv.conf"
+        Environment="KUBELET_NETWORK_ARGS=--network-plugin=cni"
+        Environment="KUBELET_DNS_ARGS=--resolv-conf=/run/systemd/resolve/resolv.conf --cluster-dns=${CLUSTER_DNS_SERVER} --cluster-domain=${CLUSTER_DNS_DOMAIN} --node-ip=${PRIVATEIP}"
+        Environment="KUBELET_EXTRA_ARGS=--allow-privileged=true --cloud-provider=external --authentication-token-webhook=true --read-only-port=0"
         EOF
         systemctl daemon-reload
         systemctl restart kubelet.service
@@ -211,30 +214,39 @@ data:
         cat > /etc/kubernetes/kubeadm_config.yaml <<EOF
         apiVersion: kubeadm.k8s.io/v1alpha1
         kind: MasterConfiguration
+        kubernetesVersion: v${CONTROL_PLANE_VERSION}
+        token: ${TOKEN}
         api:
           advertiseAddress: ${PUBLICIP}
           bindPort: ${PORT}
-        kubernetesVersion: v${CONTROL_PLANE_VERSION}
-        token: ${TOKEN}
+        networking:
+          serviceSubnet: ${SERVICE_CIDR}
+          podSubnet: ${POD_CIDR}
+        controllerManagerExtraArgs:
+          cluster-cidr: ${POD_CIDR}
+          service-cluster-ip-range: ${SERVICE_CIDR}
+          allocate-node-cidrs: "true"
         apiServerCertSANs:
         - ${PUBLICIP}
         - ${PRIVATEIP}
         - ${HOSTNAME}
         - 127.0.0.1
-        networking:
-          podSubnet: ${POD_CIDR}
         EOF
 
+        kubeadm reset --force
         kubeadm init --config /etc/kubernetes/kubeadm_config.yaml
 
+        # Annotate node.
         for tries in $(seq 1 60); do
-            # Annotate node.
             kubectl --kubeconfig /etc/kubernetes/kubelet.conf annotate --overwrite node ${HOSTNAME} machine=${MACHINE} && break
             sleep 1
         done
 
         # Apply Flannel CNI
-        kubectl --kubeconfig /etc/kubernetes/admin.conf create -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+        for tries in $(seq 1 60); do
+            kubectl --kubeconfig /etc/kubernetes/admin.conf create -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml && break
+            sleep 1
+        done
 
         echo done.
         ) 2>&1 | tee /var/log/startup.log
@@ -258,26 +270,13 @@ data:
         sh -c 'echo "deb http://apt.kubernetes.io/ kubernetes-xenial main" > /etc/apt/sources.list.d/kubernetes.list'
         apt-get update -y
         DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install -y \
-            curl \
             ca-certificates \
             apt-transport-https \
             cloud-utils \
-            ceph-common \
-            cifs-utils \
-            conntrack \
-            e2fsprogs \
             ebtables \
-            ethtool \
-            glusterfs-client \
-            iptables \
             jq \
             prips \
-            kmod \
-            openssh-client \
-            nfs-common \
-            socat \
-            util-linux \
-            open-vm-tools
+            socat
 
         # If something failed during package installation but one of docker/kubeadm/kubelet was already installed
         # an apt-mark hold after the install won't do it, which is why we test here if the binaries exist and if
@@ -321,8 +320,6 @@ data:
         }
         install_configure_docker
 
-        # kubeadm uses 10th IP as DNS server
-        # CLUSTER_DNS_SERVER=$(prips ${SERVICE_CIDR} | head -n 11 | tail -n 1)
         # Our Debian packages have versions like "1.8.0-00" or "1.8.0-01". Do a prefix
         # search based on our SemVer to find the right (newest) package version.
         function getversion() {
@@ -341,19 +338,31 @@ data:
             kubelet=${KUBELET} \
             kubeadm=${KUBEADM}
 
+        # kubeadm uses 10th IP as DNS server
+        CLUSTER_DNS_SERVER=$(prips ${SERVICE_CIDR} | head -n 11 | tail -n 1)
+
         # Override network args to use kubenet instead of cni, override Kubelet DNS args and
         # add cloud provider args.
         # Environment="KUBELET_DNS_ARGS=--cluster-dns=${CLUSTER_DNS_SERVER} --cluster-domain=${CLUSTER_DNS_DOMAIN}"
         # TODO: get back here.
-        touch /etc/systemd/system/kubelet.service.d/20-kubenet.conf
-        cat > /etc/systemd/system/kubelet.service.d/20-kubenet.conf <<EOF
+        touch /etc/systemd/system/kubelet.service.d/20-kubelet.conf
+        cat > /etc/systemd/system/kubelet.service.d/20-kubelet.conf <<EOF
         [Service]
-        Environment="KUBELET_EXTRA_ARGS=--allow-privileged=true --read-only-port=0 --cluster-domain=cluster.local --resolv-conf=/run/systemd/resolve/resolv.conf"
+        Environment="KUBELET_NETWORK_ARGS=--network-plugin=cni"
+        Environment="KUBELET_DNS_ARGS=--resolv-conf=/run/systemd/resolve/resolv.conf --cluster-dns=${CLUSTER_DNS_SERVER} --cluster-domain=${CLUSTER_DNS_DOMAIN} --node-ip=${PRIVATEIP}"
+        Environment="KUBELET_EXTRA_ARGS=--allow-privileged=true --cloud-provider=external --authentication-token-webhook=true --read-only-port=0"
         EOF
         systemctl daemon-reload
         systemctl restart kubelet.service
 
-        kubeadm join --token "${TOKEN}" "${MASTER}" --ignore-preflight-errors=all --discovery-token-unsafe-skip-ca-verification
+        export ENDPOINT=''
+        if [ -n "$MASTER_PRIVATE" ]; then
+            export ENDPOINT=$MASTER_PRIVATE
+        else
+            export ENDPOINT=$MASTER
+        fi
+
+        kubeadm join --token "${TOKEN}" "${ENDPOINT}" --ignore-preflight-errors=all --discovery-token-unsafe-skip-ca-verification
 
         for tries in $(seq 1 60); do
             kubectl --kubeconfig /etc/kubernetes/kubelet.conf annotate --overwrite node ${HOSTNAME} machine=${MACHINE} && break
