@@ -251,7 +251,7 @@ func (do *DOClient) Create(cluster *clusterv1.Cluster, machine *clusterv1.Machin
 		if err != nil {
 			return false, err
 		}
-		if sets.NewString(droplet.Tags...).Has(string(machine.UID)) {
+		if sets.NewString(droplet.Tags...).Has(string(machine.UID)) && len(droplet.Networks.V4) > 0 {
 			return true, nil
 		}
 		glog.Infof("waiting until machine %s gets fully created", machine.Name)
@@ -466,6 +466,10 @@ func (do *DOClient) GetKubeConfig(cluster *clusterv1.Cluster, master *clusterv1.
 		fmt.Sprintf("%s@%s", "root", cluster.Status.APIEndpoints[0].Host),
 		"echo STARTFILE; sudo cat /etc/kubernetes/admin.conf"))
 	kubeconfig := strings.Split(result, "STARTFILE")
+
+	if len(kubeconfig) < 2 {
+		return "", fmt.Errorf("kubeconfig not available")
+	}
 
 	return strings.TrimSpace(kubeconfig[1]), nil
 }
