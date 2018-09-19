@@ -233,7 +233,27 @@ data:
         - 127.0.0.1
         EOF
 
-        kubeadm reset --force
+        function install_custom_ca () {
+            if [ ! -n "$MASTER_CA_CERTIFICATE" ]; then
+                return
+            fi
+            if [ ! -n "$MASTER_CA_PRIVATE_KEY" ]; then
+                return
+            fi
+
+            echo "Installing custom certificate authority..."
+
+            PKI_PATH=/etc/kubernetes/pki
+            mkdir -p ${PKI_PATH}
+            CA_CERT_PATH=${PKI_PATH}/ca.crt
+            echo ${MASTER_CA_CERTIFICATE} | base64 -d > ${CA_CERT_PATH}
+            chmod 0644 ${CA_CERT_PATH}
+            CA_KEY_PATH=${PKI_PATH}/ca.key
+            echo ${MASTER_CA_PRIVATE_KEY} | base64 -d > ${CA_KEY_PATH}
+            chmod 0600 ${CA_KEY_PATH}
+        }
+        install_custom_ca
+
         kubeadm init --config /etc/kubernetes/kubeadm_config.yaml
 
         # Annotate node.
