@@ -361,6 +361,7 @@ func (do *DOClient) Update(cluster *clusterv1.Cluster, goalMachine *clusterv1.Ma
 			if err != nil {
 				return err
 			}
+			do.eventRecorder.Eventf(goalMachine, corev1.EventTypeNormal, eventReasonDelete, "machine %s control plane successfully updated", goalMachine.Name)
 		}
 
 		if currentMachine.Spec.Versions.Kubelet != goalMachine.Spec.Versions.Kubelet {
@@ -393,6 +394,7 @@ func (do *DOClient) Update(cluster *clusterv1.Cluster, goalMachine *clusterv1.Ma
 			if err != nil {
 				return err
 			}
+			do.eventRecorder.Eventf(goalMachine, corev1.EventTypeNormal, eventReasonDelete, "machine %s kubelet successfully updated", goalMachine.Name)
 		}
 	} else {
 		glog.Infof("re-creating node %s for update", currentMachine.Name)
@@ -406,6 +408,7 @@ func (do *DOClient) Update(cluster *clusterv1.Cluster, goalMachine *clusterv1.Ma
 		if err != nil {
 			return err
 		}
+		do.eventRecorder.Eventf(goalMachine, corev1.EventTypeNormal, eventReasonDelete, "node %s successfully updated", goalMachine.ObjectMeta.Name)
 	}
 
 	return nil
