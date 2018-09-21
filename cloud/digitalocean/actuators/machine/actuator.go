@@ -29,18 +29,16 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/tools/record"
 
-	clustercommon "sigs.k8s.io/cluster-api/pkg/apis/cluster/common"
-	clusterv1 "sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
-	"sigs.k8s.io/cluster-api/pkg/cert"
-	client "sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset/typed/cluster/v1alpha1"
-	"sigs.k8s.io/cluster-api/pkg/kubeadm"
-	apiutil "sigs.k8s.io/cluster-api/pkg/util"
-
 	"github.com/kubermatic/cluster-api-provider-digitalocean/cloud/digitalocean/actuators/machine/machinesetup"
 	doconfigv1 "github.com/kubermatic/cluster-api-provider-digitalocean/cloud/digitalocean/providerconfig/v1alpha1"
 	"github.com/kubermatic/cluster-api-provider-digitalocean/pkg/ssh"
 	"github.com/kubermatic/cluster-api-provider-digitalocean/pkg/sshutil"
 	"github.com/kubermatic/cluster-api-provider-digitalocean/pkg/util"
+	clustercommon "sigs.k8s.io/cluster-api/pkg/apis/cluster/common"
+	clusterv1 "sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
+	"sigs.k8s.io/cluster-api/pkg/cert"
+	client "sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset/typed/cluster/v1alpha1"
+	"sigs.k8s.io/cluster-api/pkg/kubeadm"
 
 	"github.com/digitalocean/godo"
 	"github.com/golang/glog"
@@ -365,7 +363,7 @@ func (do *DOClient) Update(cluster *clusterv1.Cluster, goalMachine *clusterv1.Ma
 			if err != nil {
 				return err
 			}
-			do.eventRecorder.Eventf(goalMachine, corev1.EventTypeNormal, eventReasonDelete, "machine %s control plane successfully updated", goalMachine.Name)
+			do.eventRecorder.Eventf(goalMachine, corev1.EventTypeNormal, eventReasonUpdate, "machine %s control plane successfully updated", goalMachine.Name)
 		}
 
 		if currentMachine.Spec.Versions.Kubelet != goalMachine.Spec.Versions.Kubelet {
@@ -398,7 +396,7 @@ func (do *DOClient) Update(cluster *clusterv1.Cluster, goalMachine *clusterv1.Ma
 			if err != nil {
 				return err
 			}
-			do.eventRecorder.Eventf(goalMachine, corev1.EventTypeNormal, eventReasonDelete, "machine %s kubelet successfully updated", goalMachine.Name)
+			do.eventRecorder.Eventf(goalMachine, corev1.EventTypeNormal, eventReasonUpdate, "machine %s kubelet successfully updated", goalMachine.Name)
 		}
 	} else {
 		glog.Infof("re-creating node %s for update", currentMachine.Name)
@@ -412,7 +410,7 @@ func (do *DOClient) Update(cluster *clusterv1.Cluster, goalMachine *clusterv1.Ma
 		if err != nil {
 			return err
 		}
-		do.eventRecorder.Eventf(goalMachine, corev1.EventTypeNormal, eventReasonDelete, "node %s successfully updated", goalMachine.ObjectMeta.Name)
+		do.eventRecorder.Eventf(goalMachine, corev1.EventTypeNormal, eventReasonUpdate, "node %s successfully updated", goalMachine.ObjectMeta.Name)
 	}
 
 	return nil
@@ -428,57 +426,6 @@ func (do *DOClient) Exists(cluster *clusterv1.Cluster, machine *clusterv1.Machin
 		return true, nil
 	}
 	return false, nil
-}
-
-// GetIP returns public IP address of the node in the cluster.
-func (do *DOClient) GetIP(cluster *clusterv1.Cluster, machine *clusterv1.Machine) (string, error) {
-	droplet, err := do.instanceExists(machine)
-	if err != nil {
-		return "", err
-	}
-	if droplet == nil {
-		return "", fmt.Errorf("instance %s doesn't exist", droplet.Name)
-	}
-	if len(droplet.Networks.V4) == 0 {
-		return "", fmt.Errorf("instance %s doesn't have IP address assigned", droplet.Name)
-	}
-	return droplet.Networks.V4[0].IPAddress, nil
-}
-
-// GetKubeConfig returns kubeconfig from the master.
-func (do *DOClient) GetKubeConfig(cluster *clusterv1.Cluster, master *clusterv1.Machine) (string, error) {
-	droplet, err := do.instanceExists(master)
-	if err != nil {
-		return "", err
-	}
-	if droplet == nil {
-		return "", fmt.Errorf("instance does not exists")
-	}
-	if len(cluster.Status.APIEndpoints) == 0 {
-		return "", fmt.Errorf("unable to find cluster api endpoint address")
-	}
-
-	// We're using system SSH to download kubeconfig file from master.
-	// The reasons for that are:
-	//   * GetKubeConfig is executed by clusterctl on local machine. We don't know location of SSH key used for
-	//     authentication and we can't add clusterctl flag for SSH key path, as it may not be possible to pass it to
-	//     machine-controller and GetKubeConfig function.
-	//   * Because we don't have SSH key, we can't use Go SSH implementation here.
-	//   * Using Go SSH implementation and SSH agent together misbehaves, so is not an option.
-	// Therefore, we're using system SSH here, so it correctly handles keys and authentication.
-	result := strings.TrimSpace(apiutil.ExecCommand(
-		"ssh", "-q",
-		"-o", "StrictHostKeyChecking no",
-		"-o", "UserKnownHostsFile /dev/null",
-		fmt.Sprintf("%s@%s", "root", cluster.Status.APIEndpoints[0].Host),
-		"echo STARTFILE; sudo cat /etc/kubernetes/admin.conf"))
-	kubeconfig := strings.Split(result, "STARTFILE")
-
-	if len(kubeconfig) < 2 {
-		return "", fmt.Errorf("kubeconfig not available")
-	}
-
-	return strings.TrimSpace(kubeconfig[1]), nil
 }
 
 func getKubeadm(params ActuatorParams) DOClientKubeadm {
