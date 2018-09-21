@@ -2,10 +2,12 @@ package machine
 
 import (
 	"bytes"
+	"encoding/base64"
 	"fmt"
 	"text/template"
 
 	clusterv1 "sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
+	"sigs.k8s.io/cluster-api/pkg/cert"
 
 	"github.com/kubermatic/cluster-api-provider-digitalocean/pkg/docker"
 
@@ -22,10 +24,12 @@ type userdataParams struct {
 	ServiceCIDR    string
 	CRPackage      string
 	CRVersion      string
+	CACertificate  string
+	CAPrivateKey   string
 }
 
 // masterUserdata builds master bootstrap script based on script provided in providerConfig and based on environment template.
-func masterUserdata(cluster *clusterv1.Cluster, machine *clusterv1.Machine, osImage, token, metadata string) (string, error) {
+func masterUserdata(cluster *clusterv1.Cluster, machine *clusterv1.Machine, certificateAuthority *cert.CertificateAuthority, osImage, token, metadata string) (string, error) {
 	var crPkg, crPkgVersion string
 	dockerVersion, err := docker.ForOS(osImage)
 	if err == nil {
@@ -37,14 +41,22 @@ func masterUserdata(cluster *clusterv1.Cluster, machine *clusterv1.Machine, osIm
 		glog.Info(err)
 	}
 
+	var caCertificate, caPrivateKey string
+	if certificateAuthority != nil {
+		caCertificate = base64.StdEncoding.EncodeToString(certificateAuthority.Certificate)
+		caPrivateKey = base64.StdEncoding.EncodeToString(certificateAuthority.PrivateKey)
+	}
+
 	params := userdataParams{
-		Cluster:     cluster,
-		Machine:     machine,
-		Token:       token,
-		PodCIDR:     subnet(cluster.Spec.ClusterNetwork.Pods),
-		ServiceCIDR: subnet(cluster.Spec.ClusterNetwork.Services),
-		CRPackage:   crPkg,
-		CRVersion:   crPkgVersion,
+		Cluster:       cluster,
+		Machine:       machine,
+		Token:         token,
+		PodCIDR:       subnet(cluster.Spec.ClusterNetwork.Pods),
+		ServiceCIDR:   subnet(cluster.Spec.ClusterNetwork.Services),
+		CRPackage:     crPkg,
+		CRVersion:     crPkgVersion,
+		CACertificate: caCertificate,
+		CAPrivateKey:  caPrivateKey,
 	}
 	tmpl := template.Must(template.New("masterEnvironment").Parse(masterEnvironmentVariables))
 
@@ -119,6 +131,8 @@ CONTROL_PLANE_VERSION={{ .Machine.Spec.Versions.ControlPlane }}
 CLUSTER_DNS_DOMAIN={{ .Cluster.Spec.ClusterNetwork.ServiceDomain }}
 POD_CIDR={{ .PodCIDR }}
 SERVICE_CIDR={{ .ServiceCIDR }}
+MASTER_CA_CERTIFICATE={{ .CACertificate }}
+MASTER_CA_PRIVATE_KEY={{ .CAPrivateKey }}
 CR_PACKAGE={{ .CRPackage }}
 CR_VERSION={{ .CRVersion }}
 `
