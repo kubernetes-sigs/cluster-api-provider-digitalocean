@@ -45,7 +45,7 @@ spec:
             cpu: 100m
             memory: 30Mi
       - name: digitalocean-machine-controller
-        image: quay.io/kubermatic/digitalocean-machine-controller:0.0.1
+        image: quay.io/kubermatic/digitalocean-machine-controller:$CONTROLLER_VERSION
         volumeMounts:
           - name: config
             mountPath: /etc/kubernetes
