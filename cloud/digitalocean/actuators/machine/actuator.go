@@ -31,6 +31,7 @@ import (
 
 	clustercommon "sigs.k8s.io/cluster-api/pkg/apis/cluster/common"
 	clusterv1 "sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
+	"sigs.k8s.io/cluster-api/pkg/cert"
 	client "sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset/typed/cluster/v1alpha1"
 	"sigs.k8s.io/cluster-api/pkg/kubeadm"
 	apiutil "sigs.k8s.io/cluster-api/pkg/util"
@@ -86,6 +87,7 @@ type DOClientSSHCreds struct {
 // DOClient is responsible for performing machine reconciliation
 type DOClient struct {
 	godoClient               *godo.Client
+	certificateAuthority     *cert.CertificateAuthority
 	scheme                   *runtime.Scheme
 	doProviderConfigCodec    *doconfigv1.DigitalOceanProviderConfigCodec
 	kubeadm                  DOClientKubeadm
@@ -99,6 +101,7 @@ type DOClient struct {
 // ActuatorParams holds parameter information for DOClient
 type ActuatorParams struct {
 	Kubeadm                  DOClientKubeadm
+	CertificateAuthority     *cert.CertificateAuthority
 	V1Alpha1Client           client.ClusterV1alpha1Interface
 	EventRecorder            record.EventRecorder
 	MachineSetupConfigGetter DOClientMachineSetupConfigGetter
@@ -129,6 +132,7 @@ func NewMachineActuator(params ActuatorParams) (*DOClient, error) {
 
 	return &DOClient{
 		godoClient:            getGodoClient(),
+		certificateAuthority:  params.CertificateAuthority,
 		scheme:                scheme,
 		doProviderConfigCodec: codec,
 		kubeadm:               getKubeadm(params),
@@ -187,7 +191,7 @@ func (do *DOClient) Create(cluster *clusterv1.Cluster, machine *clusterv1.Machin
 		return err
 	}
 	if util.IsMachineMaster(machine) {
-		parsedMetadata, err = masterUserdata(cluster, machine, machineConfig.Image, token, metadata)
+		parsedMetadata, err = masterUserdata(cluster, machine, do.certificateAuthority, machineConfig.Image, token, metadata)
 		if err != nil {
 			return err
 		}
