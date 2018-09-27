@@ -1,13 +1,3 @@
-# DigitalOcean API Access Token Secret
-apiVersion: v1
-kind: Secret
-metadata:
-  name: digitalocean
-  namespace: kube-system
-type: Opaque
-stringData:
-  token: $DIGITALOCEAN_ACCESS_TOKEN
----
 #########################################
 #                                       #
 # digitalocean-cloud-controller-manager #

@@ -3,6 +3,7 @@ items:
   kind: Machine
   metadata:
     generateName: $MASTER_NAME
+    namespace: $NAMESPACE
     labels:
       set: master
   spec:
@@ -27,6 +28,7 @@ items:
   kind: Machine
   metadata:
     generateName: $NODE_NAME
+    namespace: $NAMESPACE
     labels:
       set: node
   spec:

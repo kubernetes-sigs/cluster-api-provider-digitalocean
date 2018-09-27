@@ -33,6 +33,9 @@ The following environment variables are used by the script:
 * `$CLUSTER_NAME` - name of the cluster. Default `test-1`.
 * `$MASTER_NAME` - name of the Master instance. The randomly generated suffix is appended to the name by the `machine-controller` on-creation. Default `digitalocean-fra1-master-`.
 * `$NODE_NAME` - name of nodes. The randomly generated suffix is appended to the name by the `machine-controller` on-creation. Default `digitalocean-fra1-node-`.
+* `$NAMESPACE` - namespace where Cluster-API API Server, Cluster-API Controllers, and Cluster and Machine objects will be deployed
+
+If deploying in namespace that's not `kube-system`, manually creating secret with DigitalOcean Access Token in `kube-system` namespace is required.
 
 The `$DIGITALOCEAN_ACCESS_TOKEN` environment variable must be set to the [DigitalOcean API Access Token](https://www.digitalocean.com/docs/api/create-personal-access-token/) for the `machine-controller` and `cluster-controller` to work properly.
 

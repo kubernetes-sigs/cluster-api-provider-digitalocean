@@ -2,6 +2,7 @@ apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
   name: clusterapi-controllers
+  namespace: $NAMESPACE
   labels:
     api: clusterapi
 spec:
@@ -102,6 +103,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: machine-config
+  namespace: $NAMESPACE
 data:
   config.yaml: |-
     items:
@@ -395,6 +397,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: digitalocean
+  namespace: $NAMESPACE
 type: Opaque
 stringData:
   token: $DIGITALOCEAN_ACCESS_TOKEN
@@ -404,7 +407,7 @@ kind: Secret
 type: Opaque
 metadata:
   name: machine-controller-sshkeys
-  namespace: default
+  namespace: $NAMESPACE
 data:
   private: $SSH_PRIVATE_KEY
   public: $SSH_PUBLIC_KEY
