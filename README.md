@@ -56,14 +56,6 @@ cd ../..
 ```
 The result of the script is an `out` directory with generated manifests and a generated SSH key to be used by the `machine-controller`. More details about how it generates manifests and how to customize them can be found in the [README file in `clusterctl/examples/digitalocean` directory](./clusterctl/examples/digitalocean).
 
-As a temporary workaround for a bug with SSH keys, you need to copy the generated private key to the `/etc/sshkeys` directory, name it `private`, and give it read permissions for your user:
-```
-sudo mkdir /etc/sshkeys
-sudo cp clusterctl/examples/digitalocean/out/test-1_rsa /etc/sshkeys/private
-sudo chown $USER /etc/sshkeys/private
-```
-Issue [#39](https://github.com/kubermatic/cluster-api-provider-digitalocean/issues/39) tracks this problem.
-
 Once you have manifests generated, you can create a cluster using the following command. Make sure to replace the value of `vm-driver` flag with the name of your actual `minikube` driver.
 ```bash
 ./bin/clusterctl create cluster \
@@ -125,7 +117,7 @@ There you can change machine properties, including Kubernetes (`kubelet`) versio
 ```yaml
 apiVersion: cluster.k8s.io/v1alpha1
 kind: Machine
-metadata:  
+metadata:
   creationTimestamp: 2018-09-14T11:02:16Z
   finalizers:
   - machine.cluster.k8s.io
