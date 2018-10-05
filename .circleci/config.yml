@@ -99,10 +99,7 @@ jobs:
         name: Set up minikube
         command: |
           # Start minikube.
-          sudo minikube start --vm-driver=none --bootstrapper=localkube --kubernetes-version=${KUBERNETES_VERSION} --feature-gates=CustomResourceSubresources=true --extra-config=apiserver.Authorization.Mode=RBAC
-          # Set correct permissions on minikube and kubeconfig files.
-          sudo chown -R $USER:$USER $HOME/.kube
-          sudo chown -R $USER:$USER $HOME/.minikube
+          sudo -E minikube start --vm-driver=none --bootstrapper=localkube --kubernetes-version=${KUBERNETES_VERSION} --feature-gates=CustomResourceSubresources=true --extra-config=apiserver.Authorization.Mode=RBAC
           # Update the kubeconfig to use the minikube cluster.
           minikube update-context
     - run:
@@ -200,7 +197,9 @@ workflows:
             only: /v.*/
     - e2e:
         requires:
-        - checkout_code
+        - check-dependencies
+        - build
+        - test
         filters:
           tags:
             only: /v.*/
