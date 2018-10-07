@@ -23,7 +23,7 @@ func (do *DOClient) instanceStatus(machine *clusterv1.Machine) (instanceStatus, 
 	if do.v1Alpha1Client == nil {
 		return nil, nil
 	}
-	currentMachine, err := util.GetMachineIfExists(do.v1Alpha1Client.Machines(machine.Namespace), machine.ObjectMeta.Name)
+	currentMachine, err := util.GetMachineIfExists(do.v1Alpha1Client.Machines(machine.Namespace), machine.Name)
 	if err != nil {
 		return nil, err
 	}
@@ -35,11 +35,11 @@ func (do *DOClient) instanceStatus(machine *clusterv1.Machine) (instanceStatus, 
 
 // machineInstanceStatus converts string from annotation to the machine object.
 func (do *DOClient) machineInstanceStatus(machine *clusterv1.Machine) (instanceStatus, error) {
-	if machine.ObjectMeta.Annotations == nil {
+	if machine.Annotations == nil {
 		return nil, nil
 	}
 
-	a := machine.ObjectMeta.Annotations[InstanceStatusAnnotationKey]
+	a := machine.Annotations[InstanceStatusAnnotationKey]
 	if a == "" {
 		return nil, nil
 	}
@@ -61,7 +61,7 @@ func (do *DOClient) machineInstanceStatus(machine *clusterv1.Machine) (instanceS
 // setMachineInstanceStatus writes the instance status to the annotation.
 func (do *DOClient) setMachineInstanceStatus(machine *clusterv1.Machine, status instanceStatus) (instanceStatus, error) {
 	// Avoid status within status.
-	status.ObjectMeta.Annotations[InstanceStatusAnnotationKey] = ""
+	status.Annotations[InstanceStatusAnnotationKey] = ""
 
 	b := []byte{}
 	buff := bytes.NewBuffer(b)
@@ -72,10 +72,10 @@ func (do *DOClient) setMachineInstanceStatus(machine *clusterv1.Machine, status 
 		return nil, err
 	}
 
-	if machine.ObjectMeta.Annotations == nil {
-		machine.ObjectMeta.Annotations = make(map[string]string)
+	if machine.Annotations == nil {
+		machine.Annotations = make(map[string]string)
 	}
-	machine.ObjectMeta.Annotations[InstanceStatusAnnotationKey] = buff.String()
+	machine.Annotations[InstanceStatusAnnotationKey] = buff.String()
 
 	return machine, nil
 }
@@ -87,12 +87,12 @@ func (do *DOClient) updateInstanceStatus(machine *clusterv1.Machine) error {
 	}
 
 	status := instanceStatus(machine)
-	currentMachine, err := util.GetMachineIfExists(do.v1Alpha1Client.Machines(machine.Namespace), machine.ObjectMeta.Name)
+	currentMachine, err := util.GetMachineIfExists(do.v1Alpha1Client.Machines(machine.Namespace), machine.Name)
 	if err != nil {
 		return nil
 	}
 	if currentMachine == nil {
-		return fmt.Errorf("machine '%s' does not exist anymore, so status can't be updated", machine.ObjectMeta.Name)
+		return fmt.Errorf("machine %q does not exist anymore, so status can't be updated", machine.Name)
 	}
 
 	m, err := do.setMachineInstanceStatus(currentMachine, status)
