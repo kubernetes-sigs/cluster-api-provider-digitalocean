@@ -17,6 +17,7 @@ limitations under the License.
 package cluster
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/golang/glog"
@@ -74,22 +75,19 @@ func Start(server *options.Server, shutdown <-chan struct{}) {
 func Run(server *options.Server) error {
 	kubeConfig, err := controller.GetConfig(server.CommonConfig.Kubeconfig)
 	if err != nil {
-		glog.Errorf("Could not create Config for talking to the apiserver: %v", err)
-		return err
+		return fmt.Errorf("could not create config for apiserver: %v", err)
 	}
 
 	kubeClientControl, err := kubernetes.NewForConfig(
 		rest.AddUserAgent(kubeConfig, "cluster-controller-manager"),
 	)
 	if err != nil {
-		glog.Errorf("Invalid API configuration for kubeconfig-control: %v", err)
-		return err
+		return fmt.Errorf("invalid API configuration for kubeconfig-control: %v", err)
 	}
 
 	recorder, err := createRecorder(kubeClientControl)
 	if err != nil {
-		glog.Errorf("Could not create event recorder : %v", err)
-		return err
+		return fmt.Errorf("could not create event recorder: %v", err)
 	}
 
 	// run function will block and never return.

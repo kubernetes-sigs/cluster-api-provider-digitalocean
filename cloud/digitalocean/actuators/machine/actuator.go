@@ -15,6 +15,7 @@ package machine
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -62,7 +63,7 @@ const (
 func init() {
 	actuator, err := NewMachineActuator(ActuatorParams{})
 	if err != nil {
-		glog.Fatalf("Error creating cluster provisioner for %v : %v", ProviderName, err)
+		glog.Fatalf("error creating cluster provisioner for %v : %v", ProviderName, err)
 	}
 	clustercommon.RegisterClusterProvisioner(ProviderName, actuator)
 }
@@ -495,13 +496,13 @@ func (do *DOClient) requiresUpdate(a *clusterv1.Machine, b *clusterv1.Machine) b
 
 func (do *DOClient) validateMachine(providerConfig *doconfigv1.DigitalOceanMachineProviderConfig) error {
 	if len(providerConfig.Image) == 0 {
-		return fmt.Errorf("image slug must be provided")
+		return errors.New("image slug must be provided")
 	}
 	if len(providerConfig.Region) == 0 {
-		return fmt.Errorf("region must be provided")
+		return errors.New("region must be provided")
 	}
 	if len(providerConfig.Size) == 0 {
-		return fmt.Errorf("size must be provided")
+		return errors.New("size must be provided")
 	}
 
 	return nil

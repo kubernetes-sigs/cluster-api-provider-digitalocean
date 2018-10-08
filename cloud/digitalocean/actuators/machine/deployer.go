@@ -14,6 +14,7 @@
 package machine
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -27,13 +28,12 @@ func (do *DOClient) GetIP(cluster *clusterv1.Cluster, machine *clusterv1.Machine
 	if err != nil {
 		return "", err
 	}
+
 	if droplet == nil {
 		return "", fmt.Errorf("instance %s doesn't exist", droplet.Name)
 	}
-	if len(droplet.Networks.V4) == 0 {
-		return "", fmt.Errorf("instance %s doesn't have IP address assigned", droplet.Name)
-	}
-	return droplet.Networks.V4[0].IPAddress, nil
+
+	return droplet.PublicIPv4()
 }
 
 // GetKubeConfig returns kubeconfig from the master.
@@ -43,10 +43,10 @@ func (do *DOClient) GetKubeConfig(cluster *clusterv1.Cluster, master *clusterv1.
 		return "", err
 	}
 	if droplet == nil {
-		return "", fmt.Errorf("instance does not exists")
+		return "", errors.New("instance does not exists")
 	}
 	if len(cluster.Status.APIEndpoints) == 0 {
-		return "", fmt.Errorf("unable to find cluster api endpoint address")
+		return "", errors.New("unable to find cluster api endpoint address")
 	}
 
 	// We're using system SSH to download kubeconfig file from master.
@@ -66,7 +66,7 @@ func (do *DOClient) GetKubeConfig(cluster *clusterv1.Cluster, master *clusterv1.
 	kubeconfig := strings.Split(result, "STARTFILE")
 
 	if len(kubeconfig) < 2 {
-		return "", fmt.Errorf("kubeconfig not available")
+		return "", errors.New("kubeconfig not available")
 	}
 
 	return strings.TrimSpace(kubeconfig[1]), nil
