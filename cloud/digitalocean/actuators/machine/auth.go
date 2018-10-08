@@ -5,6 +5,8 @@ import (
 	"os"
 
 	"github.com/digitalocean/godo"
+	"github.com/golang/glog"
+
 	"golang.org/x/oauth2"
 )
 
@@ -23,9 +25,15 @@ func (t *tokenSource) Token() (*oauth2.Token, error) {
 
 // getGodoClient creates new godo client used to interact with the DigitalOcean API.
 func getGodoClient() *godo.Client {
-	token := &tokenSource{
-		AccessToken: os.Getenv("DIGITALOCEAN_ACCESS_TOKEN"),
+	doToken := os.Getenv("DIGITALOCEAN_ACCESS_TOKEN")
+	if doToken == "" {
+		glog.Fatalf("env var DIGITALOCEAN_ACCESS_TOKEN is required")
 	}
+
+	token := &tokenSource{
+		AccessToken: doToken,
+	}
+
 	oc := oauth2.NewClient(context.Background(), token)
 	return godo.NewClient(oc)
 }
