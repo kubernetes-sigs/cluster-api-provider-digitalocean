@@ -17,8 +17,8 @@
 QUAY_BUCKET = kubermatic
 PREFIX = quay.io/$(QUAY_BUCKET)
 NAME = digitalocean-machine-controller
-TAG = 0.0.1
-DEV_TAG = 0.0.2-dev
+TAG = 0.2.0
+DEV_TAG = 0.2.0-dev
 
 image: ## Build image
 	docker build -t "$(PREFIX)/$(NAME):$(TAG)" -f ./Dockerfile ../..
