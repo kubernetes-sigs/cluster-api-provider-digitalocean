@@ -65,8 +65,7 @@ jobs:
         set -e
         export GIT_TAG=$CIRCLE_TAG
         docker login -u "${DOCKERHUB_USER}" -p "${DOCKERHUB_PASS}" quay.io
-        make images-nodep
-        make push-nodep
+        make push
 
   e2e:
     machine: true
