@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-all: generate build images
+all: depend generate compile images
 
 check: depend fmt vet gometalinter
 

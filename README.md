@@ -205,36 +205,4 @@ doctl compute volume list
 
 ## Development
 
-This portion of the README file contains information about the development process.
-
-### Building Controllers
-
-The following Make targets can be used to build controllers:
-* `make compile` compiles all three components: `clusterctl`, `machine-controller` and `cluster-controller`
-* `make build` runs `dep ensure` and installs `machine-controller` and `cluster-controller`
-* `make all` runs code generation, `dep ensure`, install `machine-controller` and `cluster-controller`, and build `machine-controller` and `cluster-controller` Docker images
-
-The `make generate` target runs code generation.
-
-### Building and Pushing Images
-
-We're using two Quay.io repositories for hosting cluster-api-provider-digitalocean images: `quay.io/kubermatic/digitalocean-machine-controller` and `quay.io/kubermatic/digitalocean-cluster-controller`.
-
-Before building and pushing images to the registry, make sure to replace the version number in the [`machine-controller`](./cmd/machine-controller/Makefile) and [`cluster-controller`](./cmd/machine-controller/Makefile) Makefiles, so you don't overwrite existing images!
-
-The images are built using the `make images` target, which runs `dep ensures` and build images. There is also `make images-nodep` target, which doesn't run `dep ensure`, and is used by the CI.
-
-The images can be pushed to the registry using the `make push` and `make push-nodep` targets. Both targets build images, so you don't need to run `make images` before.
-
-### Code Style Guidelines
-
-In order for the pull request to get accepted, the code must pass `gofmt`, `govet` and `gometalinter` checks. You can run all checks by invoking the `make check` Makefile target.
-
-### Dependency Management
-
-This project uses [`dep`](https://github.com/golang/dep) for dependency management. Before pushing the code to GitHub, make sure your vendor directory is in sync by running `dep ensure`, or otherwise CI will fail.
-
-### Testing
-
-Unit tests can be invoked by running the `make test-unit` Makefile target. Integration and End-to-End tests are currently not implemented.
-
+More about development and contributing practices can be found in [`CONTRIBUTING.md`](./CONTRIBUTING.md).
