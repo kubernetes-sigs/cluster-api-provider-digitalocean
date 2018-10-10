@@ -1,0 +1,13 @@
+# See the OWNERS docs: https://github.com/kubernetes/community/blob/master/contributors/guide/owners.md
+
+aliases:
+#  sig-cluster-lifecycle-leads:
+  cluster-api-admins:
+    - kris-nova
+  cluster-api-maintainers:
+    - kris-nova
+  cluster-api-do-maintainers:
+    - andrewsykim
+    - alvaroaleman
+    - nikhita
+    - xmudrii
