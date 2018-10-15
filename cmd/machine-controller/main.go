@@ -18,6 +18,7 @@ package main
 
 import (
 	"flag"
+
 	"github.com/golang/glog"
 	"github.com/spf13/pflag"
 	"k8s.io/apiserver/pkg/util/logs"
@@ -45,6 +46,6 @@ func main() {
 
 	machineServer := options.NewServer(machineSetupConfigPath)
 	if err := machine.Run(machineServer); err != nil {
-		glog.Errorf("Failed to start the machine controller. Err: %v", err)
+		glog.Errorf("Failed to start the machine controller: %v", err)
 	}
 }

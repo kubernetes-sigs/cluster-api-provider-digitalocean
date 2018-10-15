@@ -150,7 +150,7 @@ func NewMachineActuator(params ActuatorParams) (*DOClient, error) {
 // Create creates a machine and is invoked by the Machine Controller
 func (do *DOClient) Create(cluster *clusterv1.Cluster, machine *clusterv1.Machine) error {
 	if do.machineSetupConfigGetter == nil {
-		return fmt.Errorf("machine setup config is required")
+		return errors.New("machine setup config is required")
 	}
 
 	machineConfig, err := do.decodeMachineProviderConfig(machine.Spec.ProviderConfig)
@@ -248,7 +248,7 @@ func (do *DOClient) Create(cluster *clusterv1.Cluster, machine *clusterv1.Machin
 		return err
 	}
 
-	//We need to wait until the droplet really got created as tags will be only applied when the droplet is running.
+	// We need to wait until the droplet really got created as tags will be only applied when the droplet is running.
 	err = wait.Poll(createCheckPeriod, createCheckTimeout, func() (done bool, err error) {
 		droplet, _, err := do.godoClient.Droplets.Get(do.ctx, droplet.ID)
 		if err != nil {
@@ -327,7 +327,7 @@ func (do *DOClient) Update(cluster *clusterv1.Cluster, goalMachine *clusterv1.Ma
 
 	currentMachine := (*clusterv1.Machine)(status)
 	if currentMachine == nil {
-		return fmt.Errorf("status annotation not set")
+		return errors.New("status annotation not set")
 	}
 
 	if !do.requiresUpdate(currentMachine, goalMachine) {
@@ -400,7 +400,7 @@ func (do *DOClient) Update(cluster *clusterv1.Cluster, goalMachine *clusterv1.Ma
 			do.eventRecorder.Eventf(goalMachine, corev1.EventTypeNormal, eventReasonUpdate, "machine %s kubelet successfully updated", goalMachine.Name)
 		}
 	} else {
-		glog.Infof("re-creating node %s for update", currentMachine.Name)
+		glog.Infof("Re-creating node %s for update.", currentMachine.Name)
 		err = do.Delete(cluster, currentMachine)
 		if err != nil {
 			return err
@@ -479,7 +479,7 @@ func (do *DOClient) instanceExists(machine *clusterv1.Machine) (*godo.Droplet, e
 	}
 	for _, d := range droplets {
 		if d.Name == machine.Name && sets.NewString(d.Tags...).Has(string(machine.UID)) {
-			glog.Infof("found a machine %s by name", d.Name)
+			glog.Infof("Found a machine %s by name.", d.Name)
 			return &d, nil
 		}
 	}

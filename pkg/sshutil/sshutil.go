@@ -3,9 +3,10 @@ package sshutil
 import (
 	"context"
 	"fmt"
-	"github.com/golang/glog"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/golang/glog"
 
 	"golang.org/x/crypto/ssh"
 
@@ -57,7 +58,7 @@ func NewKeyFromFile(publicKeyPath string) (*PubKey, error) {
 func (p *PubKey) Create(ctx context.Context, keysService godo.KeysService) error {
 	existingkey, res, err := keysService.GetByFingerprint(ctx, p.FingerprintMD5)
 	if err == nil && existingkey != nil && res.StatusCode >= http.StatusOK && res.StatusCode <= http.StatusAccepted {
-		glog.Info("failed to create ssh public key, the key already exists")
+		glog.Info("Failed to create ssh public key, the key already exists.")
 		return nil
 	}
 
