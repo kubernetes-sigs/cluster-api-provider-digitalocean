@@ -85,7 +85,7 @@ func (codec *DigitalOceanProviderConfigCodec) DecodeFromProviderConfig(providerC
 	if providerConfig.Value != nil {
 		_, _, err := codec.decoder.Decode(providerConfig.Value.Raw, nil, out)
 		if err != nil {
-			return fmt.Errorf("decoding failure: %v", err)
+			return fmt.Errorf("unable to decode from ProviderConfig: %v", err)
 		}
 	}
 	return nil
@@ -94,7 +94,7 @@ func (codec *DigitalOceanProviderConfigCodec) DecodeFromProviderConfig(providerC
 func (codec *DigitalOceanProviderConfigCodec) EncodeToProviderConfig(in runtime.Object) (*clusterv1.ProviderConfig, error) {
 	var buf bytes.Buffer
 	if err := codec.encoder.Encode(in, &buf); err != nil {
-		return nil, fmt.Errorf("encoding failed: %v", err)
+		return nil, fmt.Errorf("unable to encode to ProviderConfig: %v", err)
 	}
 	return &clusterv1.ProviderConfig{
 		Value: &runtime.RawExtension{Raw: buf.Bytes()},
@@ -104,7 +104,7 @@ func (codec *DigitalOceanProviderConfigCodec) EncodeToProviderConfig(in runtime.
 func (codec *DigitalOceanProviderConfigCodec) EncodeProviderStatus(in runtime.Object) (*runtime.RawExtension, error) {
 	var buf bytes.Buffer
 	if err := codec.encoder.Encode(in, &buf); err != nil {
-		return nil, fmt.Errorf("encoding failed: %v", err)
+		return nil, fmt.Errorf("unable to encode to ProviderConfig: %v", err)
 	}
 
 	return &runtime.RawExtension{Raw: buf.Bytes()}, nil
@@ -114,7 +114,7 @@ func (codec *DigitalOceanProviderConfigCodec) DecodeProviderStatus(providerStatu
 	if providerStatus != nil {
 		_, _, err := codec.decoder.Decode(providerStatus.Raw, nil, out)
 		if err != nil {
-			return fmt.Errorf("decoding failure: %v", err)
+			return fmt.Errorf("unable to decode from ProviderConfig: %v", err)
 		}
 	}
 	return nil

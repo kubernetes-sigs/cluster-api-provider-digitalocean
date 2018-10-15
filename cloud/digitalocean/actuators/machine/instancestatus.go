@@ -108,7 +108,7 @@ func (do *DOClient) updateInstanceStatus(machine *clusterv1.Machine) error {
 		return nil
 	}
 	if currentMachine == nil {
-		return fmt.Errorf("machine %q does not exist anymore, so status can't be updated", machine.Name)
+		return fmt.Errorf("status cannot be updated because machine %q does not exist anymore", machine.Name)
 	}
 
 	m, err := do.setMachineInstanceStatus(currentMachine, status)

@@ -46,6 +46,6 @@ func main() {
 
 	machineServer := options.NewServer(machineSetupConfigPath)
 	if err := machine.Run(machineServer); err != nil {
-		glog.Errorf("Failed to start the machine controller. Err: %v", err)
+		glog.Errorf("Failed to start the machine controller: %v", err)
 	}
 }

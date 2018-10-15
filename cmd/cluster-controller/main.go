@@ -42,6 +42,6 @@ func main() {
 
 	clusterServer := options.NewServer()
 	if err := cluster.Run(clusterServer); err != nil {
-		glog.Fatalf("failed to start cluster controller: %v", err)
+		glog.Fatalf("Failed to start cluster controller: %v", err)
 	}
 }

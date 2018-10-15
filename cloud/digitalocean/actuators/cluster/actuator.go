@@ -17,9 +17,10 @@ limitations under the License.
 package cluster
 
 import (
-	"fmt"
+	"errors"
 
 	"github.com/golang/glog"
+
 	clusterv1 "sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 	client "sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset/typed/cluster/v1alpha1"
 )
@@ -44,11 +45,11 @@ func NewActuator(params ActuatorParams) (*Actuator, error) {
 // Reconcile reconciles a cluster and is invoked by the Cluster Controller
 func (a *Actuator) Reconcile(cluster *clusterv1.Cluster) error {
 	glog.Infof("Reconciling cluster %v.", cluster.Name)
-	return fmt.Errorf("TODO: Not yet implemented")
+	return errors.New("reconciling is not yet supported")
 }
 
 // Delete deletes a cluster and is invoked by the Cluster Controller
 func (a *Actuator) Delete(cluster *clusterv1.Cluster) error {
 	glog.Infof("Deleting cluster %v.", cluster.Name)
-	return fmt.Errorf("TODO: Not yet implemented")
+	return errors.New("deleting is not yet supported")
 }
