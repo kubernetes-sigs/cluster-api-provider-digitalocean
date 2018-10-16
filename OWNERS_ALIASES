@@ -1,11 +1,18 @@
 # See the OWNERS docs: https://github.com/kubernetes/community/blob/master/contributors/guide/owners.md
 
 aliases:
-#  sig-cluster-lifecycle-leads:
+  sig-cluster-lifecycle-leads:
+    - luxas
+    - roberthbailey
+    - timothysc
   cluster-api-admins:
+    - justinsb
     - kris-nova
-  cluster-api-maintainers:
-    - kris-nova
+    - krousey
+    - luxas
+    - roberthbailey
+  sig-cloud-provider-leads:
+    - andrewsykim
   cluster-api-do-maintainers:
     - andrewsykim
     - alvaroaleman
