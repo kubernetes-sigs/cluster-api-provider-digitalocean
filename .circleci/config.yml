@@ -38,6 +38,14 @@ jobs:
         key: repo-{{ .Environment.CIRCLE_SHA1 }}
     - run: go test -race ./...
 
+  verify:
+    <<: *defaults
+    steps:
+    - restore_cache:
+        key: repo-{{ .Environment.CIRCLE_SHA1 }}
+    - run: ./hack/verify-boilerplate.sh
+    - run: ./hack/verify-gofmt.sh
+
   build:
     <<: *defaults
     steps:
@@ -173,6 +181,12 @@ workflows:
           tags:
             only: /v.*/
     - test:
+        requires:
+        - checkout_code
+        filters:
+          tags:
+            only: /v.*/
+    - verify:
         requires:
         - checkout_code
         filters:
