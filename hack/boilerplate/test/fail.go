@@ -1,5 +1,7 @@
 /*
-Copyright 2018 The Kubernetes Authors.
+Copyright 2014 The Kubernetes Authors.
+
+fail
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,9 +16,4 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// +k8s:deepcopy-gen=package,register
-// +k8s:conversion-gen=github.com/kubermatic/cluster-api-provider-digitalocean/cloud/digitalocean/providerconfig
-// +k8s:openapi-gen=true
-// +k8s:defaulter-gen=TypeMeta
-
-package v1alpha1
+package test

@@ -29,7 +29,7 @@ generate:
 	deepcopy-gen \
 	  -i ./cloud/digitalocean/providerconfig,./cloud/digitalocean/providerconfig/v1alpha1 \
 	  -O zz_generated.deepcopy \
-	  -h boilerplate.go.txt
+	  -h hack/boilerplate/boilerplate.generatego.txt
 
 compile: ## Compile project and create binaries for cluster-controller, machine-controller and clusterctl, in the ./bin directory
 	mkdir -p ./bin
