@@ -4,8 +4,7 @@ This repository hosts a concrete implementation of a provider for [DigitalOcean]
 
 ## Project Status
 
-This project is currently Work-in-Progress and may not be production ready. There is no backwards-compatibility guarantee at this point.
-Checkout the Features portion of the README for details about the project status.
+This project is currently work-in-progress and in Alpha, so it may not be production ready. There is no backwards-compatibility guarantee at this point. For more details on the roadmap and upcoming features, check out [the project's issue tracker on GitHub](https://github.com/kubermatic/cluster-api-provider-digitalocean/issues).
 
 ## Getting Started
 
