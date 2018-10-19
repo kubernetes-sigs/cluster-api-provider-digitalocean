@@ -13,7 +13,7 @@ This project is currently work-in-progress and in Alpha, so it may not be produc
 In order to create a cluster using `clusterctl`, you need the following tools installed on your local machine:
 
 * `kubectl`, which can be done by following [this tutorial](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
-* [`minikube`](https://kubernetes.io/docs/tasks/tools/install-minikube/) and the appropriate [`minikube` driver](https://github.com/kubernetes/minikube/blob/master/docs/drivers.md). Minikube version < 0.28 is recommend due to an upstream bug (see [#79](https://github.com/kubermatic/cluster-api-provider-digitalocean/issues/78) for more details) We recommend `kvm2` driver for Linux and `virtualbox` for macOS.
+* [`minikube`](https://kubernetes.io/docs/tasks/tools/install-minikube/) and the appropriate [`minikube` driver](https://github.com/kubernetes/minikube/blob/master/docs/drivers.md). We recommend `kvm2` driver for Linux and `virtualbox` for macOS.
 * [DigitalOcean API Access Token generated](https://www.digitalocean.com/docs/api/create-personal-access-token/) and set as the `DIGITALOCEAN_ACCESS_TOKEN` environment variable,
 * Go toolchain [installed and configured](https://golang.org/doc/install), needed in order to compile the `clusterctl` binary,
 * `cluster-api-provider-digitalocean` repository cloned:
