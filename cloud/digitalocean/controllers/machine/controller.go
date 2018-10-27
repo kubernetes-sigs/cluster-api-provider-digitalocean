@@ -37,9 +37,9 @@ import (
 	machinecontroller "sigs.k8s.io/cluster-api/pkg/controller/machine"
 	"sigs.k8s.io/cluster-api/pkg/controller/sharedinformers"
 
-	machineactuator "github.com/kubermatic/cluster-api-provider-digitalocean/cloud/digitalocean/actuators/machine"
-	"github.com/kubermatic/cluster-api-provider-digitalocean/cloud/digitalocean/actuators/machine/machinesetup"
-	"github.com/kubermatic/cluster-api-provider-digitalocean/cloud/digitalocean/controllers/machine/options"
+	machineactuator "sigs.k8s.io/cluster-api-provider-digitalocean/cloud/digitalocean/actuators/machine"
+	"sigs.k8s.io/cluster-api-provider-digitalocean/cloud/digitalocean/actuators/machine/machinesetup"
+	"sigs.k8s.io/cluster-api-provider-digitalocean/cloud/digitalocean/controllers/machine/options"
 )
 
 const (

@@ -38,8 +38,8 @@ import (
 	"sigs.k8s.io/cluster-api/pkg/controller/config"
 	"sigs.k8s.io/cluster-api/pkg/controller/sharedinformers"
 
-	clusteractuator "github.com/kubermatic/cluster-api-provider-digitalocean/cloud/digitalocean/actuators/cluster"
-	"github.com/kubermatic/cluster-api-provider-digitalocean/cloud/digitalocean/controllers/cluster/options"
+	clusteractuator "sigs.k8s.io/cluster-api-provider-digitalocean/cloud/digitalocean/actuators/cluster"
+	"sigs.k8s.io/cluster-api-provider-digitalocean/cloud/digitalocean/controllers/cluster/options"
 )
 
 const (

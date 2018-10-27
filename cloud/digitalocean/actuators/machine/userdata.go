@@ -25,7 +25,7 @@ import (
 	clusterv1 "sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 	"sigs.k8s.io/cluster-api/pkg/cert"
 
-	"github.com/kubermatic/cluster-api-provider-digitalocean/pkg/docker"
+	"sigs.k8s.io/cluster-api-provider-digitalocean/pkg/docker"
 
 	"github.com/golang/glog"
 )

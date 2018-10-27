@@ -21,7 +21,7 @@ import (
 
 	"k8s.io/apimachinery/pkg/util/sets"
 
-	"github.com/kubermatic/cluster-api-provider-digitalocean/pkg/docker/generic"
+	"sigs.k8s.io/cluster-api-provider-digitalocean/pkg/docker/generic"
 )
 
 // RuntimeVersion implements RuntimeVersion interface.

@@ -22,7 +22,7 @@ import (
 
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 
-	"github.com/kubermatic/cluster-api-provider-digitalocean/pkg/ssh"
+	"sigs.k8s.io/cluster-api-provider-digitalocean/pkg/ssh"
 
 	"github.com/pkg/sftp"
 )
