@@ -1,7 +1,7 @@
 defaults: &defaults
   docker:
   - image: golang:1.11
-  working_directory: /go/src/github.com/kubermatic/cluster-api-provider-digitalocean
+  working_directory: /go/src/sigs.k8s.io/cluster-api-provider-digitalocean
 
 version: 2
 jobs:
@@ -12,7 +12,7 @@ jobs:
     - save_cache:
         key: repo-{{ .Environment.CIRCLE_SHA1 }}
         paths:
-        - /go/src/github.com/kubermatic/cluster-api-provider-digitalocean
+        - /go/src/sigs.k8s.io/cluster-api-provider-digitalocean
 
   check-dependencies:
     <<: *defaults
@@ -56,7 +56,7 @@ jobs:
     - save_cache:
         key: cluster-api-provider-digitalocean-{{ .Revision }}
         paths:
-        - /go/src/github.com/kubermatic/cluster-api-provider-digitalocean
+        - /go/src/sigs.k8s.io/cluster-api-provider-digitalocean
 
   publish:
     <<: *defaults
@@ -88,7 +88,7 @@ jobs:
           # Make root rshared in order to fix kube-dns problems.
           sudo mount --make-rshared /
           # Create project directory
-          sudo mkdir -p /go/src/github.com/kubermatic/cluster-api-provider-digitalocean
+          sudo mkdir -p /go/src/sigs.k8s.io/cluster-api-provider-digitalocean
           # Set correct permissions on project directory
           sudo chown -R $USER:$USER /go
     - restore_cache:
@@ -138,7 +138,7 @@ jobs:
           JSONPATH='{range .items[*]}{@.metadata.name}:{range @.status.conditions[*]}{@.type}={@.status};{end}{end}'; until kubectl -n kube-system get pods -lk8s-app=kube-dns -o jsonpath="$JSONPATH" 2>&1 | grep -q "Ready=True"; do sleep 1;echo "waiting for kube-dns to be available"; kubectl get pods --all-namespaces; done
     - run:
         name: Generate manifests
-        working_directory: /go/src/github.com/kubermatic/cluster-api-provider-digitalocean/clusterctl/examples/digitalocean
+        working_directory: /go/src/sigs.k8s.io/cluster-api-provider-digitalocean/clusterctl/examples/digitalocean
         command: |
           # Make SSH directory.
           mkdir -p $HOME/.ssh
@@ -151,7 +151,7 @@ jobs:
     - run:
         name: Run clusterctl
         no_output_timeout: 10m
-        working_directory: /go/src/github.com/kubermatic/cluster-api-provider-digitalocean/clusterctl
+        working_directory: /go/src/sigs.k8s.io/cluster-api-provider-digitalocean/clusterctl
         environment:
           GOPATH: /go
         command: |

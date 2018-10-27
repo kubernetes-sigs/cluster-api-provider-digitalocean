@@ -25,7 +25,7 @@ depend-update: ## Update all dependencies
 
 .PHONY: generate
 generate:
-	go build -o $$GOPATH/bin/deepcopy-gen github.com/kubermatic/cluster-api-provider-digitalocean/vendor/k8s.io/code-generator/cmd/deepcopy-gen
+	go build -o $$GOPATH/bin/deepcopy-gen sigs.k8s.io/cluster-api-provider-digitalocean/vendor/k8s.io/code-generator/cmd/deepcopy-gen
 	deepcopy-gen \
 	  -i ./cloud/digitalocean/providerconfig,./cloud/digitalocean/providerconfig/v1alpha1 \
 	  -O zz_generated.deepcopy \
@@ -38,9 +38,9 @@ compile: ## Compile project and create binaries for cluster-controller, machine-
 	go build -o ./bin/clusterctl ./clusterctl
 
 install: ## Install cluster-controller, machine-controller and clusterctl
-	CGO_ENABLED=0 go install -ldflags '-extldflags "-static"' github.com/kubermatic/cluster-api-provider-digitalocean/cmd/cluster-controller
-	CGO_ENABLED=0 go install -ldflags '-extldflags "-static"' github.com/kubermatic/cluster-api-provider-digitalocean/cmd/machine-controller
-	CGO_ENABLED=0 go install -ldflags '-extldflags "-static"' github.com/kubermatic/cluster-api-provider-digitalocean/clusterctl
+	CGO_ENABLED=0 go install -ldflags '-extldflags "-static"' sigs.k8s.io/cluster-api-provider-digitalocean/cmd/cluster-controller
+	CGO_ENABLED=0 go install -ldflags '-extldflags "-static"' sigs.k8s.io/cluster-api-provider-digitalocean/cmd/machine-controller
+	CGO_ENABLED=0 go install -ldflags '-extldflags "-static"' sigs.k8s.io/cluster-api-provider-digitalocean/clusterctl
 
 test-unit: ## Run unit tests. Those tests will never communicate with cloud and cost you money
 	go test -race -cover ./cmd/... ./cloud/...

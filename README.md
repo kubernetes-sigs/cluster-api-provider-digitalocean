@@ -1,10 +1,10 @@
-# Kubernetes cluster-api-provider-digitalocean Project [![Build Status](https://circleci.com/gh/kubermatic/cluster-api-provider-digitalocean.svg?style=shield)](https://circleci.com/gh/kubermatic/cluster-api-provider-digitalocean/) [![Go Report Card](https://goreportcard.com/badge/github.com/kubermatic/cluster-api-provider-digitalocean)](https://goreportcard.com/report/github.com/kubermatic/cluster-api-provider-digitalocean)
+# Kubernetes cluster-api-provider-digitalocean Project [![Build Status](https://circleci.com/gh/kubermatic/cluster-api-provider-digitalocean.svg?style=shield)](https://circleci.com/gh/kubermatic/cluster-api-provider-digitalocean/) [![Go Report Card](https://goreportcard.com/badge/github.com/kubernetes-sigs/cluster-api-provider-digitalocean)](https://goreportcard.com/report/github.com/kubernetes-sigs/cluster-api-provider-digitalocean)
 
 This repository hosts a concrete implementation of a provider for [DigitalOcean](https://www.digitalocean.com/) for the [cluster-api project](https://github.com/kubernetes-sigs/cluster-api).
 
 ## Project Status
 
-This project is currently work-in-progress and in Alpha, so it may not be production ready. There is no backwards-compatibility guarantee at this point. For more details on the roadmap and upcoming features, check out [the project's issue tracker on GitHub](https://github.com/kubermatic/cluster-api-provider-digitalocean/issues).
+This project is currently work-in-progress and in Alpha, so it may not be production ready. There is no backwards-compatibility guarantee at this point. For more details on the roadmap and upcoming features, check out [the project's issue tracker on GitHub](https://github.com/kubernetes-sigs/cluster-api-provider-digitalocean/issues).
 
 ## Getting Started
 
@@ -18,7 +18,7 @@ In order to create a cluster using `clusterctl`, you need the following tools in
 * Go toolchain [installed and configured](https://golang.org/doc/install), needed in order to compile the `clusterctl` binary,
 * `cluster-api-provider-digitalocean` repository cloned:
 ```bash
-git clone https://github.com/kubermatic/cluster-api-provider-digitalocean $(go env GOPATH)/src/github.com/kubermatic/cluster-api-provider-digitalocean
+git clone https://github.com/kubernetes-sigs/cluster-api-provider-digitalocean $(go env GOPATH)/src/sigs.k8s.io/cluster-api-provider-digitalocean
 ```
 
 ### Building `clusterctl`
@@ -34,7 +34,7 @@ This command generates three binaries: `clusterctl`, `machine-controller` and `c
 
 The `clusterctl` can also be compiled manually, such as:
 ```bash
-cd $(go env GOPATH)/github.com/kubermatic/cluster-api-provider-digitalocean/clusterctl
+cd $(go env GOPATH)/src/sigs.k8s.io/cluster-api-provider-digitalocean/clusterctl
 go install
 ```
 
@@ -91,7 +91,7 @@ kubectl --kubeconfig kubeconfig get all --all-namespaces
 
 ## Upgrading the Cluster
 
-Upgrading Master is currently not possible automatically (by updating the Machine object) as Update method is not fully implemented. More details can be found in [issue #32](https://github.com/kubermatic/cluster-api-provider-digitalocean/issues/32).
+Upgrading Master is currently not possible automatically (by updating the Machine object) as Update method is not fully implemented. More details can be found in [issue #32](https://github.com/kubernetes-sigs/cluster-api-provider-digitalocean/issues/32).
 
 Workers can be upgraded by updating the appropriate Machine object for that node. Workers are upgraded by replacing nodes—first the old node is removed and then a new one with new properties is created.
 

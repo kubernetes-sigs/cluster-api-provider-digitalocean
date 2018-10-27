@@ -77,7 +77,7 @@ The next step is to build and compress binaries that will be uploaded to GitHub.
 
 ```bash
 # Build MacOS 64-bit clusterctl binary
-GOOS=darwin GOARCH=amd64 CGO_ENABLED=0 go build -a -ldflags '-extldflags "-static"' -o ./release/clusterctl github.com/kubermatic/cluster-api-provider-digitalocean/clusterctl
+GOOS=darwin GOARCH=amd64 CGO_ENABLED=0 go build -a -ldflags '-extldflags "-static"' -o ./release/clusterctl sigs.k8s.io/cluster-api-provider-digitalocean/clusterctl
 
 # Create tarball
 tar -czf ./release/clusterctl-darwin-amd64.tar.gz clusterctl
@@ -87,7 +87,7 @@ tar -czf ./release/clusterctl-darwin-amd64.tar.gz clusterctl
 
 ```
 # Build Linux 64-bit clusterctl binary
-GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -a -ldflags '-extldflags "-static"' -o ./release/clusterctl-linux-amd64 github.com/kubermatic/cluster-api-provider-digitalocean/cmd/cluster-controller
+GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -a -ldflags '-extldflags "-static"' -o ./release/clusterctl-linux-amd64 sigs.k8s.io/cluster-api-provider-digitalocean/cmd/cluster-controller
 
 # Create tarball
 tar -czf ./release/clusterctl-linux-amd64.tar.gz clusterctl
@@ -113,4 +113,4 @@ When creating a release, you need to specify the release notes for that release.
 - List of Docker images that are relevant to the release
 - SHA256 checksums of tarballs
 
-[The following example](https://github.com/kubermatic/cluster-api-provider-digitalocean/releases/tag/v0.2.0) can be used while writing release notes.
+[The following example](https://github.com/kubernetes-sigs/cluster-api-provider-digitalocean/releases/tag/v0.2.0) can be used while writing release notes.
