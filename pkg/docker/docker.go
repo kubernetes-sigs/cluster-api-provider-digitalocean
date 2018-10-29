@@ -19,7 +19,7 @@ package docker
 import (
 	"errors"
 
-	"github.com/kubermatic/cluster-api-provider-digitalocean/pkg/docker/ubuntu"
+	"sigs.k8s.io/cluster-api-provider-digitalocean/pkg/docker/ubuntu"
 )
 
 var (

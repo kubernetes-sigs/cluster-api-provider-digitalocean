@@ -15,7 +15,7 @@ limitations under the License.
 */
 
 // +k8s:deepcopy-gen=package,register
-// +k8s:conversion-gen=github.com/kubermatic/cluster-api-provider-digitalocean/cloud/digitalocean/providerconfig
+// +k8s:conversion-gen=sigs.k8s.io/cluster-api-provider-digitalocean/cloud/digitalocean/providerconfig
 // +k8s:openapi-gen=true
 // +k8s:defaulter-gen=TypeMeta
 
