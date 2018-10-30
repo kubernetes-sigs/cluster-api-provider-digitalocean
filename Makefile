@@ -14,7 +14,7 @@
 
 all: depend generate compile images
 
-check: depend fmt vet gometalinter
+check: depend gofmt vet gometalinter
 
 depend: ## Sync vendor directory by running dep ensure
 	dep version || go get -u github.com/golang/dep/cmd/dep
@@ -43,7 +43,7 @@ install: ## Install cluster-controller, machine-controller and clusterctl
 	CGO_ENABLED=0 go install -ldflags '-extldflags "-static"' sigs.k8s.io/cluster-api-provider-digitalocean/clusterctl
 
 test-unit: ## Run unit tests. Those tests will never communicate with cloud and cost you money
-	go test -race -cover ./cmd/... ./cloud/...
+	go test -race -cover ./...
 
 clean: ## Remove compiled binaries
 	rm -rf ./bin
@@ -79,3 +79,5 @@ gometalinter: ## Run gometalinter on all go files
 help:  ## Show help messages for make targets
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[32m%-30s\033[0m %s\n", $$1, $$2}'
 
+verify: depend vet gofmt
+	hack/verify-boilerplate.sh
