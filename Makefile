@@ -17,11 +17,12 @@ all: depend generate compile images
 check: depend gofmt vet gometalinter
 
 depend: ## Sync vendor directory by running dep ensure
-	dep version || go get -u github.com/golang/dep/cmd/dep
-	dep ensure -v
+	$$GOPATH/bin/dep version || go get -u github.com/golang/dep/cmd/dep
+	$$GOPATH/bin/dep ensure -v
 
 depend-update: ## Update all dependencies
-	dep ensure -update -v
+	$$GOPATH/bin/dep version || go get -u github.com/golang/dep/cmd/dep
+	$$GOPATH/bin/dep ensure -update -v
 
 .PHONY: generate
 generate:
