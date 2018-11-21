@@ -71,10 +71,8 @@ gofmt: ## Go fmt your code
 vet: ## Apply go vet to all go files
 	go vet ./...
 
-gometalinter: ## Run gometalinter on all go files
-	gometalinter --version || go get -u gopkg.in/alecthomas/gometalinter.v2
-	gometalinter --install
-	gometalinter --config gometalinter.json ./...
+lint: ## Run gometalinter on all go files
+	gometalinter --config gometalinter.json ./... --deadline 20m
 
 .PHONY: help
 help:  ## Show help messages for make targets
