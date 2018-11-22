@@ -1,4 +1,6 @@
-# Kubernetes cluster-api-provider-digitalocean Project [![Build Status](https://circleci.com/gh/kubermatic/cluster-api-provider-digitalocean.svg?style=shield)](https://circleci.com/gh/kubermatic/cluster-api-provider-digitalocean/) [![Go Report Card](https://goreportcard.com/badge/github.com/kubernetes-sigs/cluster-api-provider-digitalocean)](https://goreportcard.com/report/github.com/kubernetes-sigs/cluster-api-provider-digitalocean)
+# Kubernetes cluster-api-provider-digitalocean Project
+[![sig-cluster-lifecycle-cluster-api-provider-digitalocean/build](https://testgrid.k8s.io/q/summary/sig-cluster-lifecycle-cluster-api-provider-digitalocean/build/tests_status?style=svg)](https://testgrid.k8s.io/sig-cluster-lifecycle-cluster-api-provider-digitalocean#build)
+[![Go Report Card](https://goreportcard.com/badge/github.com/kubernetes-sigs/cluster-api-provider-digitalocean)](https://goreportcard.com/report/github.com/kubernetes-sigs/cluster-api-provider-digitalocean)
 
 This repository hosts a concrete implementation of a provider for [DigitalOcean](https://www.digitalocean.com/) for the [cluster-api project](https://github.com/kubernetes-sigs/cluster-api).
 
