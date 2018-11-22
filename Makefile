@@ -17,11 +17,12 @@ all: depend generate compile images
 check: depend gofmt vet gometalinter
 
 depend: ## Sync vendor directory by running dep ensure
-	dep version || go get -u github.com/golang/dep/cmd/dep
-	dep ensure -v
+	$$GOPATH/bin/dep version || go get -u github.com/golang/dep/cmd/dep
+	$$GOPATH/bin/dep ensure -v
 
 depend-update: ## Update all dependencies
-	dep ensure -update -v
+	$$GOPATH/bin/dep version || go get -u github.com/golang/dep/cmd/dep
+	$$GOPATH/bin/dep ensure -update -v
 
 .PHONY: generate
 generate:
@@ -70,10 +71,8 @@ gofmt: ## Go fmt your code
 vet: ## Apply go vet to all go files
 	go vet ./...
 
-gometalinter: ## Run gometalinter on all go files
-	gometalinter --version || go get -u gopkg.in/alecthomas/gometalinter.v2
-	gometalinter --install
-	gometalinter --config gometalinter.json ./...
+lint: ## Run gometalinter on all go files
+	gometalinter --config gometalinter.json ./... --deadline 20m
 
 .PHONY: help
 help:  ## Show help messages for make targets
