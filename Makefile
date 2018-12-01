@@ -28,7 +28,7 @@ depend-update: ## Update all dependencies
 generate:
 	go build -o $$GOPATH/bin/deepcopy-gen sigs.k8s.io/cluster-api-provider-digitalocean/vendor/k8s.io/code-generator/cmd/deepcopy-gen
 	deepcopy-gen \
-	  -i ./cloud/digitalocean/providerconfig,./cloud/digitalocean/providerconfig/v1alpha1 \
+	  -i ./pkg/cloud/digitalocean/providerconfig,./pkg/cloud/digitalocean/providerconfig/v1alpha1 \
 	  -O zz_generated.deepcopy \
 	  -h hack/boilerplate/boilerplate.generatego.txt
 
