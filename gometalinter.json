@@ -3,8 +3,8 @@
   "Concurrency": 2,
   "DisableAll": true,
   "Skip": [
-    "cloud/digitalocean/providerconfig",
-    "cloud/digitalocean/actuators/machine",
+    "pkg/cloud/digitalocean/actuators/machine/machinesetup",
+    "pkg/cloud/digitalocean/providerconfig",
     "cmd/cluster-controller",
     "cmd/machine-controller"
   ],
