@@ -36,12 +36,12 @@ compile: ## Compile project and create binaries for cluster-controller, machine-
 	mkdir -p ./bin
 	go build -o ./bin/cluster-controller ./cmd/cluster-controller
 	go build -o ./bin/machine-controller ./cmd/machine-controller
-	go build -o ./bin/clusterctl ./clusterctl
+	go build -o ./bin/clusterctl ./cmd/clusterctl
 
 install: ## Install cluster-controller, machine-controller and clusterctl
 	CGO_ENABLED=0 go install -ldflags '-extldflags "-static"' sigs.k8s.io/cluster-api-provider-digitalocean/cmd/cluster-controller
 	CGO_ENABLED=0 go install -ldflags '-extldflags "-static"' sigs.k8s.io/cluster-api-provider-digitalocean/cmd/machine-controller
-	CGO_ENABLED=0 go install -ldflags '-extldflags "-static"' sigs.k8s.io/cluster-api-provider-digitalocean/clusterctl
+	CGO_ENABLED=0 go install -ldflags '-extldflags "-static"' sigs.k8s.io/cluster-api-provider-digitalocean/cmd/clusterctl
 
 test-unit: ## Run unit tests. Those tests will never communicate with cloud and cost you money
 	go test -race -cover ./...
