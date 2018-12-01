@@ -34,13 +34,11 @@ generate:
 
 compile: ## Compile project and create binaries for cluster-controller, machine-controller and clusterctl, in the ./bin directory
 	mkdir -p ./bin
-	go build -o ./bin/cluster-controller ./cmd/cluster-controller
-	go build -o ./bin/machine-controller ./cmd/machine-controller
+	# TODO: manager here
 	go build -o ./bin/clusterctl ./cmd/clusterctl
 
 install: ## Install cluster-controller, machine-controller and clusterctl
-	CGO_ENABLED=0 go install -ldflags '-extldflags "-static"' sigs.k8s.io/cluster-api-provider-digitalocean/cmd/cluster-controller
-	CGO_ENABLED=0 go install -ldflags '-extldflags "-static"' sigs.k8s.io/cluster-api-provider-digitalocean/cmd/machine-controller
+	# TODO: manager here
 	CGO_ENABLED=0 go install -ldflags '-extldflags "-static"' sigs.k8s.io/cluster-api-provider-digitalocean/cmd/clusterctl
 
 test-unit: ## Run unit tests. Those tests will never communicate with cloud and cost you money
@@ -50,20 +48,16 @@ clean: ## Remove compiled binaries
 	rm -rf ./bin
 
 images: ## Build images for cluster-controller and machine-controller
-	$(MAKE) -C cmd/cluster-controller image
-	$(MAKE) -C cmd/machine-controller image
+	# TODO: manager image here
 
 push: ## Build and push images to repository for cluster-controller and machine-controller
-	$(MAKE) -C cmd/cluster-controller push
-	$(MAKE) -C cmd/machine-controller push
+	# TODO: manager image here
 
 images-dev: ## Build development images for cluster-controller and machine-controller
-	$(MAKE) -C cmd/cluster-controller image-dev
-	$(MAKE) -C cmd/machine-controller image-dev
+	# TODO: manager dev image here
 
 push-dev: ## Build and push development images to repository for cluster-controller and machine-controller
-	$(MAKE) -C cmd/cluster-controller push-dev
-	$(MAKE) -C cmd/machine-controller push-dev
+	# TODO: manager dev image here
 
 gofmt: ## Go fmt your code
 	hack/verify-gofmt.sh
