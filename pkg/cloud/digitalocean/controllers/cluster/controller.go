@@ -14,9 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package machine
+package cluster
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/golang/glog"
@@ -33,20 +34,19 @@ import (
 	"k8s.io/client-go/tools/record"
 	"sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset"
 	clusterapiclientsetscheme "sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset/scheme"
+	"sigs.k8s.io/cluster-api/pkg/controller/cluster"
 	"sigs.k8s.io/cluster-api/pkg/controller/config"
-	machinecontroller "sigs.k8s.io/cluster-api/pkg/controller/machine"
 	"sigs.k8s.io/cluster-api/pkg/controller/sharedinformers"
 
-	machineactuator "sigs.k8s.io/cluster-api-provider-digitalocean/cloud/digitalocean/actuators/machine"
-	"sigs.k8s.io/cluster-api-provider-digitalocean/cloud/digitalocean/actuators/machine/machinesetup"
-	"sigs.k8s.io/cluster-api-provider-digitalocean/cloud/digitalocean/controllers/machine/options"
+	clusteractuator "sigs.k8s.io/cluster-api-provider-digitalocean/pkg/cloud/digitalocean/actuators/cluster"
+	"sigs.k8s.io/cluster-api-provider-digitalocean/pkg/cloud/digitalocean/controllers/cluster/options"
 )
 
 const (
-	controllerName = "digitalocean-machine-controller"
+	controllerName = "digitalocean-cluster-controller"
 )
 
-func Start(server *options.Server, recorder record.EventRecorder, shutdown <-chan struct{}) {
+func Start(server *options.Server, shutdown <-chan struct{}) {
 	config, err := controller.GetConfig(server.CommonConfig.Kubeconfig)
 	if err != nil {
 		glog.Fatalf("Could not create Config for talking to the apiserver: %v", err)
@@ -57,23 +57,16 @@ func Start(server *options.Server, recorder record.EventRecorder, shutdown <-cha
 		glog.Fatalf("Could not create client for talking to the apiserver: %v", err)
 	}
 
-	configWatch, err := machinesetup.NewConfigWatch(server.MachineSetupConfigPath)
-	if err != nil {
-		glog.Fatalf("could not create configWatch: %v", err)
+	params := clusteractuator.ActuatorParams{
+		ClusterClient: client.ClusterV1alpha1().Clusters(corev1.NamespaceDefault),
 	}
-
-	params := machineactuator.ActuatorParams{
-		V1Alpha1Client:           client.ClusterV1alpha1(),
-		EventRecorder:            recorder,
-		MachineSetupConfigGetter: configWatch,
-	}
-	actuator, err := machineactuator.NewMachineActuator(params)
+	actuator, err := clusteractuator.NewActuator(params)
 	if err != nil {
-		glog.Fatalf("Could not create digitalocean machine actuator: %v", err)
+		glog.Fatalf("Could not create digitalocean cluster actuator: %v", err)
 	}
 
 	si := sharedinformers.NewSharedInformers(config, shutdown)
-	c := machinecontroller.NewMachineController(config, si, actuator)
+	c := cluster.NewClusterController(config, si, actuator)
 	c.RunAsync(shutdown)
 
 	select {}
@@ -82,27 +75,24 @@ func Start(server *options.Server, recorder record.EventRecorder, shutdown <-cha
 func Run(server *options.Server) error {
 	kubeConfig, err := controller.GetConfig(server.CommonConfig.Kubeconfig)
 	if err != nil {
-		glog.Errorf("Could not create Config for talking to the apiserver: %v", err)
-		return err
+		return fmt.Errorf("could not create config for apiserver: %v", err)
 	}
 
 	kubeClientControl, err := kubernetes.NewForConfig(
-		rest.AddUserAgent(kubeConfig, "machine-controller-manager"),
+		rest.AddUserAgent(kubeConfig, "cluster-controller-manager"),
 	)
 	if err != nil {
-		glog.Errorf("Invalid API configuration for kubeconfig-control: %v", err)
-		return err
+		return fmt.Errorf("invalid API configuration for kubeconfig-control: %v", err)
 	}
 
 	recorder, err := createRecorder(kubeClientControl)
 	if err != nil {
-		glog.Errorf("Could not create event recorder : %v", err)
-		return err
+		return fmt.Errorf("could not create event recorder: %v", err)
 	}
 
 	// run function will block and never return.
 	run := func(stop <-chan struct{}) {
-		Start(server, recorder, stop)
+		Start(server, stop)
 	}
 
 	leaderElectConfig := config.GetLeaderElectionConfig()
@@ -110,13 +100,13 @@ func Run(server *options.Server) error {
 		run(make(<-chan (struct{})))
 	}
 
-	// Identity used to distinguish between multiple machine controller instances.
+	// Identity used to distinguish between multiple cluster controller instances.
 	id, err := os.Hostname()
 	if err != nil {
 		return err
 	}
 
-	leaderElectionClient := kubernetes.NewForConfigOrDie(rest.AddUserAgent(kubeConfig, "machine-leader-election"))
+	leaderElectionClient := kubernetes.NewForConfigOrDie(rest.AddUserAgent(kubeConfig, "cluster-leader-election"))
 
 	id = id + "-" + string(uuid.NewUUID())
 	// Lock required for leader election
@@ -133,7 +123,7 @@ func Run(server *options.Server) error {
 		return err
 	}
 
-	// Try and become the leader and start machine controller loops
+	// Try and become the leader and start cluster controller loops
 	leaderelection.RunOrDie(leaderelection.LeaderElectionConfig{
 		Lock:          rl,
 		LeaseDuration: leaderElectConfig.LeaseDuration.Duration,

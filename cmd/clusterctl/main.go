@@ -17,7 +17,7 @@ limitations under the License.
 package main
 
 import (
-	_ "sigs.k8s.io/cluster-api-provider-digitalocean/cloud/digitalocean/actuators/machine"
+	_ "sigs.k8s.io/cluster-api-provider-digitalocean/pkg/cloud/digitalocean/actuators/machine"
 	"sigs.k8s.io/cluster-api/clusterctl/cmd"
 )
 
