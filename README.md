@@ -36,7 +36,7 @@ This command generates three binaries: `clusterctl`, `machine-controller` and `c
 
 The `clusterctl` can also be compiled manually, such as:
 ```bash
-cd $(go env GOPATH)/src/sigs.k8s.io/cluster-api-provider-digitalocean/clusterctl
+cd $(go env GOPATH)/src/sigs.k8s.io/cluster-api-provider-digitalocean/cmd/clusterctl
 go install
 ```
 
@@ -49,23 +49,23 @@ To create your first cluster using `cluster-api-provider-digitalocean`, you need
 * `provider-components.yaml` - contains deployment manifest for controllers, userdata used to bootstrap machines, a secret with SSH key for the `machine-controller` and a secret with DigitalOcean API Access Token.
 * [Optional] `addons.yaml` - used to deploy additional components once the cluster is bootstrapped, such as [DigitalOcean Cloud Controller Manager](https://github.com/digitalocean/digitalocean-cloud-controller-manager) and [DigitalOcean CSI plugin](https://github.com/digitalocean/csi-digitalocean).
 
-The manifests can be generated automatically by using the [`generate-yaml.sh`](./clusterctl/examples/digitalocean/generate-yaml.sh) script, located in the `clusterctl/examples/digitalocean` directory:
+The manifests can be generated automatically by using the [`generate-yaml.sh`](./cmd/clusterctl/examples/digitalocean/generate-yaml.sh) script, located in the `cmd/clusterctl/examples/digitalocean` directory:
 ```bash
-cd clusterctl/examples/digitalocean
+cd cmd/clusterctl/examples/digitalocean
 ./generate-yaml.sh
 cd ../..
 ```
-The result of the script is an `out` directory with generated manifests and a generated SSH key to be used by the `machine-controller`. More details about how it generates manifests and how to customize them can be found in the [README file in `clusterctl/examples/digitalocean` directory](./clusterctl/examples/digitalocean).
+The result of the script is an `out` directory with generated manifests and a generated SSH key to be used by the `machine-controller`. More details about how it generates manifests and how to customize them can be found in the [README file in `cmd/clusterctl/examples/digitalocean` directory](./cmd/clusterctl/examples/digitalocean).
 
 Once you have manifests generated, you can create a cluster using the following command. Make sure to replace the value of `vm-driver` flag with the name of your actual `minikube` driver.
 ```bash
 ./bin/clusterctl create cluster \
     --provider digitalocean \
     --vm-driver kvm2 \
-    -c ./clusterctl/examples/digitalocean/out/cluster.yaml \
-    -m ./clusterctl/examples/digitalocean/out/machines.yaml \
-    -p ./clusterctl/examples/digitalocean/out/provider-components.yaml \
-    -a ./clusterctl/examples/digitalocean/out/addons.yaml
+    -c ./cmd/clusterctl/examples/digitalocean/out/cluster.yaml \
+    -m ./cmd/clusterctl/examples/digitalocean/out/machines.yaml \
+    -p ./cmd/clusterctl/examples/digitalocean/out/provider-components.yaml \
+    -a ./cmd/clusterctl/examples/digitalocean/out/addons.yaml
 ```
 
 More details about the `create cluster` command can be found by invoking help:
