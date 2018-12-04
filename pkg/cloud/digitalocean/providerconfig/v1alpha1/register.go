@@ -25,7 +25,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 	clusterv1 "sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 
-	"sigs.k8s.io/cluster-api-provider-digitalocean/cloud/digitalocean/providerconfig"
+	"sigs.k8s.io/cluster-api-provider-digitalocean/pkg/cloud/digitalocean/providerconfig"
 )
 
 // DigitalOceanProviderConfigCodec is codec for decoding and encoding DigitalOcean ProviderConfig.

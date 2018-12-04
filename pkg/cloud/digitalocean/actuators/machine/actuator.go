@@ -33,8 +33,8 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/tools/record"
 
-	"sigs.k8s.io/cluster-api-provider-digitalocean/cloud/digitalocean/actuators/machine/machinesetup"
-	doconfigv1 "sigs.k8s.io/cluster-api-provider-digitalocean/cloud/digitalocean/providerconfig/v1alpha1"
+	"sigs.k8s.io/cluster-api-provider-digitalocean/pkg/cloud/digitalocean/actuators/machine/machinesetup"
+	doconfigv1 "sigs.k8s.io/cluster-api-provider-digitalocean/pkg/cloud/digitalocean/providerconfig/v1alpha1"
 	"sigs.k8s.io/cluster-api-provider-digitalocean/pkg/ssh"
 	"sigs.k8s.io/cluster-api-provider-digitalocean/pkg/sshutil"
 	"sigs.k8s.io/cluster-api-provider-digitalocean/pkg/util"
