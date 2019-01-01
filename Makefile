@@ -26,11 +26,7 @@ depend-update: ## Update all dependencies
 
 .PHONY: generate
 generate:
-	go build -o $$GOPATH/bin/deepcopy-gen sigs.k8s.io/cluster-api-provider-digitalocean/vendor/k8s.io/code-generator/cmd/deepcopy-gen
-	deepcopy-gen \
-	  -i ./pkg/cloud/digitalocean/providerconfig,./pkg/cloud/digitalocean/providerconfig/v1alpha1 \
-	  -O zz_generated.deepcopy \
-	  -h hack/boilerplate/boilerplate.generatego.txt
+	GOPATH=${GOPATH} go generate ./pkg/... ./cmd/...
 
 compile: ## Compile project and create binaries for cluster-controller, machine-controller and clusterctl, in the ./bin directory
 	mkdir -p ./bin
