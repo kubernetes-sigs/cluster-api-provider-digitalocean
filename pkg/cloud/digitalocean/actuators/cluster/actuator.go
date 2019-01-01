@@ -22,23 +22,23 @@ import (
 	"github.com/golang/glog"
 
 	clusterv1 "sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
-	client "sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset/typed/cluster/v1alpha1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // Actuator is responsible for performing cluster reconciliation
 type Actuator struct {
-	clusterClient client.ClusterInterface
+	client client.Client
 }
 
 // ActuatorParams holds parameter information for Actuator
 type ActuatorParams struct {
-	ClusterClient client.ClusterInterface
+	Client client.Client
 }
 
 // NewActuator creates a new Actuator
 func NewActuator(params ActuatorParams) (*Actuator, error) {
 	return &Actuator{
-		clusterClient: params.ClusterClient,
+		client: params.Client,
 	}, nil
 }
 
