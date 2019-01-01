@@ -23,7 +23,7 @@ import (
 )
 
 func (do *DOClient) upgradeCommandMasterControlPlane(machine *clusterv1.Machine) ([]string, error) {
-	machineConfig, err := do.decodeMachineProviderConfig(machine.Spec.ProviderConfig)
+	machineConfig, err := machineProviderFromProviderConfig(machine.Spec.ProviderSpec)
 	if err != nil {
 		return nil, fmt.Errorf("error decoding provided machineConfig: %v", err)
 	}
@@ -43,7 +43,7 @@ func (do *DOClient) upgradeCommandMasterControlPlane(machine *clusterv1.Machine)
 }
 
 func (do *DOClient) upgradeCommandMasterKubelet(machine *clusterv1.Machine) ([]string, error) {
-	machineConfig, err := do.decodeMachineProviderConfig(machine.Spec.ProviderConfig)
+	machineConfig, err := machineProviderFromProviderConfig(machine.Spec.ProviderSpec)
 	if err != nil {
 		return nil, fmt.Errorf("error decoding provided machineConfig: %v", err)
 	}
