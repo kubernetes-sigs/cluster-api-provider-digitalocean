@@ -20,12 +20,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/ghodss/yaml"
 	"net/http"
 	"os"
 	"strconv"
-	"strings"
 	"time"
+
+	"github.com/ghodss/yaml"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
@@ -129,6 +129,7 @@ func NewMachineActuator(params ActuatorParams) (*DOClient, error) {
 		eventRecorder:            params.EventRecorder,
 		scheme:                   params.Scheme,
 		godoClient:               getGodoClient(),
+		ctx:                      context.Background(),
 	}, nil
 }
 
@@ -422,16 +423,21 @@ func getKubeadm(params ActuatorParams) DOClientKubeadm {
 }
 
 func (do *DOClient) getKubeadmToken() (string, error) {
-	tokenParams := kubeadm.TokenCreateParams{
-		Ttl: time.Duration(30) * time.Minute,
+	if do.kubeadm == nil {
+		return "", errors.New("kubeadm not available")
 	}
 
-	token, err := do.kubeadm.TokenCreate(tokenParams)
-	if err != nil {
-		return "", err
-	}
+	// tokenParams := kubeadm.TokenCreateParams{
+	// 	Ttl: time.Duration(30) * time.Minute,
+	// }
 
-	return strings.TrimSpace(token), nil
+	// token, err := do.kubeadm.TokenCreate(tokenParams)
+	// if err != nil {
+	// 	return "", err
+	// }
+
+	// return strings.TrimSpace(token), nil
+	return "abcdef.1234567890abcdef", nil
 }
 
 // instanceExists returns instance with provided name if it already exists in the cloud.
