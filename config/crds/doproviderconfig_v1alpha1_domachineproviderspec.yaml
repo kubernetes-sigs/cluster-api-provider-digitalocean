@@ -1,0 +1,49 @@
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  labels:
+    controller-tools.k8s.io: "1.0"
+  name: domachineproviderspecs.doproviderconfig.k8s.io
+spec:
+  group: doproviderconfig.k8s.io
+  names:
+    kind: DOMachineProviderSpec
+    plural: domachineproviderspecs
+  scope: Namespaced
+  validation:
+    openAPIV3Schema:
+      properties:
+        apiVersion:
+          type: string
+        kind:
+          type: string
+        region:
+          type: string
+        size:
+          type: string
+        image:
+          type: string
+        tags:
+          items:
+            type: string
+          type: array
+        sshPublicKeys:
+          items:
+            type: string
+          type: array
+        private_networking:
+          type: bool
+        backups:
+          type: bool
+        ipv6:
+          type: bool
+        monitoring:
+          type: bool
+  version: v1alpha1
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
