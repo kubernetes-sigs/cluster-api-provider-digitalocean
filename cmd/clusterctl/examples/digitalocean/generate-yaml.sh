@@ -20,10 +20,10 @@ OVERWRITE=0
 OUTPUT_DIR=${OUTPUT_DIR:-out}
 CONTROLLER_VERSION=${CONTROLLER_VERSION:-0.2.0}
 
-PROVIDERCOMPONENT_TEMPLATE_FILE=provider-components.yaml.template
-PROVIDERCOMPONENT_GENERATED_FILE=${OUTPUT_DIR}/provider-components.yaml
 MACHINES_TEMPLATE_FILE=machines.yaml.template
 MACHINES_GENERATED_FILE=${OUTPUT_DIR}/machines.yaml
+MACHINES_CONFIG_TEMPLATE_FILE=machines_config.yaml.template
+MACHINES_CONFIG_GENERATED_FILE=${OUTPUT_DIR}/machines_config.yaml
 CLUSTER_TEMPLATE_FILE=cluster.yaml.template
 CLUSTER_GENERATED_FILE=${OUTPUT_DIR}/cluster.yaml
 ADDONS_TEMPLATE_FILE=addons.yaml.template
@@ -67,13 +67,13 @@ while test $# -gt 0; do
         esac
 done
 
-if [ $OVERWRITE -ne 1 ] && [ -f $PROVIDERCOMPONENT_GENERATED_FILE ]; then
-  echo "File $PROVIDERCOMPONENT_GENERATED_FILE already exists. Delete it manually before running this script."
+if [ $OVERWRITE -ne 1 ] && [ -f $MACHINES_GENERATED_FILE ]; then
+  echo "File $MACHINES_GENERATED_FILE already exists. Delete it manually before running this script."
   exit 1
 fi
 
-if [ $OVERWRITE -ne 1 ] && [ -f $MACHINES_GENERATED_FILE ]; then
-  echo "File $MACHINES_GENERATED_FILE already exists. Delete it manually before running this script."
+if [ $OVERWRITE -ne 1 ] && [ -f $MACHINES_CONFIG_GENERATED_FILE ]; then
+  echo "File $MACHINES_CONFIG_GENERATED_FILE already exists. Delete it manually before running this script."
   exit 1
 fi
 
@@ -103,15 +103,6 @@ echo "Done generating SSH key $SSH_KEY_GENERATED_FILE"
 SSH_PUBLIC_KEY="$(cat ${SSH_KEY_GENERATED_FILE}.pub | base64 | tr -d '\r\n')"
 SSH_PRIVATE_KEY=$(cat ${SSH_KEY_GENERATED_FILE} | base64 | tr -d '\r\n')
 
-cat $PROVIDERCOMPONENT_TEMPLATE_FILE \
-  | sed -e "s/\$DIGITALOCEAN_ACCESS_TOKEN/$DIGITALOCEAN_ACCESS_TOKEN/" \
-  | sed -e "s/\$SSH_PRIVATE_KEY/$SSH_PRIVATE_KEY/" \
-  | sed -e "s/\$SSH_PUBLIC_KEY/$SSH_PUBLIC_KEY/" \
-  | sed -e "s/\$CONTROLLER_VERSION/$CONTROLLER_VERSION/" \
-  | sed -e "s/\$NAMESPACE/$NAMESPACE/" \
-  > $PROVIDERCOMPONENT_GENERATED_FILE
-echo "Done generating $PROVIDERCOMPONENT_GENERATED_FILE"
-
 cat $MACHINES_TEMPLATE_FILE \
     | sed -e "s/\$REGION/$REGION/" \
     | sed -e "s/\$MASTER_NAME/$MASTER_NAME/" \
@@ -119,6 +110,10 @@ cat $MACHINES_TEMPLATE_FILE \
     | sed -e "s/\$NAMESPACE/$NAMESPACE/" \
   > $MACHINES_GENERATED_FILE
 echo "Done generating $MACHINES_GENERATED_FILE"
+
+cat $MACHINES_CONFIG_TEMPLATE_FILE \
+  > $MACHINES_CONFIG_GENERATED_FILE
+echo "Done generating $MACHINES_CONFIG_GENERATED_FILE"
 
 cat $CLUSTER_TEMPLATE_FILE \
     | sed -e "s/\$CLUSTER_NAME/$CLUSTER_NAME/" \
