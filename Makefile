@@ -1,66 +1,78 @@
-# Image URL to use all building/pushing image targets
-IMG ?= xmudrii/do-cluster-api-controller:latest
+# Copyright 2018 The Kubernetes Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-all: test manager clusterctl
+QUAY_BUCKET = kubermatic
+PREFIX = quay.io/$(QUAY_BUCKET)
+NAME = digitalocean-manager
+TAG = 0.3.0
+DEV_TAG = 0.3.0-dev
 
-# Run tests
-test: generate fmt vet manifests
-	go test -v -tags=integration ./pkg/... ./cmd/... -coverprofile cover.out
+all: depend generate compile images
 
-# Build manager binary
-manager: generate fmt vet
-	go build -o bin/manager sigs.k8s.io/cluster-api-provider-digitalocean/cmd/manager
+check: depend gofmt vet gometalinter
 
-# Build manager binary
-clusterctl: generate fmt vet
-	go build -o bin/clusterctl sigs.k8s.io/cluster-api-provider-digitalocean/cmd/clusterctl
+depend: ## Sync vendor directory by running dep ensure
+	$$GOPATH/bin/dep version || go get -u github.com/golang/dep/cmd/dep
+	$$GOPATH/bin/dep ensure -v
+
+depend-update: ## Update all dependencies
+	$$GOPATH/bin/dep version || go get -u github.com/golang/dep/cmd/dep
+	$$GOPATH/bin/dep ensure -update -v
 
 .PHONY: generate
 generate:
 	GOPATH=${GOPATH} go generate ./pkg/... ./cmd/...
 
-compile: ## Compile project and create binaries for cluster-controller, machine-controller and clusterctl, in the ./bin directory
+compile: ## Compile project and create binaries for manager and clusterctl, in the ./bin directory
 	mkdir -p ./bin
-	# TODO: manager here
+	go build -o ./bin/manager ./cmd/manager
 	go build -o ./bin/clusterctl ./cmd/clusterctl
 
-install: ## Install cluster-controller, machine-controller and clusterctl
-	# TODO: manager here
+install: ## Install manager and clusterctl
+	CGO_ENABLED=0 go install -ldflags '-extldflags "-static"' sigs.k8s.io/cluster-api-provider-digitalocean/cmd/manager
 	CGO_ENABLED=0 go install -ldflags '-extldflags "-static"' sigs.k8s.io/cluster-api-provider-digitalocean/cmd/clusterctl
 
 test-unit: ## Run unit tests. Those tests will never communicate with cloud and cost you money
 	go test -race -cover ./...
 
-# Install CRDs into a cluster
-install: manifests
-	kubectl apply -f config/crds
+clean: ## Remove compiled binaries
+	rm -rf ./bin
 
-# Deploy controller in the configured Kubernetes cluster in ~/.kube/config
-deploy: manifests
-	kubectl apply -f config/crds
-	kustomize build config/default | kubectl apply -f -
+images: ## Build image for manager
+	docker build -t "$(PREFIX)/$(NAME):$(TAG)" -f ./Dockerfile .
 
-# Generate manifests e.g. CRD, RBAC etc.
-manifests:
-	go run vendor/sigs.k8s.io/controller-tools/cmd/controller-gen/main.go all
+push: images ## Build and push image to repository for manager
+	docker push "$(PREFIX)/$(NAME):$(TAG)"
 
-# Run go fmt against code
-fmt:
-	go fmt ./pkg/... ./cmd/...
+images-dev: ## Build development image for manager
+	docker build -t "$(PREFIX)/$(NAME):$(DEV_TAG)" -f ./Dockerfile .
 
-# Run go vet against code
-vet:
-	go vet ./pkg/... ./cmd/...
+push-dev: images-dev ## Build and push development image to repository for manager
+	docker push "$(PREFIX)/$(NAME):$(DEV_TAG)"
 
-# Generate code
-generate:
-	go generate ./pkg/... ./cmd/...
+gofmt: ## Go fmt your code
+	hack/verify-gofmt.sh
 
-# Build the docker image
-docker-build: generate fmt vet manifests
-	docker build . -t ${IMG}
-	@echo "updating kustomize image patch file for manager resource"
-	sed -i'' -e 's@image: .*@image: '"${IMG}"'@' ./config/default/do_manager_image_patch.yaml
+vet: ## Apply go vet to all go files
+	go vet ./...
+
+lint: ## Run gometalinter on all go files
+	gometalinter --config gometalinter.json ./... --deadline 20m
+
+.PHONY: help
+help:  ## Show help messages for make targets
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[32m%-30s\033[0m %s\n", $$1, $$2}'
 
 verify: depend vet gofmt
 	hack/verify-boilerplate.sh
