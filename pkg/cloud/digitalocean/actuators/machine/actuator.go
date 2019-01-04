@@ -23,6 +23,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/ghodss/yaml"
@@ -157,11 +158,6 @@ func (do *DOClient) Create(ctx context.Context, cluster *clusterv1.Cluster, mach
 		return nil
 	}
 
-	token, err := do.getKubeadmToken()
-	if err != nil {
-		return err
-	}
-
 	var parsedMetadata string
 	configParams := &machinesetup.ConfigParams{
 		Image:    machineConfig.Image,
@@ -176,11 +172,15 @@ func (do *DOClient) Create(ctx context.Context, cluster *clusterv1.Cluster, mach
 		return err
 	}
 	if util.IsMachineMaster(machine) {
-		parsedMetadata, err = masterUserdata(cluster, machine, do.certificateAuthority, machineConfig.Image, token, metadata)
+		parsedMetadata, err = masterUserdata(cluster, machine, do.certificateAuthority, machineConfig.Image, metadata)
 		if err != nil {
 			return err
 		}
 	} else {
+		token, err := do.getKubeadmToken()
+		if err != nil {
+			return err
+		}
 		parsedMetadata, err = nodeUserdata(cluster, machine, machineConfig.Image, token, metadata)
 		if err != nil {
 			return err
@@ -427,17 +427,15 @@ func (do *DOClient) getKubeadmToken() (string, error) {
 		return "", errors.New("kubeadm not available")
 	}
 
-	// tokenParams := kubeadm.TokenCreateParams{
-	// 	Ttl: time.Duration(30) * time.Minute,
-	// }
+	tokenParams := kubeadm.TokenCreateParams{
+		Ttl: time.Duration(30) * time.Minute,
+	}
+	token, err := do.kubeadm.TokenCreate(tokenParams)
+	if err != nil {
+		return "", err
+	}
 
-	// token, err := do.kubeadm.TokenCreate(tokenParams)
-	// if err != nil {
-	// 	return "", err
-	// }
-
-	// return strings.TrimSpace(token), nil
-	return "abcdef.1234567890abcdef", nil
+	return strings.TrimSpace(token), nil
 }
 
 // instanceExists returns instance with provided name if it already exists in the cloud.
