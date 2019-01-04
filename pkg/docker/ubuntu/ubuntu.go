@@ -17,6 +17,7 @@ limitations under the License.
 package ubuntu
 
 import (
+	"errors"
 	"fmt"
 
 	"k8s.io/apimachinery/pkg/util/sets"
@@ -64,5 +65,5 @@ func (d RuntimeVersion) GetDockerInstallCandidate(kubernetesVersion string) (str
 		}
 	}
 
-	return "", "", fmt.Errorf("no install candidate available for the desired version")
+	return "", "", errors.New("no install candidate available for the desired version")
 }

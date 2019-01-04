@@ -17,6 +17,7 @@ limitations under the License.
 package ssh
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 
@@ -86,7 +87,7 @@ func (s *Client) Connect() error {
 // Execute executes command on the remote server and returns stdout and stderr output.
 func (s *Client) Execute(cmd string) ([]byte, error) {
 	if s.Conn == nil {
-		return nil, fmt.Errorf("not connected to the server")
+		return nil, errors.New("not connected to the server")
 	}
 
 	// Start interactive session.
@@ -106,7 +107,7 @@ func (s *Client) Execute(cmd string) ([]byte, error) {
 // Close closes the SSH connection.
 func (s *Client) Close() error {
 	if s.Conn == nil {
-		return fmt.Errorf("connection not existing")
+		return errors.New("connection not existing")
 	}
 	return s.Conn.Close()
 }

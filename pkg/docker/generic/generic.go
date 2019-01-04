@@ -17,6 +17,7 @@ limitations under the License.
 package generic
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/Masterminds/semver"
@@ -41,7 +42,7 @@ func getOfficiallySupportedVersions(kubernetesVersion string) ([]string, error) 
 	case "1.8", "1.9", "1.10", "1.11":
 		return []string{"1.11.2", "1.12.6", "1.13.1", "17.03.2", "17.12", "18.03", "18.06"}, nil
 	default:
-		return nil, fmt.Errorf("no supported docker version for provided kubernetes version found")
+		return nil, errors.New("no supported docker version for provided kubernetes version found")
 	}
 }
 
