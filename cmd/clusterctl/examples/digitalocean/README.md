@@ -31,7 +31,7 @@ OVERWRITE=1 ./generate-yaml.sh
 2. Generate the `provider-components.yaml` manifest.
 ```bash
 # Return to the project's root directory
-cd ../..
+cd ../../../..
 # Build provider-components manifest for deploying the Manager for the DigitalOcean Provider
 kustomize build config/default/ > cmd/clusterctl/examples/digitalocean/out/provider-components.yaml
 # Append manifest for deploying Cluster-API Controller to the generated provider-components manifest

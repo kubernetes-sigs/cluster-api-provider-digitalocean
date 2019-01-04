@@ -54,7 +54,6 @@ The manifests can be generated automatically by using the [`generate-yaml.sh`](.
 ```bash
 cd cmd/clusterctl/examples/digitalocean
 ./generate-yaml.sh
-cd ../..
 ```
 
 The result of the script is an `out` directory with generated manifests and a generated SSH key to be used by the `machine-controller`. More details about how it generates manifests and how to customize them can be found in the [README file in `cmd/clusterctl/examples/digitalocean` directory](./cmd/clusterctl/examples/digitalocean).
@@ -62,7 +61,7 @@ The result of the script is an `out` directory with generated manifests and a ge
 The `generate-yaml.sh` script takes care of `cluster.yaml`, `machines.yaml` and `addons.yaml` manifests, while the `provider-components.yaml` manifest must be generated using [Kustomize](https://github.com/kubernetes-sigs/kustomize), such as:
 ```bash
 # Return to the project's root directory
-cd ../..
+cd ../../../..
 # Build provider-components manifest for deploying the Manager for the DigitalOcean Provider
 kustomize build config/default/ > cmd/clusterctl/examples/digitalocean/out/provider-components.yaml
 # Append manifest for deploying Cluster-API Controller to the generated provider-components manifest
