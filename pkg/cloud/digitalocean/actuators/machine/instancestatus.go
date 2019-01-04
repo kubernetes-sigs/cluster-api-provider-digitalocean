@@ -18,6 +18,7 @@ package machine
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 
 	"k8s.io/apimachinery/pkg/runtime/serializer/json"
@@ -71,7 +72,7 @@ func (do *DOClient) machineInstanceStatus(machine *clusterv1.Machine) (instanceS
 }
 
 // setMachineInstanceStatus writes the instance status to the annotation.
-func (do *DOClient) setMachineInstanceStatus(machine *clusterv1.Machine, status instanceStatus) (instanceStatus, error) {
+func (do *DOClient) setMachineInstanceStatus(machine *clusterv1.Machine, status instanceStatus) (*clusterv1.Machine, error) {
 	// Avoid status within status.
 	status.ObjectMeta.Annotations[InstanceStatusAnnotationKey] = ""
 
@@ -106,12 +107,10 @@ func (do *DOClient) updateInstanceStatus(machine *clusterv1.Machine) error {
 		return fmt.Errorf("status cannot be updated because machine %q does not exist anymore", machine.Name)
 	}
 
-	_, err = do.setMachineInstanceStatus(currentMachine, status)
+	m, err := do.setMachineInstanceStatus(currentMachine, status)
 	if err != nil {
 		return err
 	}
 
-	// TODO(xmudrii): Get back here (urgent)
-	//return do.client.Update(context.Background(), m)
-	return nil
+	return do.client.Update(context.Background(), m)
 }
