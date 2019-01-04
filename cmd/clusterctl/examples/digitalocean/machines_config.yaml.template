@@ -91,8 +91,6 @@ items:
 
       # Override network args to use kubenet instead of cni, override Kubelet DNS args and
       # add cloud provider args.
-      # Environment="KUBELET_DNS_ARGS=--cluster-dns=${CLUSTER_DNS_SERVER} --cluster-domain=${CLUSTER_DNS_DOMAIN}"
-      # TODO: get back here.
       touch /etc/systemd/system/kubelet.service.d/20-kubelet.conf
       cat > /etc/systemd/system/kubelet.service.d/20-kubelet.conf <<EOF
       [Service]
@@ -257,8 +255,6 @@ items:
 
       # Override network args to use kubenet instead of cni, override Kubelet DNS args and
       # add cloud provider args.
-      # Environment="KUBELET_DNS_ARGS=--cluster-dns=${CLUSTER_DNS_SERVER} --cluster-domain=${CLUSTER_DNS_DOMAIN}"
-      # TODO: get back here.
       touch /etc/systemd/system/kubelet.service.d/20-kubelet.conf
       cat > /etc/systemd/system/kubelet.service.d/20-kubelet.conf <<EOF
       [Service]
