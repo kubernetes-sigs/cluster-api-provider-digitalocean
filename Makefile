@@ -54,6 +54,8 @@ images: ## Build image for manager
 
 push: images ## Build and push image to repository for manager
 	docker push "$(PREFIX)/$(NAME):$(TAG)"
+	# Put the appropriate image tag in the Manager Kustomize manifest
+	sed -i'' -e 's@image: .*@image: '"$(PREFIX)/$(NAME):$(TAG)"'@' ./config/default/do_manager_image_patch.yaml
 
 images-dev: ## Build development image for manager
 	docker build -t "$(PREFIX)/$(NAME):$(DEV_TAG)" -f ./Dockerfile .
