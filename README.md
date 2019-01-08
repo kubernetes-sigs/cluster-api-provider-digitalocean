@@ -163,7 +163,7 @@ watch -n1 kubectl get nodes
 
 ## Deleting the Cluster
 
-To delete Master and confirm all relevant resources are deleted from the cloud, we're going to use [`doctl`—DigitalOcean CLI](https://github.com/digitalocean/doctl). You can also use DigitalOcean Cloud Control Panel or API instead of `doctl.
+To delete Master and confirm all relevant resources are deleted from the cloud, we're going to use [`doctl`—DigitalOcean CLI](https://github.com/digitalocean/doctl). You can also use DigitalOcean Cloud Control Panel or API instead of `doctl`.
 
 First, save the Droplet ID of Master, as we'll use it later to delete the control plane machine:
 
