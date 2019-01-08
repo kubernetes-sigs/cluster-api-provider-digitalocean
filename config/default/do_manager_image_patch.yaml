@@ -7,5 +7,5 @@ spec:
   template:
     spec:
       containers:
-      - image: xmudrii/do-cluster-api-controller:latest
+      - image: quay.io/kubermatic/cluster-api-do-controller:latest
         name: manager

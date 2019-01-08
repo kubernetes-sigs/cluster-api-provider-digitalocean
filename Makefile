@@ -14,9 +14,9 @@
 
 QUAY_BUCKET = kubermatic
 PREFIX = quay.io/$(QUAY_BUCKET)
-NAME = digitalocean-manager
-TAG = 0.3.0
-DEV_TAG = 0.3.0-dev
+NAME = cluster-api-do-controller
+TAG = v1.0.0-alpha.1
+DEV_TAG = v1.0.0-alpha.1
 
 all: depend generate compile images
 
