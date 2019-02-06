@@ -7,7 +7,7 @@ items:
     labels:
       set: master
   spec:
-    providerConfig:
+    providerSpec:
       value:
         region: "$REGION"
         size: "s-2vcpu-2gb"
@@ -32,7 +32,7 @@ items:
     labels:
       set: node
   spec:
-    providerConfig:
+    providerSpec:
       value:
         region: "$REGION"
         size: "s-2vcpu-2gb"

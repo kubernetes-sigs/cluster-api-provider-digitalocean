@@ -12,6 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+QUAY_BUCKET = kubermatic
+PREFIX = quay.io/$(QUAY_BUCKET)
+NAME = cluster-api-do-controller
+TAG = v1.0.0-alpha.1
+DEV_TAG = v1.0.0-alpha.1
+
 all: depend generate compile images
 
 check: depend gofmt vet gometalinter
@@ -26,19 +32,15 @@ depend-update: ## Update all dependencies
 
 .PHONY: generate
 generate:
-	go build -o $$GOPATH/bin/deepcopy-gen sigs.k8s.io/cluster-api-provider-digitalocean/vendor/k8s.io/code-generator/cmd/deepcopy-gen
-	deepcopy-gen \
-	  -i ./pkg/cloud/digitalocean/providerconfig,./pkg/cloud/digitalocean/providerconfig/v1alpha1 \
-	  -O zz_generated.deepcopy \
-	  -h hack/boilerplate/boilerplate.generatego.txt
+	GOPATH=${GOPATH} go generate ./pkg/... ./cmd/...
 
-compile: ## Compile project and create binaries for cluster-controller, machine-controller and clusterctl, in the ./bin directory
+compile: ## Compile project and create binaries for manager and clusterctl, in the ./bin directory
 	mkdir -p ./bin
-	# TODO: manager here
+	go build -o ./bin/manager ./cmd/manager
 	go build -o ./bin/clusterctl ./cmd/clusterctl
 
-install: ## Install cluster-controller, machine-controller and clusterctl
-	# TODO: manager here
+install: ## Install manager and clusterctl
+	CGO_ENABLED=0 go install -ldflags '-extldflags "-static"' sigs.k8s.io/cluster-api-provider-digitalocean/cmd/manager
 	CGO_ENABLED=0 go install -ldflags '-extldflags "-static"' sigs.k8s.io/cluster-api-provider-digitalocean/cmd/clusterctl
 
 test-unit: ## Run unit tests. Those tests will never communicate with cloud and cost you money
@@ -47,17 +49,19 @@ test-unit: ## Run unit tests. Those tests will never communicate with cloud and 
 clean: ## Remove compiled binaries
 	rm -rf ./bin
 
-images: ## Build images for cluster-controller and machine-controller
-	# TODO: manager image here
+images: ## Build image for manager
+	docker build -t "$(PREFIX)/$(NAME):$(TAG)" -f ./Dockerfile .
 
-push: ## Build and push images to repository for cluster-controller and machine-controller
-	# TODO: manager image here
+push: images ## Build and push image to repository for manager
+	docker push "$(PREFIX)/$(NAME):$(TAG)"
+	# Put the appropriate image tag in the Manager Kustomize manifest
+	sed -i'' -e 's@image: .*@image: '"$(PREFIX)/$(NAME):$(TAG)"'@' ./config/default/do_manager_image_patch.yaml
 
-images-dev: ## Build development images for cluster-controller and machine-controller
-	# TODO: manager dev image here
+images-dev: ## Build development image for manager
+	docker build -t "$(PREFIX)/$(NAME):$(DEV_TAG)" -f ./Dockerfile .
 
-push-dev: ## Build and push development images to repository for cluster-controller and machine-controller
-	# TODO: manager dev image here
+push-dev: images-dev ## Build and push development image to repository for manager
+	docker push "$(PREFIX)/$(NAME):$(DEV_TAG)"
 
 gofmt: ## Go fmt your code
 	hack/verify-gofmt.sh
@@ -74,3 +78,4 @@ help:  ## Show help messages for make targets
 
 verify: depend vet gofmt
 	hack/verify-boilerplate.sh
+

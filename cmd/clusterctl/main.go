@@ -17,10 +17,18 @@ limitations under the License.
 package main
 
 import (
-	_ "sigs.k8s.io/cluster-api-provider-digitalocean/pkg/cloud/digitalocean/actuators/machine"
-	"sigs.k8s.io/cluster-api/clusterctl/cmd"
+	"github.com/golang/glog"
+	"sigs.k8s.io/cluster-api-provider-digitalocean/pkg/cloud/digitalocean/actuators/machine"
+	"sigs.k8s.io/cluster-api/cmd/clusterctl/cmd"
+	"sigs.k8s.io/cluster-api/pkg/apis/cluster/common"
 )
 
 func main() {
+	var err error
+	machine.MachineActuator, err = machine.NewMachineActuator(machine.ActuatorParams{})
+	if err != nil {
+		glog.Fatalf("Error creating cluster provisioner for google : %v", err)
+	}
+	common.RegisterClusterProvisioner("digitalocean", machine.MachineActuator)
 	cmd.Execute()
 }

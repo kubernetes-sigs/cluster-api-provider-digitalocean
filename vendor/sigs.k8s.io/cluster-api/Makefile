@@ -12,81 +12,96 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-.PHONY: genapi genconversion genclientset gendeepcopy
+# If you update this file, please follow
+# https://suva.sh/posts/well-documented-makefiles
 
-all: generate build images
+.DEFAULT_GOAL:=help
 
-depend:
-	dep version || go get -u github.com/golang/dep/cmd/dep
-	dep ensure -v
+# Default timeout for starting/stopping the Kubebuilder test controlplane
+export KUBEBUILDER_CONTROLPLANE_START_TIMEOUT ?=60s
+export KUBEBUILDER_CONTROLPLANE_STOP_TIMEOUT ?=60s
 
-	# go libraries often ship BUILD and BUILD.bazel files, but they often don't work.
-	# We delete them and regenerate them
-	find vendor -name "BUILD" -delete
-	find vendor -name "BUILD.bazel" -delete
+# Image URL to use all building/pushing image targets
+IMG ?= gcr.io/k8s-cluster-api/cluster-api-controller:latest
 
-	bazel run //:gazelle
+all: test manager clusterctl
 
-generate: genapi genconversion genclientset gendeepcopy genopenapi
+help:  ## Display this help
+	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
 
-genapi: depend
-	go build -o $$GOPATH/bin/apiregister-gen sigs.k8s.io/cluster-api/vendor/github.com/kubernetes-incubator/apiserver-builder/cmd/apiregister-gen
-	$$GOPATH/bin/apiregister-gen -i ./pkg/apis,./pkg/apis/cluster,./pkg/apis/cluster/v1alpha1
+.PHONY: gazelle
+gazelle: ## Run Bazel Gazelle
+	(which bazel && bazel run //:gazelle) || true
 
-genconversion: depend
-	go build -o $$GOPATH/bin/conversion-gen sigs.k8s.io/cluster-api/vendor/k8s.io/code-generator/cmd/conversion-gen
-	$$GOPATH/bin/conversion-gen -i ./pkg/apis/cluster/v1alpha1/ -O zz_generated.conversion --go-header-file boilerplate.go.txt
+.PHONY: test
+test: generate fmt vet manifests verify ## Run tests
+	go test -v -tags=integration ./pkg/... ./cmd/...
 
-genclientset: depend
-	go build -o $$GOPATH/bin/client-gen sigs.k8s.io/cluster-api/vendor/k8s.io/code-generator/cmd/client-gen
-	$$GOPATH/bin/client-gen \
-	  --input="cluster/v1alpha1" \
-		--clientset-name="clientset" \
-		--input-base="sigs.k8s.io/cluster-api/pkg/apis" \
-		--output-package "sigs.k8s.io/cluster-api/pkg/client/clientset_generated" \
-		--go-header-file boilerplate.go.txt \
-		--clientset-path sigs.k8s.io/cluster-api/pkg/client/clientset_generated
+.PHONY: manager
+manager: generate fmt vet ## Build manager binary
+	go build -o bin/manager sigs.k8s.io/cluster-api/cmd/manager
 
-gendeepcopy:
-	go build -o $$GOPATH/bin/deepcopy-gen sigs.k8s.io/cluster-api/vendor/k8s.io/code-generator/cmd/deepcopy-gen
-	$$GOPATH/bin/deepcopy-gen \
-	  -i ./pkg/apis/cluster/,./pkg/apis/cluster/v1alpha1/ \
-	  -O zz_generated.deepcopy \
-	  -h boilerplate.go.txt
+.PHONY: clusterctl
+clusterctl: generate fmt vet ## Build clusterctl binary
+	go build -o bin/clusterctl sigs.k8s.io/cluster-api/cmd/clusterctl
 
-STATIC_API_DIRS = k8s.io/apimachinery/pkg/apis/meta/v1
-STATIC_API_DIRS += k8s.io/apimachinery/pkg/api/resource
-STATIC_API_DIRS += k8s.io/apimachinery/pkg/version
-STATIC_API_DIRS += k8s.io/apimachinery/pkg/runtime
-STATIC_API_DIRS += k8s.io/apimachinery/pkg/util/intstr
-STATIC_API_DIRS += k8s.io/api/core/v1
+.PHONY: run
+run: generate fmt vet ## Run against the configured Kubernetes cluster in ~/.kube/config
+	go run ./cmd/manager/main.go
 
-# Automatically extract vendored apis under vendor/k8s.io/api.
-VENDOR_API_DIRS := $(shell find vendor/k8s.io/api -type d | grep -E 'v[[:digit:]]+(alpha[[:digit:]]+|beta[[:digit:]]+)*' | sed -e 's/^vendor\///')
+.PHONY: deploy
+deploy: manifests ## Deploy controller in the configured Kubernetes cluster in ~/.kube/config
+	kustomize build config/default | kubectl apply -f -
 
-empty:=
-comma:=,
-space:=$(empty) $(empty)
 
-genopenapi: static_apis = $(subst $(space),$(comma),$(STATIC_API_DIRS))
-genopenapi: vendor_apis = $(subst $(space),$(comma),$(VENDOR_API_DIRS))
+.PHONY: manifests
+manifests: ## Generate manifests e.g. CRD, RBAC etc.
+	go run vendor/sigs.k8s.io/controller-tools/cmd/controller-gen/main.go all
+	@# Kubebuilder CRD generation can't handle intstr.IntOrString properly:
+	@# https://github.com/kubernetes-sigs/kubebuilder/issues/442
+	sed -i -e 's/maxSurge:/maxSurge: {}/g' -e '/maxSurge:/{n;d};' config/crds/cluster_v1alpha1_machinedeployment.yaml
+	sed -i -e 's/maxUnavailable:/maxUnavailable: {}/g' -e '/maxUnavailable:/{n;d};' config/crds/cluster_v1alpha1_machinedeployment.yaml
 
-genopenapi:
-	go build -o $$GOPATH/bin/openapi-gen sigs.k8s.io/cluster-api/vendor/k8s.io/code-generator/cmd/openapi-gen
-	$$GOPATH/bin/openapi-gen \
-	  --input-dirs $(static_apis) \
-	  --input-dirs $(vendor_apis) \
-	  --input-dirs ./pkg/apis/cluster/,./pkg/apis/cluster/v1alpha1/ \
-	  --output-package "sigs.k8s.io/cluster-api/pkg/openapi" \
-	  --go-header-file boilerplate.go.txt
+.PHONY: fmt
+fmt: ## Run go fmt against code
+	go fmt ./pkg/... ./cmd/...
 
-build: depend
-	CGO_ENABLED=0 go install -a -ldflags '-extldflags "-static"' sigs.k8s.io/cluster-api/cmd/apiserver
-	CGO_ENABLED=0 go install -a -ldflags '-extldflags "-static"' sigs.k8s.io/cluster-api/cmd/controller-manager
+.PHONY: vet
+vet: ## Run go vet against code
+	go vet ./pkg/... ./cmd/...
 
-images: depend
-	$(MAKE) -C cmd/apiserver image
-	$(MAKE) -C cmd/controller-manager image
+.PHONY: generate
+generate: clientset ## Generate code
+	go generate ./pkg/... ./cmd/...
 
+.PHONY: clientset
+clientset: ## Generate a typed clientset
+	rm -rf pkg/client
+	cd ./vendor/k8s.io/code-generator/cmd && go install ./client-gen ./lister-gen ./informer-gen
+	$$GOPATH/bin/client-gen --clientset-name clientset --input-base sigs.k8s.io/cluster-api/pkg/apis \
+		--input cluster/v1alpha1 --output-package sigs.k8s.io/cluster-api/pkg/client/clientset_generated \
+		--go-header-file=./hack/boilerplate.go.txt
+	$$GOPATH/bin/lister-gen --input-dirs sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1 \
+		--output-package sigs.k8s.io/cluster-api/pkg/client/listers_generated \
+		--go-header-file=./hack/boilerplate.go.txt
+	$$GOPATH/bin/informer-gen --input-dirs sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1 \
+		--versioned-clientset-package sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset \
+		--listers-package sigs.k8s.io/cluster-api/pkg/client/listers_generated \
+		--output-package sigs.k8s.io/cluster-api/pkg/client/informers_generated \
+		--go-header-file=./hack/boilerplate.go.txt
+	make gazelle
+
+.PHONY: docker-build
+docker-build: generate fmt vet manifests ## Build the docker image
+	docker build . -t ${IMG}
+	@echo "updating kustomize image patch file for manager resource"
+	sed -i'' -e 's@image: .*@image: '"${IMG}"'@' ./config/default/manager_image_patch.yaml
+
+.PHONY: docker-push
+docker-push: ## Push the docker image
+	docker push ${IMG}
+
+.PHONY: verify
 verify:
 	./hack/verify_boilerplate.py
+	./hack/verify_clientset.sh

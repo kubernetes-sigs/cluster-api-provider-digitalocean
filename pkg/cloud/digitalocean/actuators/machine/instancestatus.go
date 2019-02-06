@@ -18,9 +18,9 @@ package machine
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/runtime/serializer/json"
 
 	clusterv1 "sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
@@ -36,10 +36,10 @@ type instanceStatus *clusterv1.Machine
 
 // instanceStatus returns machine object based on instance status from annotation.
 func (do *DOClient) instanceStatus(machine *clusterv1.Machine) (instanceStatus, error) {
-	if do.v1Alpha1Client == nil {
+	if do.client == nil {
 		return nil, nil
 	}
-	currentMachine, err := util.GetMachineIfExists(do.v1Alpha1Client.Machines(machine.Namespace), machine.Name)
+	currentMachine, err := util.GetMachineIfExists(do.client, machine.ObjectMeta.Namespace, machine.ObjectMeta.Name)
 	if err != nil {
 		return nil, err
 	}
@@ -51,22 +51,19 @@ func (do *DOClient) instanceStatus(machine *clusterv1.Machine) (instanceStatus, 
 
 // machineInstanceStatus converts string from annotation to the machine object.
 func (do *DOClient) machineInstanceStatus(machine *clusterv1.Machine) (instanceStatus, error) {
-	if machine.Annotations == nil {
+	if machine.ObjectMeta.Annotations == nil {
 		return nil, nil
 	}
 
-	a := machine.Annotations[InstanceStatusAnnotationKey]
+	a := machine.ObjectMeta.Annotations[InstanceStatusAnnotationKey]
 	if a == "" {
 		return nil, nil
 	}
 
 	var status clusterv1.Machine
 	serializer := json.NewSerializer(json.DefaultMetaFactory, do.scheme, do.scheme, false)
-	_, _, err := serializer.Decode([]byte(a), &schema.GroupVersionKind{
-		Group:   "",
-		Version: "cluster.k8s.io/v1alpha1",
-		Kind:    "Machine",
-	}, &status)
+	gvk := clusterv1.SchemeGroupVersion.WithKind("Machine")
+	_, _, err := serializer.Decode([]byte(a), &gvk, &status)
 	if err != nil {
 		return nil, fmt.Errorf("error decoding machine status: %v", err)
 	}
@@ -75,20 +72,19 @@ func (do *DOClient) machineInstanceStatus(machine *clusterv1.Machine) (instanceS
 }
 
 // setMachineInstanceStatus writes the instance status to the annotation.
-func (do *DOClient) setMachineInstanceStatus(machine *clusterv1.Machine, status instanceStatus) (instanceStatus, error) {
+func (do *DOClient) setMachineInstanceStatus(machine *clusterv1.Machine, status instanceStatus) (*clusterv1.Machine, error) {
 	// Avoid status within status.
-	status.Annotations[InstanceStatusAnnotationKey] = ""
+	status.ObjectMeta.Annotations[InstanceStatusAnnotationKey] = ""
 
 	b := []byte{}
 	buff := bytes.NewBuffer(b)
 	serializer := json.NewSerializer(json.DefaultMetaFactory, do.scheme, do.scheme, false)
-
 	err := serializer.Encode((*clusterv1.Machine)(status), buff)
 	if err != nil {
 		return nil, err
 	}
 
-	if machine.Annotations == nil {
+	if machine.ObjectMeta.Annotations == nil {
 		machine.Annotations = make(map[string]string)
 	}
 	machine.Annotations[InstanceStatusAnnotationKey] = buff.String()
@@ -98,12 +94,12 @@ func (do *DOClient) setMachineInstanceStatus(machine *clusterv1.Machine, status 
 
 // updateInstanceStatus updates the machine object with the new annotation.
 func (do *DOClient) updateInstanceStatus(machine *clusterv1.Machine) error {
-	if do.v1Alpha1Client == nil {
+	if do.client == nil {
 		return nil
 	}
 
 	status := instanceStatus(machine)
-	currentMachine, err := util.GetMachineIfExists(do.v1Alpha1Client.Machines(machine.Namespace), machine.Name)
+	currentMachine, err := util.GetMachineIfExists(do.client, machine.Namespace, machine.Name)
 	if err != nil {
 		return nil
 	}
@@ -116,6 +112,5 @@ func (do *DOClient) updateInstanceStatus(machine *clusterv1.Machine) error {
 		return err
 	}
 
-	_, err = do.v1Alpha1Client.Machines(machine.Namespace).Update(m)
-	return err
+	return do.client.Update(context.Background(), m)
 }

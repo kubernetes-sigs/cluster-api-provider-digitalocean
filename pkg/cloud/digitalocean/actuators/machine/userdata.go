@@ -45,7 +45,7 @@ type userdataParams struct {
 }
 
 // masterUserdata builds master bootstrap script based on script provided in providerConfig and based on environment template.
-func masterUserdata(cluster *clusterv1.Cluster, machine *clusterv1.Machine, certificateAuthority *cert.CertificateAuthority, osImage, token, metadata string) (string, error) {
+func masterUserdata(cluster *clusterv1.Cluster, machine *clusterv1.Machine, certificateAuthority *cert.CertificateAuthority, osImage, metadata string) (string, error) {
 	var crPkg, crPkgVersion string
 	dockerVersion, err := docker.ForOS(osImage)
 	if err == nil {
@@ -66,7 +66,6 @@ func masterUserdata(cluster *clusterv1.Cluster, machine *clusterv1.Machine, cert
 	params := userdataParams{
 		Cluster:       cluster,
 		Machine:       machine,
-		Token:         token,
 		PodCIDR:       subnet(cluster.Spec.ClusterNetwork.Pods),
 		ServiceCIDR:   subnet(cluster.Spec.ClusterNetwork.Services),
 		CRPackage:     crPkg,
@@ -137,7 +136,6 @@ const (
 	// masterEnvironment is the environment variables template for master instances.
 	masterEnvironmentVariables = `#!/bin/bash
 KUBELET_VERSION={{ .Machine.Spec.Versions.Kubelet }}
-TOKEN={{ .Token }}
 PORT=443
 NAMESPACE={{ .Machine.ObjectMeta.Namespace }}
 MACHINE=$NAMESPACE

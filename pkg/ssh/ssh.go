@@ -42,8 +42,7 @@ type Client struct {
 	Conn *gossh.Client
 }
 
-// NewClient returns a SSH client representation.
-// TODO: This assumes the SSH key doesn't have password! This is same as for other upstream providers.
+// NewClient returns a SSH client representation. This function assumes the SSH key doesn't have password
 func NewClient(address, port, username, privateKeyPath string) (*Client, error) {
 	pk, err := ioutil.ReadFile(privateKeyPath)
 	if err != nil {

@@ -15,6 +15,7 @@ This project is currently work-in-progress and in Alpha, so it may not be produc
 In order to create a cluster using `clusterctl`, you need the following tools installed on your local machine:
 
 * `kubectl`, which can be done by following [this tutorial](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
+* [`kustomize`](https://github.com/kubernetes-sigs/kustomize), used to generate manifests needed to deploy a cluster,
 * [`minikube`](https://kubernetes.io/docs/tasks/tools/install-minikube/) and the appropriate [`minikube` driver](https://github.com/kubernetes/minikube/blob/master/docs/drivers.md). We recommend `kvm2` driver for Linux and `virtualbox` for macOS.
 * [DigitalOcean API Access Token generated](https://www.digitalocean.com/docs/api/create-personal-access-token/) and set as the `DIGITALOCEAN_ACCESS_TOKEN` environment variable,
 * Go toolchain [installed and configured](https://golang.org/doc/install), needed in order to compile the `clusterctl` binary,
@@ -46,16 +47,27 @@ To create your first cluster using `cluster-api-provider-digitalocean`, you need
 
 * `cluster.yaml` - defines Cluster properties, such as Pod and Services CIDR, Services Domain, etc.
 * `machines.yaml` - defines Machine properties, such as machine size, image, tags, SSH keys, enabled features, as well as what Kubernetes version will be used for each machine.
-* `provider-components.yaml` - contains deployment manifest for controllers, userdata used to bootstrap machines, a secret with SSH key for the `machine-controller` and a secret with DigitalOcean API Access Token.
+* `provider-components.yaml` - contains deployment manifest for Cluster-API Controller and DigitalOcean Manager binary which manages and reconciles Cluster-API resources related to this provider.
 * [Optional] `addons.yaml` - used to deploy additional components once the cluster is bootstrapped, such as [DigitalOcean Cloud Controller Manager](https://github.com/digitalocean/digitalocean-cloud-controller-manager) and [DigitalOcean CSI plugin](https://github.com/digitalocean/csi-digitalocean).
 
 The manifests can be generated automatically by using the [`generate-yaml.sh`](./cmd/clusterctl/examples/digitalocean/generate-yaml.sh) script, located in the `cmd/clusterctl/examples/digitalocean` directory:
 ```bash
 cd cmd/clusterctl/examples/digitalocean
 ./generate-yaml.sh
-cd ../..
 ```
+
 The result of the script is an `out` directory with generated manifests and a generated SSH key to be used by the `machine-controller`. More details about how it generates manifests and how to customize them can be found in the [README file in `cmd/clusterctl/examples/digitalocean` directory](./cmd/clusterctl/examples/digitalocean).
+
+The `generate-yaml.sh` script takes care of `cluster.yaml`, `machines.yaml` and `addons.yaml` manifests, while the `provider-components.yaml` manifest must be generated using [Kustomize](https://github.com/kubernetes-sigs/kustomize), such as:
+```bash
+# Return to the project's root directory
+cd ../../../..
+# Build provider-components manifest for deploying the Manager for the DigitalOcean Provider
+kustomize build config/default/ > cmd/clusterctl/examples/digitalocean/out/provider-components.yaml
+# Append manifest for deploying Cluster-API Controller to the generated provider-components manifest
+echo "---" >> cmd/clusterctl/examples/digitalocean/out/provider-components.yaml
+kustomize build vendor/sigs.k8s.io/cluster-api/config/default/ >> cmd/clusterctl/examples/digitalocean/out/provider-components.yaml
+```
 
 Once you have manifests generated, you can create a cluster using the following command. Make sure to replace the value of `vm-driver` flag with the name of your actual `minikube` driver.
 ```bash
@@ -75,7 +87,7 @@ More details about the `create cluster` command can be found by invoking help:
 
 The `clusterctl`'s workflow is:
 * Create a Minikube bootstrap cluster,
-* Deploy the `cluster-api-controller`, `digitalocean-machine-controller` and `digitalocean-cluster-controller`, on the bootstrap cluster,
+* Deploy the `cluster-api-controller` and `digitalocean-manager`,
 * Create a Master, download `kubeconfig` file, and deploy controllers on the Master,
 * Create other specified machines (nodes),
 * Deploy addon components ([`digitalocean-cloud-controller-manager`](https://github.com/digitalocean/digitalocean-cloud-controller-manager) and [`csi-digitalocean`](https://github.com/digitalocean/csi-digitalocean)),
@@ -134,7 +146,7 @@ metadata:
 spec:
   metadata:
     creationTimestamp: null
-  providerConfig:
+  providerSpec:
     ValueFrom: null
     value:
       backups: false

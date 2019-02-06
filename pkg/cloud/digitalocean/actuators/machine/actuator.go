@@ -26,6 +26,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ghodss/yaml"
+
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -33,16 +35,15 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/tools/record"
 
+	doconfigv1 "sigs.k8s.io/cluster-api-provider-digitalocean/pkg/apis/doproviderconfig/v1alpha1"
 	"sigs.k8s.io/cluster-api-provider-digitalocean/pkg/cloud/digitalocean/actuators/machine/machinesetup"
-	doconfigv1 "sigs.k8s.io/cluster-api-provider-digitalocean/pkg/cloud/digitalocean/providerconfig/v1alpha1"
 	"sigs.k8s.io/cluster-api-provider-digitalocean/pkg/ssh"
 	"sigs.k8s.io/cluster-api-provider-digitalocean/pkg/sshutil"
 	"sigs.k8s.io/cluster-api-provider-digitalocean/pkg/util"
-	clustercommon "sigs.k8s.io/cluster-api/pkg/apis/cluster/common"
 	clusterv1 "sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
 	"sigs.k8s.io/cluster-api/pkg/cert"
-	client "sigs.k8s.io/cluster-api/pkg/client/clientset_generated/clientset/typed/cluster/v1alpha1"
 	"sigs.k8s.io/cluster-api/pkg/kubeadm"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/digitalocean/godo"
 	"github.com/golang/glog"
@@ -63,13 +64,7 @@ const (
 	RegionAnnotationKey = "droplet-region"
 )
 
-func init() {
-	actuator, err := NewMachineActuator(ActuatorParams{})
-	if err != nil {
-		glog.Fatalf("error creating cluster provisioner for %v : %v", ProviderName, err)
-	}
-	clustercommon.RegisterClusterProvisioner(ProviderName, actuator)
-}
+var MachineActuator *DOClient
 
 type DOClientKubeadm interface {
 	TokenCreate(params kubeadm.TokenCreateParams) (string, error)
@@ -88,39 +83,29 @@ type DOClientSSHCreds struct {
 
 // DOClient is responsible for performing machine reconciliation
 type DOClient struct {
-	godoClient               *godo.Client
 	certificateAuthority     *cert.CertificateAuthority
-	scheme                   *runtime.Scheme
-	doProviderConfigCodec    *doconfigv1.DigitalOceanProviderConfigCodec
 	kubeadm                  DOClientKubeadm
-	ctx                      context.Context
-	SSHCreds                 DOClientSSHCreds
-	v1Alpha1Client           client.ClusterV1alpha1Interface
-	eventRecorder            record.EventRecorder
+	sshCreds                 DOClientSSHCreds
+	client                   client.Client
 	machineSetupConfigGetter DOClientMachineSetupConfigGetter
+	eventRecorder            record.EventRecorder
+	scheme                   *runtime.Scheme
+	godoClient               *godo.Client
+	ctx                      context.Context
 }
 
 // ActuatorParams holds parameter information for DOClient
 type ActuatorParams struct {
-	Kubeadm                  DOClientKubeadm
 	CertificateAuthority     *cert.CertificateAuthority
-	V1Alpha1Client           client.ClusterV1alpha1Interface
-	EventRecorder            record.EventRecorder
+	Kubeadm                  DOClientKubeadm
+	Client                   client.Client
 	MachineSetupConfigGetter DOClientMachineSetupConfigGetter
+	EventRecorder            record.EventRecorder
+	Scheme                   *runtime.Scheme
 }
 
 // NewMachineActuator creates a new DOClient
 func NewMachineActuator(params ActuatorParams) (*DOClient, error) {
-	scheme, err := doconfigv1.NewScheme()
-	if err != nil {
-		return nil, err
-	}
-
-	codec, err := doconfigv1.NewCodec()
-	if err != nil {
-		return nil, err
-	}
-
 	var user, privateKeyPath, publicKeyPath string
 	if _, err := os.Stat("/etc/sshkeys/private"); err == nil {
 		privateKeyPath = "/etc/sshkeys/private"
@@ -133,30 +118,29 @@ func NewMachineActuator(params ActuatorParams) (*DOClient, error) {
 	}
 
 	return &DOClient{
-		godoClient:            getGodoClient(),
-		certificateAuthority:  params.CertificateAuthority,
-		scheme:                scheme,
-		doProviderConfigCodec: codec,
-		kubeadm:               getKubeadm(params),
-		ctx:                   context.Background(),
-		SSHCreds: DOClientSSHCreds{
+		certificateAuthority: params.CertificateAuthority,
+		kubeadm:              getKubeadm(params),
+		sshCreds: DOClientSSHCreds{
 			privateKeyPath: privateKeyPath,
 			publicKeyPath:  publicKeyPath,
 			user:           user,
 		},
-		v1Alpha1Client:           params.V1Alpha1Client,
-		eventRecorder:            params.EventRecorder,
+		client:                   params.Client,
 		machineSetupConfigGetter: params.MachineSetupConfigGetter,
+		eventRecorder:            params.EventRecorder,
+		scheme:                   params.Scheme,
+		godoClient:               getGodoClient(),
+		ctx:                      context.Background(),
 	}, nil
 }
 
 // Create creates a machine and is invoked by the Machine Controller
-func (do *DOClient) Create(cluster *clusterv1.Cluster, machine *clusterv1.Machine) error {
+func (do *DOClient) Create(ctx context.Context, cluster *clusterv1.Cluster, machine *clusterv1.Machine) error {
 	if do.machineSetupConfigGetter == nil {
 		return errors.New("machine setup config is required")
 	}
 
-	machineConfig, err := do.decodeMachineProviderConfig(machine.Spec.ProviderConfig)
+	machineConfig, err := machineProviderFromProviderConfig(machine.Spec.ProviderSpec)
 	if err != nil {
 		return fmt.Errorf("error decoding provided machineConfig: %v", err)
 	}
@@ -174,11 +158,6 @@ func (do *DOClient) Create(cluster *clusterv1.Cluster, machine *clusterv1.Machin
 		return nil
 	}
 
-	token, err := do.getKubeadmToken()
-	if err != nil {
-		return err
-	}
-
 	var parsedMetadata string
 	configParams := &machinesetup.ConfigParams{
 		Image:    machineConfig.Image,
@@ -193,11 +172,15 @@ func (do *DOClient) Create(cluster *clusterv1.Cluster, machine *clusterv1.Machin
 		return err
 	}
 	if util.IsMachineMaster(machine) {
-		parsedMetadata, err = masterUserdata(cluster, machine, do.certificateAuthority, machineConfig.Image, token, metadata)
+		parsedMetadata, err = masterUserdata(cluster, machine, do.certificateAuthority, machineConfig.Image, metadata)
 		if err != nil {
 			return err
 		}
 	} else {
+		token, err := do.getKubeadmToken()
+		if err != nil {
+			return err
+		}
 		parsedMetadata, err = nodeUserdata(cluster, machine, machineConfig.Image, token, metadata)
 		if err != nil {
 			return err
@@ -217,8 +200,8 @@ func (do *DOClient) Create(cluster *clusterv1.Cluster, machine *clusterv1.Machin
 		dropletSSHKeys = append(dropletSSHKeys, godo.DropletCreateSSHKey{Fingerprint: sshkey.FingerprintMD5})
 	}
 	// Add machineActuator public key.
-	if do.SSHCreds.publicKeyPath != "" {
-		sshkey, err := sshutil.NewKeyFromFile(do.SSHCreds.publicKeyPath)
+	if do.sshCreds.publicKeyPath != "" {
+		sshkey, err := sshutil.NewKeyFromFile(do.sshCreds.publicKeyPath)
 		if err != nil {
 			return err
 		}
@@ -271,7 +254,7 @@ func (do *DOClient) Create(cluster *clusterv1.Cluster, machine *clusterv1.Machin
 	machine.ObjectMeta.Annotations[IDAnnotationKey] = strconv.Itoa(droplet.ID)
 	machine.ObjectMeta.Annotations[RegionAnnotationKey] = droplet.Region.Name
 
-	_, err = do.v1Alpha1Client.Machines(machine.Namespace).Update(machine)
+	err = do.client.Update(ctx, machine)
 	if err != nil {
 		return err
 	}
@@ -285,7 +268,7 @@ func (do *DOClient) Create(cluster *clusterv1.Cluster, machine *clusterv1.Machin
 }
 
 // Delete deletes a machine and is invoked by the Machine Controller
-func (do *DOClient) Delete(cluster *clusterv1.Cluster, machine *clusterv1.Machine) error {
+func (do *DOClient) Delete(ctx context.Context, cluster *clusterv1.Cluster, machine *clusterv1.Machine) error {
 	droplet, err := do.instanceExists(machine)
 	if err != nil {
 		return err
@@ -305,8 +288,8 @@ func (do *DOClient) Delete(cluster *clusterv1.Cluster, machine *clusterv1.Machin
 }
 
 // Update updates a machine and is invoked by the Machine Controller
-func (do *DOClient) Update(cluster *clusterv1.Cluster, goalMachine *clusterv1.Machine) error {
-	goalMachineConfig, err := do.decodeMachineProviderConfig(goalMachine.Spec.ProviderConfig)
+func (do *DOClient) Update(ctx context.Context, cluster *clusterv1.Cluster, goalMachine *clusterv1.Machine) error {
+	goalMachineConfig, err := machineProviderFromProviderConfig(goalMachine.Spec.ProviderSpec)
 	if err != nil {
 		return fmt.Errorf("error decoding provided machineConfig: %v", err)
 	}
@@ -344,7 +327,7 @@ func (do *DOClient) Update(cluster *clusterv1.Cluster, goalMachine *clusterv1.Ma
 				return err
 			}
 
-			sshClient, err := ssh.NewClient(cluster.Status.APIEndpoints[0].Host, "22", do.SSHCreds.user, do.SSHCreds.privateKeyPath)
+			sshClient, err := ssh.NewClient(cluster.Status.APIEndpoints[0].Host, "22", do.sshCreds.user, do.sshCreds.privateKeyPath)
 			if err != nil {
 				return err
 			}
@@ -376,7 +359,7 @@ func (do *DOClient) Update(cluster *clusterv1.Cluster, goalMachine *clusterv1.Ma
 				return err
 			}
 
-			sshClient, err := ssh.NewClient(cluster.Status.APIEndpoints[0].Host, "22", do.SSHCreds.user, do.SSHCreds.privateKeyPath)
+			sshClient, err := ssh.NewClient(cluster.Status.APIEndpoints[0].Host, "22", do.sshCreds.user, do.sshCreds.privateKeyPath)
 			if err != nil {
 				return err
 			}
@@ -404,13 +387,13 @@ func (do *DOClient) Update(cluster *clusterv1.Cluster, goalMachine *clusterv1.Ma
 		}
 	} else {
 		glog.Infof("Re-creating node %s for update.", currentMachine.Name)
-		err = do.Delete(cluster, currentMachine)
+		err = do.Delete(ctx, cluster, currentMachine)
 		if err != nil {
 			return err
 		}
 
 		goalMachine.Annotations[IDAnnotationKey] = ""
-		err = do.Create(cluster, goalMachine)
+		err = do.Create(ctx, cluster, goalMachine)
 		if err != nil {
 			return err
 		}
@@ -421,7 +404,7 @@ func (do *DOClient) Update(cluster *clusterv1.Cluster, goalMachine *clusterv1.Ma
 }
 
 // Exists test for the existance of a machine and is invoked by the Machine Controller
-func (do *DOClient) Exists(cluster *clusterv1.Cluster, machine *clusterv1.Machine) (bool, error) {
+func (do *DOClient) Exists(ctx context.Context, cluster *clusterv1.Cluster, machine *clusterv1.Machine) (bool, error) {
 	droplet, err := do.instanceExists(machine)
 	if err != nil {
 		return false, err
@@ -440,10 +423,13 @@ func getKubeadm(params ActuatorParams) DOClientKubeadm {
 }
 
 func (do *DOClient) getKubeadmToken() (string, error) {
+	if do.kubeadm == nil {
+		return "", errors.New("kubeadm not available")
+	}
+
 	tokenParams := kubeadm.TokenCreateParams{
 		Ttl: time.Duration(30) * time.Minute,
 	}
-
 	token, err := do.kubeadm.TokenCreate(tokenParams)
 	if err != nil {
 		return "", err
@@ -493,7 +479,7 @@ func (do *DOClient) instanceExists(machine *clusterv1.Machine) (*godo.Droplet, e
 func (do *DOClient) requiresUpdate(a *clusterv1.Machine, b *clusterv1.Machine) bool {
 	// Do not want status changes. Do want changes that impact machine provisioning
 	return !equality.Semantic.DeepEqual(a.Spec.ObjectMeta, b.Spec.ObjectMeta) ||
-		!equality.Semantic.DeepEqual(a.Spec.ProviderConfig, b.Spec.ProviderConfig) ||
+		!equality.Semantic.DeepEqual(a.Spec.ProviderSpec, b.Spec.ProviderSpec) ||
 		!equality.Semantic.DeepEqual(a.Spec.Versions, b.Spec.Versions)
 }
 
@@ -511,13 +497,10 @@ func (do *DOClient) validateMachine(providerConfig *doconfigv1.DigitalOceanMachi
 	return nil
 }
 
-// decodeMachineProviderConfig returns DigitalOcean MachineProviderConfig from upstream Spec.
-func (do *DOClient) decodeMachineProviderConfig(providerConfig clusterv1.ProviderConfig) (*doconfigv1.DigitalOceanMachineProviderConfig, error) {
+func machineProviderFromProviderConfig(providerConfig clusterv1.ProviderSpec) (*doconfigv1.DigitalOceanMachineProviderConfig, error) {
 	var config doconfigv1.DigitalOceanMachineProviderConfig
-	err := do.doProviderConfigCodec.DecodeFromProviderConfig(providerConfig, &config)
-	if err != nil {
+	if err := yaml.Unmarshal(providerConfig.Value.Raw, &config); err != nil {
 		return nil, err
 	}
-
-	return &config, err
+	return &config, nil
 }

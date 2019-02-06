@@ -4,9 +4,7 @@
   "DisableAll": true,
   "Skip": [
     "pkg/cloud/digitalocean/actuators/machine/machinesetup",
-    "pkg/cloud/digitalocean/providerconfig",
-    "cmd/cluster-controller",
-    "cmd/machine-controller"
+    "pkg/apis"
   ],
   "Exclude": [
     "should have comment or be unexported",
