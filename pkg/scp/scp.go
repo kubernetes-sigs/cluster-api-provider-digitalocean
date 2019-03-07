@@ -17,6 +17,7 @@ limitations under the License.
 package scp
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 
@@ -41,7 +42,7 @@ func NewSCPClient(sshClient *ssh.Client) *Client {
 // ReadBytes reads from remote location.
 func (cl *Client) ReadBytes(remotePath string) ([]byte, error) {
 	if cl.client.Conn == nil {
-		return nil, fmt.Errorf("connection not established")
+		return nil, errors.New("connection not established")
 	}
 
 	c, err := sftp.NewClient(cl.client.Conn)
@@ -75,7 +76,7 @@ func (cl *Client) ReadBytes(remotePath string) ([]byte, error) {
 // WriteBytes writes to remote location.
 func (cl *Client) WriteBytes(remotePath string, content []byte) error {
 	if cl.client.Conn == nil {
-		return fmt.Errorf("connection not established")
+		return errors.New("connection not established")
 	}
 
 	c, err := sftp.NewClient(cl.client.Conn)
