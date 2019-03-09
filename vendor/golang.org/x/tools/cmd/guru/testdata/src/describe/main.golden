@@ -16,10 +16,10 @@ definition of package "describe"
 
 -------- @describe unsafe --------
 import of package "unsafe"
-	builtin Alignof
+	builtin Alignof 
 	builtin Offsetof
 	type  Pointer  unsafe.Pointer
-	builtin Sizeof
+	builtin Sizeof  
 
 -------- @describe type-ref-builtin --------
 reference to built-in type float64
@@ -246,3 +246,4 @@ Methods:
 
 -------- @describe def-imethod-I.f --------
 definition of interface method func (I).f()
+

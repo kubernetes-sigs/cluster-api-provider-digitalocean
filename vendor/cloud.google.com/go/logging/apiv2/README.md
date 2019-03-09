@@ -7,3 +7,5 @@ Use the handwritten logging client (in the parent directory,
 cloud.google.com/go/logging) in preference to this.
 
 This code is EXPERIMENTAL and subject to CHANGE AT ANY TIME.
+
+

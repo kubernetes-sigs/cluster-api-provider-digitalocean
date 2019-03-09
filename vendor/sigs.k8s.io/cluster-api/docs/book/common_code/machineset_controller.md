@@ -2,7 +2,7 @@
 
 `MachineSet`s are currently different from `Cluster` and `Machine` resources in
 that they do not define an actuator interface. They are generic controllers
-which implement their intent by modifying provider-specific `Cluster` and
+which implement their intent by modifying provider-specific `Cluster` and 
 `Machine` resources.
 
 {% method %}

@@ -166,3 +166,4 @@ message OneofStdTypes {
     google.protobuf.BytesValue repBytes = 11 [(gogoproto.wktpointer) = true];
   }
 }
+

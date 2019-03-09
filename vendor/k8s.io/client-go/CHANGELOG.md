@@ -304,8 +304,8 @@ because `k8s.io/client-go` depends on them.
 
     * [https://github.com/kubernetes/kubernetes/pull/54660](https://github.com/kubernetes/kubernetes/pull/54660)
 
-* [k8s.io/api] The dynamic admission webhook is split into two kinds, mutating and validating.
-The kinds have changed completely and old code must be ported to `admissionregistration.k8s.io/v1beta1` -
+* [k8s.io/api] The dynamic admission webhook is split into two kinds, mutating and validating. 
+The kinds have changed completely and old code must be ported to `admissionregistration.k8s.io/v1beta1` - 
 `MutatingWebhookConfiguration` and `ValidatingWebhookConfiguration`
 
     * [https://github.com/kubernetes/kubernetes/pull/55282](https://github.com/kubernetes/kubernetes/pull/55282)
@@ -520,11 +520,11 @@ No significant changes since v4.0.0-beta.0.
 
 **Breaking changes:**
 
-* Moved client-go/util/clock to apimachinery/pkg/util/clock
+* Moved client-go/util/clock to apimachinery/pkg/util/clock 
 
     * [https://github.com/kubernetes/kubernetes/pull/45933](https://github.com/kubernetes/kubernetes/pull/45933/commits/8013212db54e95050c622675c6706cce5de42b45)
 
-* Some [API helpers](https://github.com/kubernetes/client-go/blob/release-3.0/pkg/api/helpers.go) were removed.
+* Some [API helpers](https://github.com/kubernetes/client-go/blob/release-3.0/pkg/api/helpers.go) were removed. 
 
 * Dynamic client takes GetOptions as an input parameter
 
@@ -568,7 +568,7 @@ Bug fixes:
 
 # v2.0.0
 
-* Included bug fixes in k8s.io/kuberentes release-1.5 branch, up to commit
+* Included bug fixes in k8s.io/kuberentes release-1.5 branch, up to commit 
   bde8578d9675129b7a2aa08f1b825ec6cc0f3420
 
 # v2.0.0-alpha.1
@@ -578,11 +578,11 @@ Bug fixes:
 * Clientset supported multiple versions per API group
 * Added ThirdPartyResources example
 * Kubernetes API changes
-  * Apps API group graduated to v1beta1
+  * Apps API group graduated to v1beta1 
   * Policy API group graduated to v1beta1
   * Added support for batch/v2alpha1/cronjob
   * Renamed PetSet to StatefulSet
-
+  
 
 # v1.5.0
 

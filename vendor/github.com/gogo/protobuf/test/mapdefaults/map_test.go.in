@@ -134,3 +134,4 @@ func TestUnmarshalImplicitDefaultKeyValue2(t *testing.T) {
 		t.Fatalf("Unexpected value for \"\": %s", val)
 	}
 }
+

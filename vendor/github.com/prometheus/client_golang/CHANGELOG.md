@@ -1,7 +1,7 @@
 ## 0.9.2 / 2018-12-06
 * [FEATURE] Support for Go modules. #501
 * [FEATURE] `Timer.ObserveDuration` returns observed duration. #509
-* [ENHANCEMENT] Improved doc comments and error messages. #504
+* [ENHANCEMENT] Improved doc comments and error messages. #504 
 * [BUGFIX] Fix race condition during metrics gathering. #512
 * [BUGFIX] Fix testutil metric comparison for Histograms and empty labels. #494
   #498

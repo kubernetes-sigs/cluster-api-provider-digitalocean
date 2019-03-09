@@ -165,3 +165,4 @@ Each of these are the same as their Message Option counterparts, except they app
   * Cross version tests are made with [Travis CI](https://travis-ci.org/gogo/protobuf).
   * GRPC Tests are also handled by a different project [grpctests](https://github.com/gogo/grpctests), since it depends on a lot of grpc libraries.
   * Thanks to [go-fuzz](https://github.com/dvyukov/go-fuzz/) we have proper [fuzztests](https://github.com/gogo/fuzztests).
+

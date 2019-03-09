@@ -1020,3 +1020,5 @@ Natural Language.
 [`cloud.google.com/go/preview/logging`](https://godoc.org/cloud.google.com/go/preview/logging).
 This client uses gRPC as its transport layer, and supports log reading, sinks
 and metrics. It will replace the current client at `cloud.google.com/go/logging` shortly.
+
+

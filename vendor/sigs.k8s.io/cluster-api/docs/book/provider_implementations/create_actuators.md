@@ -103,7 +103,7 @@ const (
 )
 
 // Actuator is responsible for performing machine reconciliation
-type Actuator struct {
+type Actuator struct { 
         machinesGetter client.MachinesGetter
 }
 

@@ -362,3 +362,4 @@ message JSONSchemaPropsOrStringArray {
 
   repeated string property = 2;
 }
+

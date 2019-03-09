@@ -15,7 +15,7 @@ Features:
 - tab completion of commands, options
 
 Not yet features, but soon:
-- unnecessary CONTINUATION frames on short boundaries, to test peer implementations
+- unnecessary CONTINUATION frames on short boundaries, to test peer implementations 
 - request bodies (DATA frames)
 - send invalid frames for testing server implementations (supported by underlying Framer)
 
@@ -34,7 +34,7 @@ $ h2i <host>
 ```
 $ h2i
 Usage: h2i <hostname>
-
+  
   -insecure
         Whether to skip TLS cert validation
   -nextproto string
@@ -50,7 +50,7 @@ Negotiated protocol "h2-14"
   [MAX_FRAME_SIZE = 16384]
 [FrameHeader WINDOW_UPDATE len=4]
   Window-Increment = 983041
-
+  
 h2i> PING h2iSayHI
 [FrameHeader PING flags=ACK len=8]
   Data = "h2iSayHI"
@@ -58,7 +58,7 @@ h2i> headers
 (as HTTP/1.1)> GET / HTTP/1.1
 (as HTTP/1.1)> Host: ip.appspot.com
 (as HTTP/1.1)> User-Agent: h2i/brad-n-blake
-(as HTTP/1.1)>
+(as HTTP/1.1)>  
 Opening Stream-ID 1:
  :authority = ip.appspot.com
  :method = GET
@@ -76,10 +76,10 @@ Opening Stream-ID 1:
   "173.164.155.78\n"
 [FrameHeader PING len=8]
   Data = "\x00\x00\x00\x00\x00\x00\x00\x00"
-h2i> ping
-[FrameHeader PING flags=ACK len=8]
-  Data = "h2i_ping"
-h2i> ping
+h2i> ping  
+[FrameHeader PING flags=ACK len=8]  
+  Data = "h2i_ping"  
+h2i> ping  
 [FrameHeader PING flags=ACK len=8]
   Data = "h2i_ping"
 h2i> ping
@@ -94,3 +94,4 @@ ReadFrame: EOF
 Quick few hour hack. So much yet to do. Feel free to file issues for
 bugs or wishlist items, but [@bmizerany](https://github.com/bmizerany/)
 and I aren't yet accepting pull requests until things settle down.
+

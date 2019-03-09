@@ -34,24 +34,24 @@ Certificate:
         X509v3 extensions:
             X509v3 Key Usage: critical
                 Digital Signature
-            X509v3 Basic Constraints:
+            X509v3 Basic Constraints: 
                 CA:FALSE
-            X509v3 Extended Key Usage:
+            X509v3 Extended Key Usage: 
                 TLS Web Client Authentication
-            X509v3 Subject Key Identifier:
+            X509v3 Subject Key Identifier: 
                 F4:17:02:DD:1B:01:AB:C5:BC:17:A4:5C:4B:75:8E:EC:B1:E0:C8:F1
-            X509v3 Authority Key Identifier:
+            X509v3 Authority Key Identifier: 
                 keyid:AE:42:88:75:DD:05:A6:8E:48:7F:50:69:F9:B7:34:23:49:B8:B4:71
 
-            Authority Information Access:
+            Authority Information Access: 
                 CA Issuers - URI:http://green.no/ca/tls-ca.cer
 
-            X509v3 CRL Distribution Points:
+            X509v3 CRL Distribution Points: 
 
                 Full Name:
                   URI:http://green.no/ca/tls-ca.crl
 
-            X509v3 Subject Alternative Name:
+            X509v3 Subject Alternative Name: 
                 email:barney@telenor.no
     Signature Algorithm: sha1WithRSAEncryption
          96:9a:c5:41:8a:2f:4a:c4:80:d9:2b:1a:cf:07:85:e9:b6:18:

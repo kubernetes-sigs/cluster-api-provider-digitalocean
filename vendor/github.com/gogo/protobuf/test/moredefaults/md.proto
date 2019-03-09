@@ -50,3 +50,4 @@ message MoreDefaultsA {
 	optional test.A A1 = 5;
 	optional test.A A2 = 6 [(gogoproto.nullable) = false];
 }
+

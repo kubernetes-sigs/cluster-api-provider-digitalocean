@@ -38,3 +38,4 @@ message A {
 extend A {
 	optional int64 Field1 = 1 [(gogoproto.nullable) = false];
 }
+

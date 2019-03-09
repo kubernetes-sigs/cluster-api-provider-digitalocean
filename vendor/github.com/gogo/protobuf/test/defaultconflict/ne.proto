@@ -39,3 +39,4 @@ enum E {
 message A {
 	optional E Field1 = 1 [(gogoproto.nullable) = false];
 }
+

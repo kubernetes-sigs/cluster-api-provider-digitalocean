@@ -10,3 +10,4 @@ refresh-tests:
 	-rm testdata/*.textproto
 	cp $(SRC)/testdata/*.textproto testdata
 	openssl dgst -sha1 $(SRC)/testdata/test-suite.binproto > testdata/VERSION
+

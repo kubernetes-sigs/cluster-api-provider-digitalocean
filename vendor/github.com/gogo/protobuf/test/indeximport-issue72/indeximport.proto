@@ -43,3 +43,4 @@ option (gogoproto.testgen_all) = true;
 message IndexQueries {
 	repeated index.IndexQuery Queries = 1;
 }
+

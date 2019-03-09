@@ -210,3 +210,5 @@ func (rs *Ruleset) Underscore(word string) string
 ```
 
 lowercase underscore version "BigBen" -> "big_ben"
+
+

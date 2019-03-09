@@ -1,10 +1,10 @@
 # golsp testing extension
 
-An extension for debugging the Go Language Server provided by
+An extension for debugging the Go Language Server provided by 
 https://golang.org/x/tools/cmd/golsp. The code for this extension comes from
-a combination of
+a combination of 
 https://github.com/Microsoft/vscode-extension-samples/blob/master/lsp-sample
-and https://github.com/Microsoft/vscode-go.
+and https://github.com/Microsoft/vscode-go. 
 
 ## Features
 
@@ -17,5 +17,5 @@ and https://github.com/Microsoft/vscode-go.
 
 To package the extension, run `vsce package` from this directory. To install
 the extension, navigate to the "Extensions" panel in VSCode, and select
-"Install from VSIX..." from the menu in the top right corner. Choose the
+"Install from VSIX..." from the menu in the top right corner. Choose the 
 `golsp-1.0.0.vsix file` and reload VSCode.

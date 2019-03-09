@@ -16,7 +16,7 @@ import Foundation
 import Gnostic
 
 extension ServiceRenderer {
-
+    
     func renderClient() -> String {
         var code = CodePrinter()
         code.print(header)
@@ -181,3 +181,4 @@ public init(service: String) {
         return code.content
     }
 }
+

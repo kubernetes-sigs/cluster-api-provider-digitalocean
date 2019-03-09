@@ -20,28 +20,28 @@ func Log(_ message : String) {
 }
 
 func main() throws {
-
+  
   // read the code generation request
   let rawRequest = try Stdin.readall()
   let request = try Gnostic_Plugin_V1_Request(serializedData:rawRequest)
 
   var response = Gnostic_Plugin_V1_Response()
-
+  
   var openapiv2 : Openapi_V2_Document?
   var surface : Surface_V1_Model?
-
+  
   for model in request.models {
     if model.typeURL == "openapi.v2.Document" {
-      openapiv2 = try Openapi_V2_Document(serializedData: model.value)
+      openapiv2 = try Openapi_V2_Document(serializedData: model.value)      
     } else if model.typeURL == "surface.v1.Model" {
-      surface = try Surface_V1_Model(serializedData: model.value)
+      surface = try Surface_V1_Model(serializedData: model.value)      
     }
-  }
-
+  }  
+	
 
   if let openapiv2 = openapiv2,
     let surface = surface {
-
+  
     // build the service renderer
     let renderer = ServiceRenderer(surface:surface, document:openapiv2)
 

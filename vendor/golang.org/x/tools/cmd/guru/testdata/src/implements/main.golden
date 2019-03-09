@@ -47,3 +47,4 @@ struct type D
 	implements F
 pointer type *D
 	implements FG
+

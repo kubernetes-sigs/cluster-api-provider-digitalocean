@@ -31,7 +31,7 @@ getStdin.buffer().then(buffer => {
 			}
 		}
 	}
-
+	
 	const payload = {
 		messages: messages
 	}

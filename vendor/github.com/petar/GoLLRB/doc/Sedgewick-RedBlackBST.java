@@ -1,4 +1,4 @@
-public class RedBlackBST<Key extends Comparable<Key>, Value>
+public class RedBlackBST<Key extends Comparable<Key>, Value> 
 {
    private static final int BST = 0;
    private static final int TD234 = 1;
@@ -9,7 +9,7 @@ public class RedBlackBST<Key extends Comparable<Key>, Value>
    private Node root;            // root of the BST
    private int k;                // ordinal for drawing
    private final int species;    // species kind of tree for insert
-   private int heightBLACK;      // black height of tree
+   private int heightBLACK;      // black height of tree 
 
    RedBlackBST(int species)
    {  this.species = species;  }
@@ -38,13 +38,13 @@ public class RedBlackBST<Key extends Comparable<Key>, Value>
    {  return size(root);  }
 
    private int size(Node x)
-   {
+   { 
       if (x == null) return 0;
       else           return x.N;
    }
 
    public int rootRank()
-   {
+   { 
        if (root == null) return 0;
        else              return size(root.left);
    }
@@ -56,7 +56,7 @@ public class RedBlackBST<Key extends Comparable<Key>, Value>
    {  return heightBLACK;  }
 
    private int height(Node x)
-   {
+   { 
       if (x == null) return 0;
       else           return x.height;
    }
@@ -76,7 +76,7 @@ public class RedBlackBST<Key extends Comparable<Key>, Value>
    }
 
    public Key min()
-   {
+   {  
       if (root == null) return null;
       else              return min(root);
    }
@@ -88,7 +88,7 @@ public class RedBlackBST<Key extends Comparable<Key>, Value>
    }
 
    public Key max()
-   {
+   {  
       if (root == null) return null;
       else              return max(root);
    }
@@ -107,20 +107,20 @@ public class RedBlackBST<Key extends Comparable<Key>, Value>
    }
 
    private Node insert(Node h, Key key, Value value)
-   {
-      if (h == null)
+   { 
+      if (h == null) 
          return new Node(key, value);
 
-      if (species == TD234)
+      if (species == TD234) 
          if (isRed(h.left) && isRed(h.right))
 	     colorFlip(h);
 
       if (eq(key, h.key))
          h.value = value;
-      else if (less(key, h.key))
-         h.left = insert(h.left, key, value);
-      else
-         h.right = insert(h.right, key, value);
+      else if (less(key, h.key)) 
+         h.left = insert(h.left, key, value); 
+      else 
+         h.right = insert(h.right, key, value); 
 
       if (species == BST) return setN(h);
 
@@ -144,7 +144,7 @@ public class RedBlackBST<Key extends Comparable<Key>, Value>
    }
 
    private Node deleteMin(Node h)
-   {
+   { 
       if (h.left == null)
          return null;
 
@@ -163,9 +163,9 @@ public class RedBlackBST<Key extends Comparable<Key>, Value>
    }
 
    private Node deleteMax(Node h)
-   {
+   { 
        //      if (h.right == null)
-	  //      {
+	  //      {  
 	  //         if (h.left != null)
 	  //            h.left.color = BLACK;
 	  //         return h.left;
@@ -186,22 +186,22 @@ public class RedBlackBST<Key extends Comparable<Key>, Value>
    }
 
    public void delete(Key key)
-   {
+   { 
       root = delete(root, key);
       root.color = BLACK;
    }
 
    private Node delete(Node h, Key key)
-   {
-      if (less(key, h.key))
+   { 
+      if (less(key, h.key)) 
       {
          if (!isRed(h.left) && !isRed(h.left.left))
             h = moveRedLeft(h);
          h.left =  delete(h.left, key);
       }
-      else
+      else 
       {
-         if (isRed(h.left))
+         if (isRed(h.left)) 
             h = rotateRight(h);
          if (eq(key, h.key) && (h.right == null))
             return null;
@@ -215,7 +215,7 @@ public class RedBlackBST<Key extends Comparable<Key>, Value>
          }
          else h.right = delete(h.right, key);
       }
-
+ 
       return fixUp(h);
    }
 
@@ -231,7 +231,7 @@ public class RedBlackBST<Key extends Comparable<Key>, Value>
     }
 
    private void colorFlip(Node h)
-   {
+   {  
       h.color        = !h.color;
       h.left.color   = !h.left.color;
       h.right.color  = !h.right.color;
@@ -242,8 +242,8 @@ public class RedBlackBST<Key extends Comparable<Key>, Value>
       Node x = h.right;
       h.right = x.left;
       x.left = setN(h);
-      x.color      = x.left.color;
-      x.left.color = RED;
+      x.color      = x.left.color;                   
+      x.left.color = RED;                     
       return setN(x);
    }
 
@@ -252,8 +252,8 @@ public class RedBlackBST<Key extends Comparable<Key>, Value>
       Node x = h.left;
       h.left = x.right;
       x.right = setN(h);
-      x.color       = x.right.color;
-      x.right.color = RED;
+      x.color       = x.right.color;                   
+      x.right.color = RED;                     
       return setN(x);
     }
 
@@ -262,7 +262,7 @@ public class RedBlackBST<Key extends Comparable<Key>, Value>
        // are black, make h.left or one of its children red.
        colorFlip(h);
        if (isRed(h.right.left))
-       {
+       { 
           h.right = rotateRight(h.right);
           h = rotateLeft(h);
           colorFlip(h);
@@ -275,7 +275,7 @@ public class RedBlackBST<Key extends Comparable<Key>, Value>
        // are black, make h.right or one of its children red.
        colorFlip(h);
        if (isRed(h.left.left))
-       {
+       { 
           h = rotateRight(h);
 	  colorFlip(h);
        }
@@ -295,7 +295,7 @@ public class RedBlackBST<Key extends Comparable<Key>, Value>
 
       return setN(h);
    }
-
+      
    private Node setN(Node h)
    {
       h.N = size(h.left) + size(h.right) + 1;
@@ -303,15 +303,15 @@ public class RedBlackBST<Key extends Comparable<Key>, Value>
       else                                  h.height = height(h.right) + 1;
       return h;
    }
-
+      
    public String toString()
-   {
+   {  
       if (root == null) return "";
-      else              return heightB() + " " + toString(root);
+      else              return heightB() + " " + toString(root);  
    }
 
    public String toString(Node x)
-   {
+   {  
       String s = "(";
       if (x.left == null) s += "("; else s += toString(x.left);
       if (isRed(x)) s += "*";
@@ -322,14 +322,14 @@ public class RedBlackBST<Key extends Comparable<Key>, Value>
 // Methods for tree drawing
 
     public void draw(double y, double lineWidth, double nodeSize)
-    {
-      k = 0;
+    { 
+      k = 0; 
       setcoords(root, y);
       StdDraw.setPenColor(StdDraw.BLACK);
       StdDraw.setPenRadius(lineWidth);
-      drawlines(root);
+      drawlines(root); 
       StdDraw.setPenColor(StdDraw.WHITE);
-      drawnodes(root, nodeSize);
+      drawnodes(root, nodeSize); 
     }
 
     public void setcoords(Node x, double d)
@@ -368,9 +368,9 @@ public class RedBlackBST<Key extends Comparable<Key>, Value>
     }
 
     public void mark(Key key)
-    {
+    { 
       StdDraw.setPenColor(StdDraw.BLACK);
-      marknodes(key, root);
+      marknodes(key, root); 
     }
 
     public void marknodes(Key key, Node x)
@@ -390,7 +390,7 @@ public class RedBlackBST<Key extends Comparable<Key>, Value>
 	if (x == null) return 0;
 	return size(x) - 1 + ipl(x.left) + ipl(x.right);
     }
-
+       
     public int sizeRed()
     {  return sizeRed(root);  }
 
@@ -400,15 +400,15 @@ public class RedBlackBST<Key extends Comparable<Key>, Value>
         if (isRed(x)) return 1 + sizeRed(x.left) + sizeRed(x.right);
         else          return sizeRed(x.left) + sizeRed(x.right);
     }
-
+       
 // Integrity checks
 
-   public boolean check()
+   public boolean check() 
    {  // Is this tree a red-black tree?
       return isBST() && is234() && isBalanced();
    }
 
-   private boolean isBST()
+   private boolean isBST() 
    {  // Is this tree a BST?
       return isBST(root, min(), max());
    }
@@ -419,7 +419,7 @@ public class RedBlackBST<Key extends Comparable<Key>, Value>
       if (x == null) return true;
       if (less(x.key, min) || less(max, x.key)) return false;
       return isBST(x.left, min, x.key) && isBST(x.right, x.key, max);
-   }
+   } 
 
    private boolean is234() { return is234(root); }
    private boolean is234(Node x)
@@ -431,7 +431,7 @@ public class RedBlackBST<Key extends Comparable<Key>, Value>
         if (isRed(x.left))
           if (isRed(x.left.left)) return false;
       return is234(x.left) && is234(x.right);
-   }
+   } 
 
    private boolean isBalanced()
    { // Do all paths from root to leaf have same number of black edges?
@@ -446,13 +446,13 @@ public class RedBlackBST<Key extends Comparable<Key>, Value>
    }
 
    private boolean isBalanced(Node x, int black)
-   { // Does every path from the root to a leaf have the given number
+   { // Does every path from the root to a leaf have the given number 
      // of black links?
       if      (x == null && black == 0) return true;
       else if (x == null && black != 0) return false;
       if (!isRed(x)) black--;
       return isBalanced(x.left, black) && isBalanced(x.right, black);
-   }
+   } 
 
 
   public static void main(String[] args)

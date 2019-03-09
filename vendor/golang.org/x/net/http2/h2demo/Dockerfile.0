@@ -131,3 +131,4 @@ RUN go install cloud.google.com/go/compute/metadata \
 COPY . /go/src/golang.org/x/net/
 
 RUN go install -tags "h2demo netgo" -ldflags "-linkmode=external -extldflags '-static -pthread'" golang.org/x/net/http2/h2demo
+

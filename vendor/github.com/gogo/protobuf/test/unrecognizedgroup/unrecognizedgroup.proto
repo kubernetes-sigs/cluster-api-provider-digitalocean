@@ -64,13 +64,14 @@ message A {
 message OldWithGroup {
 	optional int64 Field1 = 1;
 	optional group Group1 = 2 {
-	optional int64 Field1 = 1;
-	optional int32 Field2 = 2;
-	repeated double Field3 = 3;
-	}
+    	optional int64 Field1 = 1;
+    	optional int32 Field2 = 2;
+    	repeated double Field3 = 3;
+  	}
 	repeated double Field3 = 3;
 	optional group Group2 = 4 {
-	optional int64 Field1 = 1;
-	repeated double Field2 = 2;
-	}
+    	optional int64 Field1 = 1;
+    	repeated double Field2 = 2;
+  	}
 }
+

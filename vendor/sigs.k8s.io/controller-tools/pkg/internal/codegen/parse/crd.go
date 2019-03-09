@@ -403,7 +403,7 @@ var objectTemplate = template.Must(template.New("object-template").Parse(
     },
     {{if .Required}}Required: []string{
         {{ range $k, $v := .Required -}}
-        "{{ $v }}",
+        "{{ $v }}", 
         {{ end -}}
     },{{ end -}}
 }`))

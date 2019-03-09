@@ -53,3 +53,4 @@ reference to package "lib"
 	type  Type   int
 		method (Type) Method(x *int) *int
 	var   Var    int
+

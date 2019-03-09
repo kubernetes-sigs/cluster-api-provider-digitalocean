@@ -6,8 +6,8 @@
 getting_started/existing_providers.md) section.
 
 ## What is the Cluster API?
-
-The Cluster API is a Kubernetes project to bring declarative, [Kubernetes-style
+  
+The Cluster API is a Kubernetes project to bring declarative, [Kubernetes-style 
 APIs][k8s-apis] to cluster creation, configuration, and management. It
 provides optional, additive functionality on top of core Kubernetes. By making
 use of structured nature of kubernetes APIs it is possible to build higher-level
@@ -20,8 +20,8 @@ ease of use and more sophisticated automation.
 
 #### Kubernetes Developers
 
-Kubernetes Developers will learn how to develop Cluster API providers which
-allow Kubernetes to be deployed to ever more environments, thereby increasing
+Kubernetes Developers will learn how to develop Cluster API providers which 
+allow Kubernetes to be deployed to ever more environments, thereby increasing 
 how often and where users can deploy their applications.
 
 Including the ability to:
@@ -39,7 +39,7 @@ as other Cluster API resources. For example,
 
 A Kubernetes User can be an Application User, Developer, or anyone else who
 needs access to a Kubernetes cluster. One of the aims of the Cluster API
-project is to leverage the relative uniformity of Kubernetes APIs and
+project is to leverage the relative uniformity of Kubernetes APIs and 
 associated tooling to make it easier for ordinary users to access computational
 resources in a portable way.
 
@@ -53,7 +53,7 @@ Including the ability to:
 
 - Create reproducable Kubernetes clusters.
 - Create hybrid cloud environments which optimize for cost, performance, and
-reliability.
+reliability. 
 
 ## Resources
 
@@ -68,19 +68,20 @@ This section describes how to use the navigation elements of this book
 
 ##### Code Navigation
 
-Code samples may be either displayed to the side of the corresponding
-documentation, or inlined immediately afterward.  This setting may be toggled
+Code samples may be either displayed to the side of the corresponding 
+documentation, or inlined immediately afterward.  This setting may be toggled 
 using the split-screen icon at the left side of the top nav.
 
 ##### Table of Contents
 
-The table of contents may be hidden using the hamburger icon at the left side
+The table of contents may be hidden using the hamburger icon at the left side 
 of the top nav.
 
 ##### OS / Language Navigation
 
-Some chapters have code snippets for multiple OS or Languages.  These chapters
-will display OS or Language selections at the right side of the top nav, which
+Some chapters have code snippets for multiple OS or Languages.  These chapters 
+will display OS or Language selections at the right side of the top nav, which 
 may be used to change the OS or Language of the examples shown.
 
 <!-- References -->
+

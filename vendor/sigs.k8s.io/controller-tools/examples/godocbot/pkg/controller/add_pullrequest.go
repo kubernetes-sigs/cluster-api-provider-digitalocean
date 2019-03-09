@@ -17,7 +17,7 @@ limitations under the License.
 package controller
 
 import (
-
+	
 	"sigs.k8s.io/controller-tools/examples/godocbot/pkg/controller/pullrequest"
 )
 

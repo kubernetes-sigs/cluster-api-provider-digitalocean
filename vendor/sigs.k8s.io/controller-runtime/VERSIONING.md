@@ -152,7 +152,7 @@ after that.
 
 3. Add a release for controller-runtime on GitHub, using those release
    notes, with a title of `vX.Y.Z`.
-
+ 
 4. Do a similar process for
    [controller-tools](https://github.com/kubernetes-sigs/controller-tools)
 
@@ -206,10 +206,10 @@ converging on a ergonomic API.
 
    - Users will intuitively see `List`, and use that in new projects, even
      if it's marked as deprecated.
-
+   
    - Users who don't notice the deprecation may be confused as to the
      difference between `List` and `ListParametric`.
-
+   
    - It's not immediately obvious in isolation (e.g. in surrounding code)
      why the method is called `ListParametric`, and may cause confusion
      when reading code that makes use of that method.
@@ -225,8 +225,8 @@ Development branches:
 
 - don't win us much in terms of maintenance in the case of breaking
   changes (we still have to merge/manage multiple branches for development
-  and stable)
-
+  and stable) 
+  
 - can be confusing to contributors, who often expect master to have the
   latest changes.
 

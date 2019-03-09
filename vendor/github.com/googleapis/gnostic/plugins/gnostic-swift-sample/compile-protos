@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Use this script to run protoc and swift-proto to generate
+# Use this script to run protoc and swift-proto to generate 
 # support code for gnostic protos.
 
 GNOSTIC=$GOPATH/src/github.com/googleapis/gnostic
@@ -34,7 +34,7 @@ rm -rf Sources/Gnostic/*.pb.swift
 rm -rf Sources/Gnostic/github.com
 
 # compile protos
-for proto in "${PROTOS[@]}"
+for proto in "${PROTOS[@]}" 
 do
   echo "COMPILING $proto"
   protoc $GNOSTIC/$proto \
@@ -49,3 +49,4 @@ find Sources/Gnostic/github.com -name "*.pb.swift" -exec mv {} Sources/Gnostic \
 rm -rf Sources/Gnostic/github.com
 
 done
+

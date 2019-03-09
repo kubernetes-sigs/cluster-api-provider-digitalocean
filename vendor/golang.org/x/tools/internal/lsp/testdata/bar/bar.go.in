@@ -25,7 +25,7 @@ func _() {
 	_ = foo.StructFoo{
 		Val       //@complete("l", Value)
 	}
-	_ = foo.StructFoo{
+  	_ = foo.StructFoo{
 		Va        //@complete("a", Value)
 	}
 	_ = foo.StructFoo{

@@ -1,5 +1,5 @@
 
-build:
+build:	
 	go get
 	go install
 	cd generate-gnostic; go get; go install
@@ -13,3 +13,4 @@ build:
 	ln -s $(GOPATH)/bin/gnostic-go-generator $(GOPATH)/bin/gnostic-go-client
 	ln -s $(GOPATH)/bin/gnostic-go-generator $(GOPATH)/bin/gnostic-go-server
 	cd extensions/sample; make
+
