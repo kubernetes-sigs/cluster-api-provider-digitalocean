@@ -27,7 +27,7 @@ import (
 
 	"sigs.k8s.io/cluster-api-provider-digitalocean/pkg/docker"
 
-	"github.com/golang/glog"
+	"k8s.io/klog"
 )
 
 // userdataParams are parameters used to parse the environment variables for bootstrap scripts.
@@ -54,7 +54,7 @@ func masterUserdata(cluster *clusterv1.Cluster, machine *clusterv1.Machine, cert
 			return "", fmt.Errorf("failed to get docker install candidate for %s: %v", machine.Spec.Versions.Kubelet, err)
 		}
 	} else {
-		glog.Info(err)
+		klog.Info(err)
 	}
 
 	var caCertificate, caPrivateKey string
@@ -95,7 +95,7 @@ func nodeUserdata(cluster *clusterv1.Cluster, machine *clusterv1.Machine, osImag
 			return "", fmt.Errorf("failed to get docker install candidate for %s: %v", machine.Spec.Versions.Kubelet, err)
 		}
 	} else {
-		glog.Info(err)
+		klog.Info(err)
 	}
 
 	params := userdataParams{
