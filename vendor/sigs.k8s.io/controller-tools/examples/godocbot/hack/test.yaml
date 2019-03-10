@@ -3,4 +3,4 @@ kind: PullRequest
 metadata:
   name: test
 spec:
-  url: "https://github.com/droot/godocbot-test-rep/pull/1"
+  url: "https://github.com/droot/godocbot-test-rep/pull/1" 

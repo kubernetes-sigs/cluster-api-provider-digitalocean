@@ -16,7 +16,7 @@ import Foundation
 import Gnostic
 
 extension ServiceRenderer {
-
+    
     func renderServer() -> String {
         var code = CodePrinter()
         code.print(header)
@@ -36,7 +36,7 @@ extension ServiceRenderer {
         }
         code.outdent()
         code.print("}")
-
+        
         code.print("func intValue(_ s:String?) -> Int64 {")
         code.indent()
         code.print("guard let s = s else {")

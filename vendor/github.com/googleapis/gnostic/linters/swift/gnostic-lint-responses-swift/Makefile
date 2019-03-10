@@ -14,5 +14,5 @@ clean :
 	rm -rf .build
 	rm -f Package.pins Package.resolved
 
-run:
+run:	
 	gnostic ../../../examples/v2.0/yaml/petstore.yaml --lint-responses-swift

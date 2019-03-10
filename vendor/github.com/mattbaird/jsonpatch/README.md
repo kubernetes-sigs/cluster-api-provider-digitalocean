@@ -7,7 +7,7 @@ JSON Patch allows you to generate JSON that describes changes you want to make t
 go get github.com/mattbaird/jsonpatch
 ```
 
-I tried some of the other "jsonpatch" go implementations, but none of them could diff two json documents and
+I tried some of the other "jsonpatch" go implementations, but none of them could diff two json documents and 
 generate format like jsonpatch.com specifies. Here's an example of the patch format:
 
 ```json

@@ -40,3 +40,4 @@ message Value {
         uint64 type_two = 2;
     }
 }
+

@@ -8,14 +8,14 @@ defined by the `kubebuilder` project.
 
 ##### cmd/...
 
-The `cmd` package contains the manager main program.  Manager is responsible
-for initializing shared dependencies and starting / stopping Controllers.
+The `cmd` package contains the manager main program.  Manager is responsible 
+for initializing shared dependencies and starting / stopping Controllers. 
 
 The `cmd` package also contains the shared `clusterctl`.
 
 ##### pkg/apis/...
 
-The `pkg/apis/...` packages contains the API resource definitions. Users edit
+The `pkg/apis/...` packages contains the API resource definitions. Users edit 
 the `*_types.go` files under this directory to implement their API definitions.
 
 Each resource lives in a `pkg/apis/<api-group-name>/<api-version-name>/<api-kind-name>_types.go` file.
@@ -49,3 +49,4 @@ Kubebuilder creates yaml config for installing the CRDs and related objects unde
 ##### docs/...
 
 API reference documentation, user defined API samples and API conceptual documentation go here.
+

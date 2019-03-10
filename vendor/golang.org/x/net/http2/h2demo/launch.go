@@ -68,14 +68,14 @@ coreos:
       content: |
         [Unit]
         Description=HTTP2 Demo
-
+        
         [Service]
         ExecStartPre=/bin/bash -c 'mkdir -p /opt/bin && curl -s -o /opt/bin/h2demo http://storage.googleapis.com/http2-demo-server-tls/h2demo && chmod +x /opt/bin/h2demo'
         ExecStart=/opt/bin/h2demo --prod
         RestartSec=5s
         Restart=always
         Type=simple
-
+        
         [Install]
         WantedBy=multi-user.target
 `

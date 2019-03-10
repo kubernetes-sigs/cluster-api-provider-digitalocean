@@ -5,7 +5,7 @@ search trees in Go Language.
 
 ## Overview
 
-As of this writing and to the best of the author's knowledge,
+As of this writing and to the best of the author's knowledge, 
 Go still does not have a balanced binary search tree (BBST) data structure.
 These data structures are quite useful in a variety of cases. A BBST maintains
 elements in sorted order under dynamic updates (inserts and deletes) and can
@@ -31,7 +31,7 @@ I consider it to be in stable, perhaps even production, shape. There are no know
 With a healthy Go Language installed, simply run `go get github.com/petar/GoLLRB/llrb`
 
 ## Example
-
+    
 	package main
 
 	import (
@@ -61,6 +61,6 @@ With a healthy Go Language installed, simply run `go get github.com/petar/GoLLRB
 
 ## About
 
-GoLLRB was written by [Petar Maymounkov](http://pdos.csail.mit.edu/~petar/).
+GoLLRB was written by [Petar Maymounkov](http://pdos.csail.mit.edu/~petar/). 
 
 Follow me on [Twitter @maymounkov](http://www.twitter.com/maymounkov)!

@@ -66,7 +66,7 @@ func main() throws {
         response.files.append(file)
       }
     }
-  }
+  }  
 
   let serializedResponse = try response.serializedData()
   Stdout.write(bytes: serializedResponse)

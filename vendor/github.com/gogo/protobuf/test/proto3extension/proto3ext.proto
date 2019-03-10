@@ -8,3 +8,4 @@ extend google.protobuf.FieldOptions {
   bool primary = 51234;
   bool index = 51235;
 }
+

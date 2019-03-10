@@ -14,3 +14,4 @@ option (gogoproto.testgen_all) = true;
 message Subtype {
   optional issue312.TaskState state = 4;
 }
+

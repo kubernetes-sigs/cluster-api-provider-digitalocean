@@ -18,7 +18,6 @@ package main
 
 import (
 	"flag"
-	"log"
 
 	"k8s.io/klog"
 	"sigs.k8s.io/cluster-api-provider-digitalocean/pkg/cloud/digitalocean/actuators/machine"
@@ -43,13 +42,13 @@ func main() {
 	// Get a config to talk to the apiserver
 	cfg, err := config.GetConfig()
 	if err != nil {
-		log.Fatal(err)
+		klog.Fatal(err)
 	}
 
 	// Setup a Manager
 	mgr, err := manager.New(cfg, manager.Options{})
 	if err != nil {
-		log.Fatal(err)
+		klog.Fatal(err)
 	}
 
 	configWatch, err := machinesetup.NewConfigWatch(*machineSetupConfig)
@@ -64,24 +63,24 @@ func main() {
 		Scheme:                   mgr.GetScheme(),
 	})
 	if err != nil {
-		log.Fatalf("Error creating cluster provisioner for google : %v", err)
+		klog.Fatalf("Error creating cluster provisioner for google : %v", err)
 	}
 
 	common.RegisterClusterProvisioner("digitalocean", machine.MachineActuator)
 
 	// Setup Scheme for all resources
 	if err := apis.AddToScheme(mgr.GetScheme()); err != nil {
-		log.Fatal(err)
+		klog.Fatal(err)
 	}
 
 	if err := clusterapis.AddToScheme(mgr.GetScheme()); err != nil {
-		log.Fatal(err)
+		klog.Fatal(err)
 	}
 	// Setup all Controllers
 	if err := controller.AddToManager(mgr); err != nil {
-		log.Fatal(err)
+		klog.Fatal(err)
 	}
 
 	// Start the Manager
-	log.Fatal(mgr.Start(signals.SetupSignalHandler()))
+	klog.Fatal(mgr.Start(signals.SetupSignalHandler()))
 }

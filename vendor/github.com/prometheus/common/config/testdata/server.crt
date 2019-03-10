@@ -34,24 +34,24 @@ Certificate:
         X509v3 extensions:
             X509v3 Key Usage: critical
                 Digital Signature, Key Encipherment
-            X509v3 Basic Constraints:
+            X509v3 Basic Constraints: 
                 CA:FALSE
-            X509v3 Extended Key Usage:
+            X509v3 Extended Key Usage: 
                 TLS Web Server Authentication, TLS Web Client Authentication
-            X509v3 Subject Key Identifier:
+            X509v3 Subject Key Identifier: 
                 70:A9:FB:44:66:3C:63:96:E6:05:B2:74:47:C8:18:7E:43:6D:EE:8B
-            X509v3 Authority Key Identifier:
+            X509v3 Authority Key Identifier: 
                 keyid:AE:42:88:75:DD:05:A6:8E:48:7F:50:69:F9:B7:34:23:49:B8:B4:71
 
-            Authority Information Access:
+            Authority Information Access: 
                 CA Issuers - URI:http://green.no/ca/tls-ca.cer
 
-            X509v3 CRL Distribution Points:
+            X509v3 CRL Distribution Points: 
 
                 Full Name:
                   URI:http://green.no/ca/tls-ca.crl
 
-            X509v3 Subject Alternative Name:
+            X509v3 Subject Alternative Name: 
                 IP Address:127.0.0.1, IP Address:127.0.0.0, DNS:localhost
     Signature Algorithm: sha1WithRSAEncryption
          56:1e:b8:52:ba:f5:72:42:ad:15:71:c1:5e:00:63:c9:4d:56:

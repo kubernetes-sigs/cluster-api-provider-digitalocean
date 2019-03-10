@@ -34,3 +34,4 @@ import "github.com/gogo/protobuf/gogoproto/gogo.proto";
 message A {
 	optional int64 Field1 = 1 [default = 1234, (gogoproto.nullable) = false];;
 }
+

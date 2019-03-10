@@ -28,3 +28,4 @@
 
 regenerate:
 	protoc-min-version --proto_path=../../../../../:../../protobuf/:. --version="3.0.0" --gogo_out=. *.proto
+

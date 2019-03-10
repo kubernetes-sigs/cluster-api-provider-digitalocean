@@ -46,7 +46,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/digitalocean/godo"
-	"github.com/golang/glog"
+	"k8s.io/klog"
 )
 
 const (
@@ -154,7 +154,7 @@ func (do *DOClient) Create(ctx context.Context, cluster *clusterv1.Cluster, mach
 		return err
 	}
 	if droplet != nil {
-		glog.Info("Skipping the machine that already exists.")
+		klog.Info("Skipping the machine that already exists.")
 		return nil
 	}
 
@@ -243,7 +243,7 @@ func (do *DOClient) Create(ctx context.Context, cluster *clusterv1.Cluster, mach
 		if sets.NewString(droplet.Tags...).Has(string(machine.UID)) && len(droplet.Networks.V4) > 0 {
 			return true, nil
 		}
-		glog.Infof("waiting until machine %s gets fully created", machine.Name)
+		klog.Infof("waiting until machine %s gets fully created", machine.Name)
 		return false, nil
 	})
 
@@ -274,7 +274,7 @@ func (do *DOClient) Delete(ctx context.Context, cluster *clusterv1.Cluster, mach
 		return err
 	}
 	if droplet == nil {
-		glog.Info("Skipping the machine that doesn't exist.")
+		klog.Info("Skipping the machine that doesn't exist.")
 		return nil
 	}
 
@@ -386,7 +386,7 @@ func (do *DOClient) Update(ctx context.Context, cluster *clusterv1.Cluster, goal
 			do.eventRecorder.Eventf(goalMachine, corev1.EventTypeNormal, eventReasonUpdate, "machine %s kubelet successfully updated", goalMachine.Name)
 		}
 	} else {
-		glog.Infof("Re-creating node %s for update.", currentMachine.Name)
+		klog.Infof("Re-creating node %s for update.", currentMachine.Name)
 		err = do.Delete(ctx, cluster, currentMachine)
 		if err != nil {
 			return err
@@ -468,7 +468,7 @@ func (do *DOClient) instanceExists(machine *clusterv1.Machine) (*godo.Droplet, e
 	}
 	for _, d := range droplets {
 		if d.Name == machine.Name && sets.NewString(d.Tags...).Has(string(machine.UID)) {
-			glog.Infof("Found a machine %s by name.", d.Name)
+			klog.Infof("Found a machine %s by name.", d.Name)
 			return &d, nil
 		}
 	}

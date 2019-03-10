@@ -9,7 +9,7 @@ Messages are collected by gnostic and written to a common output file,
 allowing multiple linter plugins to be invoked in a single gnostic
 run.
 
-The following invocation runs the `gnostic-lint-paths` and
+The following invocation runs the `gnostic-lint-paths` and 
 `gnostic-lint-descriptions` plugins and writes their messages
 to a file named `lint.pb`.
 

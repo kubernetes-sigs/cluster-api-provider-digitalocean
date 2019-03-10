@@ -42,3 +42,4 @@ message Multi3 {
   };
   optional HatType hat_type = 1;
 }
+

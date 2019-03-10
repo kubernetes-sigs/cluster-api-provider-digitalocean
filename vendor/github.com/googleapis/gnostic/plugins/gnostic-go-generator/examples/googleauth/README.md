@@ -2,10 +2,10 @@
 
 This directory contains support code that can be used to get an OAuth2 token for a Google API user.
 
-It is designed to work on computers with attached displays.
+It is designed to work on computers with attached displays. 
 Use it to write command-line tools and test programs that call Google APIs.
 
-## Instructions
+## Instructions 
 
 Import this package and make the following call to request a token.
 
@@ -23,7 +23,7 @@ To use this package, you need to download a "client secrets" file and
 save it as `client_secrets.json` in the directory where your tool is run.
 
 To get this file, visit the {{ Google Cloud Console }}{{ https://cloud.google.com/console }}
-and create a project. Then go to the API Manager to enable the APIs that you want to use
+and create a project. Then go to the API Manager to enable the APIs that you want to use 
 and create OAuth2 credentials. You'll then be able to download these credentials
 as JSON. Save this file as `client_secrets.json`
 

@@ -163,3 +163,4 @@ func responsesHasFieldNamedError(_ value: Any?) -> Bool {
 func lowercase(_ s : String) -> String {
     return s.lowercased()
 }
+

@@ -8,3 +8,4 @@ LABEL maintainer "golang-dev@googlegroups.com"
 COPY ca-certificates.crt /etc/ssl/certs/
 COPY h2demo /
 ENTRYPOINT ["/h2demo", "-prod"]
+

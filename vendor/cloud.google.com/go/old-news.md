@@ -612,7 +612,7 @@ Breaking changes to cloud.google.com/go/storage:
     (The `iterator` package is at `google.golang.org/api/iterator`.)
 
     Replace `Query.Cursor` with `ObjectIterator.PageInfo().Token`.
-
+    
     Replace `Query.MaxResults` with `ObjectIterator.PageInfo().MaxSize`.
 
 
@@ -695,3 +695,4 @@ Natural Language.
 [`cloud.google.com/go/preview/logging`](https://godoc.org/cloud.google.com/go/preview/logging).
 This client uses gRPC as its transport layer, and supports log reading, sinks
 and metrics. It will replace the current client at `cloud.google.com/go/logging` shortly.
+

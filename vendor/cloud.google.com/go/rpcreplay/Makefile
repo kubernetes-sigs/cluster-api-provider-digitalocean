@@ -29,3 +29,4 @@ gen-protos:  sync-protobuf
 
 sync-protobuf:
 	cd $(PROTOBUF_REPO); git pull
+

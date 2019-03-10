@@ -212,9 +212,9 @@ The bug is that the final phase installs p11 instead of p1. The test failure loo
 	            > go install -i p11
 	            [stderr]
 	            can't load package: package p11: cannot find package "p11" in any of:
-			/Users/rsc/go/src/p11 (from $GOROOT)
-			$WORK/d1/src/p11 (from $GOPATH)
-			$WORK/d2/src/p11
+	            	/Users/rsc/go/src/p11 (from $GOROOT)
+	            	$WORK/d1/src/p11 (from $GOPATH)
+	            	$WORK/d2/src/p11
 	            [exit status 1]
 	            FAIL: unexpected go command failure
 
@@ -258,9 +258,9 @@ for manual debugging of failing tests:
 	            > go install -i p11
 	            [stderr]
 	            can't load package: package p11: cannot find package "p11" in any of:
-			/Users/rsc/go/src/p11 (from $GOROOT)
-			$WORK/d1/src/p11 (from $GOPATH)
-			$WORK/d2/src/p11
+	            	/Users/rsc/go/src/p11 (from $GOROOT)
+	            	$WORK/d1/src/p11 (from $GOPATH)
+	            	$WORK/d2/src/p11
 	            [exit status 1]
 	            FAIL: unexpected go command failure
 

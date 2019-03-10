@@ -1,6 +1,6 @@
 # Overview
 
-In order to demonstrate how to develop a new Cluster API provider we will use
+In order to demonstrate how to develop a new Cluster API provider we will use 
 `kubebuilder` to create an example provider. For more information on `kubebuilder`
 and CRDs in general we highly recommend reading the [Kubebuilder Book][kubebuilder-book].
 Much of the information here was adapted directly from it.

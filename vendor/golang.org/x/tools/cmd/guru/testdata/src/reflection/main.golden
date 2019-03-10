@@ -31,3 +31,4 @@ this reflect.Type may contain these dynamic types:
 		*bool
 		*int
 		map[*int]*bool
+

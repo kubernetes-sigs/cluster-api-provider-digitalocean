@@ -37,3 +37,4 @@ deploy-prod: push-prod
 deploy-staging: push-staging
 	go install golang.org/x/build/cmd/xb
 	xb --staging kubectl set image deployment/tipgodoc-deployment tipgodoc=$(IMAGE_STAGING):$(VERSION)
+

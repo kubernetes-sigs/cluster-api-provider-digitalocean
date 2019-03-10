@@ -28,15 +28,15 @@ of a single statement: either a return statement with a single
 replacement.
 
 	package P
-	import ( "errors"; "fmt" )
-	func before(s string) error { return fmt.Errorf("%s", s) }
-	func after(s string)  error { return errors.New(s) }
+ 	import ( "errors"; "fmt" )
+ 	func before(s string) error { return fmt.Errorf("%s", s) }
+ 	func after(s string)  error { return errors.New(s) }
 
 The expression statement form is useful when the expression has no
 result, for example:
 
-	func before(msg string) { log.Fatalf("%s", msg) }
-	func after(msg string)  { log.Fatal(msg) }
+ 	func before(msg string) { log.Fatalf("%s", msg) }
+ 	func after(msg string)  { log.Fatal(msg) }
 
 The parameters of both functions are wildcards that may match any
 expression assignable to that type.  If the pattern contains multiple

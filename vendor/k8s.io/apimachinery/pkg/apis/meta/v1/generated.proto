@@ -432,7 +432,7 @@ message ListOptions {
   // a list starting from the next key, but from the latest snapshot, which is inconsistent from the
   // previous list results - objects that are created, modified, or deleted after the first list request
   // will be included in the response, as long as their keys are after the "next key".
-  //
+  // 
   // This field is not supported when watch is true. Clients may start a watch from the last
   // resourceVersion value returned by the server and not miss any modifications.
   optional string continue = 8;

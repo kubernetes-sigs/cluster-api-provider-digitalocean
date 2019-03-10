@@ -37,3 +37,4 @@ option (gogoproto.goproto_getters_all) = false;
 message A {
 	optional int64 Field1 = 1 [default=1234];
 }
+

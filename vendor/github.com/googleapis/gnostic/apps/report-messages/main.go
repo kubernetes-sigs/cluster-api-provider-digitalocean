@@ -43,7 +43,7 @@ func readMessagesFromFileWithName(filename string) *plugins.Messages {
 
 func printMessages(code *printer.Code, messages *plugins.Messages) {
 	for _, message := range messages.Messages {
-		line := fmt.Sprintf("%-7s %-14s %s %+v",
+		line := fmt.Sprintf("%-7s %-14s %s %+v", 
 				message.Level,
 				message.Code,
 				message.Text,
