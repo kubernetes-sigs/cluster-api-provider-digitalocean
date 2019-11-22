@@ -1,0 +1,17 @@
+run:
+  concurrency: 2
+  timeout: 5m
+  skip-dirs:
+    - pkg/cloud/digitalocean/actuators/machine/machinesetup
+    - pkg/apis
+
+linters:
+  disable-all: true
+  enable:
+    - vet
+    - golint
+    - varcheck
+    - structcheck
+    - gosimple
+    - unused
+    - errcheck
