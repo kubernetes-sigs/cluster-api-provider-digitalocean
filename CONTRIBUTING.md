@@ -4,7 +4,7 @@ This document contains guidelines for contributing to the `cluster-api-provider-
 
 ## Code Style Guidelines
 
-In order for the pull request to get accepted the code must pass `gofmt`, `govet` and `gometalinter` checks. You can run all checks by invoking `make check`.
+In order for the pull request to get accepted the code must pass `gofmt`, `govet` and `golangci-lint` checks. You can run all checks by invoking `make check`.
 
 ## Dependency Management
 
