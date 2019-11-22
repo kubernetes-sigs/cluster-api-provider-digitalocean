@@ -77,6 +77,8 @@ gofmt: ## Go fmt your code
 vet: ## Apply go vet to all go files
 	go vet ./...
 
+# Temporarily needed until dep gets replaced by go modules
+$(GOLANGCI_LINT): export GO111MODULE=on
 $(GOLANGCI_LINT): $(TOOLS_DIR)/go.mod ## Build golangci-lint from tools folder.
 	cd $(TOOLS_DIR); go build -tags=tools -o $(BIN_DIR)/golangci-lint github.com/golangci/golangci-lint/cmd/golangci-lint
 
