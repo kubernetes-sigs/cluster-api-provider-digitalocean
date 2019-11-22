@@ -8,7 +8,7 @@ In order for the pull request to get accepted the code must pass `gofmt`, `govet
 
 ## Dependency Management
 
-This project uses [`dep`](https://github.com/golang/dep) for dependency management. Before pushing the code to GitHub, make sure your vendor directory is in sync by running `dep ensure` or otherwise CI will fail.
+This project uses [`go modules`](https://github.com/golang/go/wiki/Modules) for dependency management.
 
 ## Testing
 
@@ -18,7 +18,7 @@ Unit tests can be run by invoking `make test-unit`. Integration and End-to-End t
 
 The following Make targets can be used to build controllers:
 
-* `all` runs code generation, `dep ensure`, builds `machine-controller`, `cluster-controller` and `clusterctl` binaries, as well as builds `machine-controller` and `cluster-controller` Docker images
+* `all` runs code generation, builds `machine-controller`, `cluster-controller` and `clusterctl` binaries, as well as builds `machine-controller` and `cluster-controller` Docker images
 * `compile` compiles `clusterctl`, `machine-controller` and `cluster-controller`, and stores them in the `./bin` directory
 * `install` compiles `clusterctl`, `machine-controller` and `cluster-controller`, and stores them in the `$GOPTAH/bin` directory
 
