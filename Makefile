@@ -18,17 +18,9 @@ NAME = cluster-api-do-controller
 TAG = v1.0.0-alpha.1
 DEV_TAG = v1.0.0-alpha.1
 
-all: depend generate compile images
+all: generate compile images
 
-check: depend gofmt vet gometalinter
-
-depend: ## Sync vendor directory by running dep ensure
-	$$GOPATH/bin/dep version || go get -u github.com/golang/dep/cmd/dep
-	$$GOPATH/bin/dep ensure -v
-
-depend-update: ## Update all dependencies
-	$$GOPATH/bin/dep version || go get -u github.com/golang/dep/cmd/dep
-	$$GOPATH/bin/dep ensure -update -v
+check: gofmt vet gometalinter
 
 .PHONY: generate
 generate:
@@ -76,6 +68,6 @@ lint: ## Run gometalinter on all go files
 help:  ## Show help messages for make targets
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[32m%-30s\033[0m %s\n", $$1, $$2}'
 
-verify: depend vet gofmt
+verify: vet gofmt
 	hack/verify-boilerplate.sh
 
