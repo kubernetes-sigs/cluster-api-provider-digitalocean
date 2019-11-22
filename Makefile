@@ -18,9 +18,17 @@ NAME = cluster-api-do-controller
 TAG = v1.0.0-alpha.1
 DEV_TAG = v1.0.0-alpha.1
 
+# Directories.
+TOOLS_DIR := hack/tools
+TOOLS_BIN_DIR := $(TOOLS_DIR)/bin
+BIN_DIR := bin
+
+# Binaries.
+GOLANGCI_LINT := $(TOOLS_BIN_DIR)/golangci-lint
+
 all: depend generate compile images
 
-check: depend gofmt vet gometalinter
+check: depend gofmt vet lint
 
 depend: ## Sync vendor directory by running dep ensure
 	$$GOPATH/bin/dep version || go get -u github.com/golang/dep/cmd/dep
@@ -69,8 +77,11 @@ gofmt: ## Go fmt your code
 vet: ## Apply go vet to all go files
 	go vet ./...
 
-lint: ## Run gometalinter on all go files
-	gometalinter --config gometalinter.json ./... --deadline 20m
+$(GOLANGCI_LINT): $(TOOLS_DIR)/go.mod ## Build golangci-lint from tools folder.
+	cd $(TOOLS_DIR); go build -tags=tools -o $(BIN_DIR)/golangci-lint github.com/golangci/golangci-lint/cmd/golangci-lint
+
+lint: $(GOLANGCI_LINT) ## Run golangci-lint on all go files
+	$(GOLANGCI_LINT) run --config .golangci.yml ./...
 
 .PHONY: help
 help:  ## Show help messages for make targets
