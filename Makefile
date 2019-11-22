@@ -18,6 +18,9 @@ NAME = cluster-api-do-controller
 TAG = v1.0.0-alpha.1
 DEV_TAG = v1.0.0-alpha.1
 
+# Active module mode, as we use go modules to manage dependencies
+export GO111MODULE=on
+
 all: generate compile images
 
 check: gofmt vet gometalinter
