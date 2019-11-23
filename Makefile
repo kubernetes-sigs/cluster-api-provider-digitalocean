@@ -79,6 +79,8 @@ vet: ## Apply go vet to all go files
 
 # Temporarily needed until dep gets replaced by go modules
 $(GOLANGCI_LINT): export GO111MODULE=on
+# Temporarily needed until golangci-lint version can be bumped
+$(GOLANGCI_LINT): export GOPROXY=direct
 $(GOLANGCI_LINT): $(TOOLS_DIR)/go.mod ## Build golangci-lint from tools folder.
 	cd $(TOOLS_DIR); go build -tags=tools -o $(BIN_DIR)/golangci-lint github.com/golangci/golangci-lint/cmd/golangci-lint
 
