@@ -1,0 +1,17 @@
+apiVersion: skaffold/v2alpha1
+kind: Config
+build:
+  local:
+    useBuildkit: true
+  artifacts:
+  - image: cluster-api-digitalocean-controller
+    docker:
+      buildArgs:
+        ARCH: amd64
+deploy:
+  kubectl:
+    flags:
+      apply:
+        - --validate=false
+    manifests:
+      - examples/_out/provider-components.yaml
