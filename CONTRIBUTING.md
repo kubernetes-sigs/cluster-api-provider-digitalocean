@@ -1,116 +1,81 @@
-# Contributing guidelines
+# Contributing Guidelines
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-This document contains guidelines for contributing to the `cluster-api-provider-digitalocean` project.
 
-## Code Style Guidelines
+- [Contributor License Agreements](#contributor-license-agreements)
+- [Finding Things That Need Help](#finding-things-that-need-help)
+- [Contributing a Patch](#contributing-a-patch)
+- [Backporting a Patch](#backporting-a-patch)
+  - [Merge Approval](#merge-approval)
+  - [Google Doc Viewing Permissions](#google-doc-viewing-permissions)
+  - [Issue and Pull Request Management](#issue-and-pull-request-management)
 
-In order for the pull request to get accepted the code must pass `gofmt`, `govet` and `gometalinter` checks. You can run all checks by invoking `make check`.
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-## Dependency Management
+Read the following guide if you're interested in contributing to cluster-api-provider-digitalocean.
 
-This project uses [`dep`](https://github.com/golang/dep) for dependency management. Before pushing the code to GitHub, make sure your vendor directory is in sync by running `dep ensure` or otherwise CI will fail.
+## Contributor License Agreements
 
-## Testing
+We'd love to accept your patches! Before we can take them, we have to jump a couple of legal hurdles.
 
-Unit tests can be run by invoking `make test-unit`. Integration and End-to-End tests are currently not implemented.
+Please fill out either the individual or corporate Contributor License Agreement (CLA). More information about the CLA
+and instructions for signing it [can be found here](https://github.com/kubernetes/community/blob/master/CLA.md).
 
-## Building
+***NOTE***: Only original source code from you and other people that have signed the CLA can be accepted into the
+repository.
 
-The following Make targets can be used to build controllers:
+## Finding Things That Need Help
 
-* `all` runs code generation, `dep ensure`, builds `machine-controller`, `cluster-controller` and `clusterctl` binaries, as well as builds `machine-controller` and `cluster-controller` Docker images
-* `compile` compiles `clusterctl`, `machine-controller` and `cluster-controller`, and stores them in the `./bin` directory
-* `install` compiles `clusterctl`, `machine-controller` and `cluster-controller`, and stores them in the `$GOPTAH/bin` directory
+If you're new to the project and want to help, but don't know where to start, we have a semi-curated list of issues that
+should not need deep knowledge of the system. [Have a look and see if anything sounds
+interesting](https://github.com/kubernetes-sigs/cluster-api-provider-digitalocean/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22).
+Alternatively, read some of the docs on other controllers and try to write your own, file and fix any/all issues that
+come up, including gaps in documentation!
 
-## Versioning
+## Contributing a Patch
 
-This project follows [semantic versioning 2.0.0](https://semver.org/).
+1. If you haven't already done so, sign a Contributor License Agreement (see details above).
+1. Fork the desired repo, develop and test your code changes.
+1. Submit a pull request.
 
-GitHub releases follow notation of `v0.x.y`. Docker images doesn't have the `v` prefix, e.g. `0.x.y`. Development versions of Docker images have the `-dev` suffix.
+All changes must be code reviewed. Coding conventions and standards are explained in the official [developer
+docs](https://github.com/kubernetes/community/tree/master/contributors/devel). Expect reviewers to request that you
+avoid common [go style mistakes](https://github.com/golang/go/wiki/CodeReviewComments) in your PRs.
 
-## Docker Images
+## Backporting a Patch
 
-We host the following images on `quay.io`:
+Cluster API maintains older versions through `release-X.Y` branches. We accept backports of bug fixes to the most recent
+release branch. For example, if the most recent branch is `release-0.2`, and the `master` branch is under active
+development for v0.3.0, a bug fix that merged to `master` that also affects `v0.2.x` may be considered for backporting
+to `release-0.2`. We generally do not accept PRs against older release branches.
 
-* [`quay.io/kubermatic/digitalocean-machine-controller`](https://quay.io/repository/kubermatic/digitalocean-machine-controller)
-* [`quay.io/kubermatic/digitalocean-cluster-controller`](https://quay.io/repository/kubermatic/digitalocean-cluster-controller)
+### Merge Approval
 
-### Building images locally
+Please see the [Kubernetes community document on pull
+requests](https://git.k8s.io/community/contributors/guide/pull-requests.md) for more information about the merge
+process.
 
-The `make images` and `make images-dev` commands can be used to build Docker images locally. The `images-dev` target build a development version of the image, annotated with the `-dev` suffix.
+### Google Doc Viewing Permissions
 
-### Pushing images to `quay.io`
+To gain viewing permissions to google docs in this project, please join either the
+[kubernetes-dev](https://groups.google.com/forum/#!forum/kubernetes-dev) or
+[kubernetes-sig-cluster-lifecycle](https://groups.google.com/forum/#!forum/kubernetes-sig-cluster-lifecycle) google
+group.
 
-The `make push` and `make push-dev` targets build images and then push them to `quay.io` repositories used by the project.
+### Issue and Pull Request Management
 
-**NOTE:** Make sure to set appropriate tag name for images in [`machine-controller`](./cmd/machine-controller/Makefile) and in [`cluster-controller`](./cmd/cluster-controller/Makefile) Makefiles, so you don't overwrite existing images!
+Anyone may comment on issues and submit reviews for pull requests. However, in order to be assigned an issue or pull
+request, you must be a member of the [Kubernetes SIGs](https://github.com/kubernetes-sigs) GitHub organization.
 
-## Release process
+If you are a Kubernetes GitHub organization member, you are eligible for membership in the Kubernetes SIGs GitHub
+organization and can request membership by [opening an
+issue](https://github.com/kubernetes/org/issues/new?template=membership.md&title=REQUEST%3A%20New%20membership%20for%20%3Cyour-GH-handle%3E)
+against the kubernetes/org repo.
 
-This section of the document describes how to handle the release process. Releasing new version of Cluster-API provider for DigitalOcean requires write access to GitHub and Quay.io repositories.
+However, if you are a member of any of the related Kubernetes GitHub organizations but not of the Kubernetes org, you
+will need explicit sponsorship for your membership request. You can read more about Kubernetes membership and
+sponsorship [here](https://github.com/kubernetes/community/blob/master/community-membership.md).
 
-### Creating tag
-
-The first step is to create a new Git tag and then push it to GitHub. The following Git command creates new tag based on current branch/latest commit:
-
-```bash
-git tag -as v0.x.y -m "Release v0.x.y of Cluster API provider for DigitalOcean"
-```
-
-If you want to specify the commit hash to be used for the tag, you can use command such as:
-
-```bash
-git tag -as v0.x.y <short-commit-hash> -m "Release v0.x.y of Cluster API provider for DigitalOcean"
-```
-
-Once the tag is created you need to push it to GitHub, such as:
-
-```bash
-git push --tags
-```
-
-### Building binaries
-
-The next step is to build and compress binaries that will be uploaded to GitHub. Note that only `clusterctl` binaries are uploaded to GitHub, while `machine-controller` and `cluster-controller` are only published as Docker images.
-
-#### Building MacOS `clusterctl` binary
-
-```bash
-# Build MacOS 64-bit clusterctl binary
-GOOS=darwin GOARCH=amd64 CGO_ENABLED=0 go build -a -ldflags '-extldflags "-static"' -o ./release/clusterctl sigs.k8s.io/cluster-api-provider-digitalocean/clusterctl
-
-# Create tarball
-tar -czf ./release/clusterctl-darwin-amd64.tar.gz clusterctl
-```
-
-#### Building Linux `clusterctl` binary
-
-```
-# Build Linux 64-bit clusterctl binary
-GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -a -ldflags '-extldflags "-static"' -o ./release/clusterctl-linux-amd64 sigs.k8s.io/cluster-api-provider-digitalocean/cmd/cluster-controller
-
-# Create tarball
-tar -czf ./release/clusterctl-linux-amd64.tar.gz clusterctl
-```
-
-### Pushing Docker Images
-
-The Docker images can be pushed by invoking `make push`.
-
-**NOTE:** Make sure to set appropriate tag name for images in [`machine-controller`](./cmd/machine-controller/Makefile) and in [`cluster-controller`](./cmd/cluster-controller/Makefile) Makefiles, so you don't overwrite existing images!
-
-### Creating GitHub release
-
-The last step is to create a GitHub release and push `clusterctl` binaries to GitHub.
-
-To learn about GitHub Releases, check out the [official GitHub Releases documentation](https://help.github.com/articles/creating-releases/).
-
-#### Writing Release Notes
-
-When creating a release, you need to specify the release notes for that release. The release notes should include:
-
-- Changelog, which can be generated using [`gchl`](https://github.com/kubermatic/gchl)
-- List of Docker images that are relevant to the release
-- SHA256 checksums of tarballs
-
-[The following example](https://github.com/kubernetes-sigs/cluster-api-provider-digitalocean/releases/tag/v0.2.0) can be used while writing release notes.
+Cluster API maintainers can assign you an issue or pull request by leaving a `/assign <your Github ID>` comment on the
+issue or pull request.
