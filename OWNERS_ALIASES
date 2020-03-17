@@ -16,8 +16,5 @@ aliases:
     - ncdc
     - vincepri
     - chuckha
-  sig-cloud-provider-leads:
-    - andrewsykim
   cluster-api-do-maintainers:
-    - andrewsykim
     - xmudrii
