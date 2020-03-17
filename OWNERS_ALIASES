@@ -17,4 +17,6 @@ aliases:
     - vincepri
     - chuckha
   cluster-api-do-maintainers:
+    - cpanato
+    - prksu
     - xmudrii
