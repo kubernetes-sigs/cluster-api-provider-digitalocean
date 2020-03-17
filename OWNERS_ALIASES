@@ -2,13 +2,20 @@
 
 aliases:
   sig-cluster-lifecycle-leads:
+    - neolit123
     - justinsb
-    - luxas
     - timothysc
   cluster-api-admins:
-    - davidewatson
-    - detiber
     - justinsb
+    - detiber
+    - davidewatson
+    - vincepri
+  cluster-api-maintainers:
+    - justinsb
+    - detiber
+    - ncdc
+    - vincepri
+    - chuckha
   sig-cloud-provider-leads:
     - andrewsykim
   cluster-api-do-maintainers:
