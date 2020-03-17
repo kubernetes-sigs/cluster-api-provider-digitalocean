@@ -4,7 +4,9 @@ approvers:
   - sig-cluster-lifecycle-leads
   - sig-cloud-provider-leads
   - cluster-api-admins
+  - cluster-api-maintainers
   - cluster-api-do-maintainers
 
 reviewers:
+  - cluster-api-maintainers
   - cluster-api-do-maintainers
