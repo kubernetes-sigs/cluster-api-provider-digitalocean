@@ -1,0 +1,20 @@
+# permissions to do viewer domachinetemplates.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: domachinetemplate-viewer-role
+rules:
+- apiGroups:
+  - infrastructure.cluster.x-k8s.io
+  resources:
+  - domachinetemplates
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - infrastructure.cluster.x-k8s.io
+  resources:
+  - domachinetemplates/status
+  verbs:
+  - get

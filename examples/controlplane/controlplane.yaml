@@ -1,0 +1,40 @@
+apiVersion: cluster.x-k8s.io/v1alpha2
+kind: Machine
+metadata:
+  name: ${CLUSTER_NAME}-controlplane-0
+  labels:
+    cluster.x-k8s.io/control-plane: "true"
+    cluster.x-k8s.io/cluster-name: "${CLUSTER_NAME}"
+spec:
+  version: ${KUBERNETES_VERSION}
+  bootstrap:
+    configRef:
+      apiVersion: bootstrap.cluster.x-k8s.io/v1alpha2
+      kind: KubeadmConfig
+      name: ${CLUSTER_NAME}-controlplane-0
+  infrastructureRef:
+    apiVersion: infrastructure.cluster.x-k8s.io/v1alpha2
+    kind: DOMachine
+    name: ${CLUSTER_NAME}-controlplane-0
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1alpha2
+kind: DOMachine
+metadata:
+  name: ${CLUSTER_NAME}-controlplane-0
+spec:
+  size: ${CONTROL_PLANE_MACHINE_TYPE}
+  image: ${MACHINE_IMAGE}
+  sshKeys:
+    - ${SSH_KEY_FINGERPRINT}
+---
+apiVersion: bootstrap.cluster.x-k8s.io/v1alpha2
+kind: KubeadmConfig
+metadata:
+  name: ${CLUSTER_NAME}-controlplane-0
+spec:
+  initConfiguration:
+    nodeRegistration:
+      name: '{{ ds.meta_data["local_hostname"] }}'
+      kubeletExtraArgs:
+        cloud-provider: external
+        provider-id: digitalocean://'{{ ds.meta_data["instance_id"] }}'
