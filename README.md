@@ -22,17 +22,17 @@ previous cluster managers such as [kops][kops] and
 
 ## Project Status
 
-This project is currently work-in-progress and in Alpha, so it may not be production ready. There is no backwards-compatibility guarantee at this point. For more details on the roadmap and upcoming features, check out [the project's issue tracker on GitHub][issue].
+This project is currently a work-in-progress, in an Alpha state, so it may not be production ready. There is no backwards-compatibility guarantee at this point. For more details on the roadmap and upcoming features, check out [the project's issue tracker on GitHub][issue].
 
 ## Launching a Kubernetes cluster on DigitalOcean
 
-Check out the [getting started guide](./docs/getting-started.md) for launching a cluster on DigitalOcean. 
+Check out the [getting started guide](./docs/getting-started.md) for launching a cluster on DigitalOcean.
 
 ## Features
 
 - Native Kubernetes manifests and API
 - Support for single and multi-node control plane clusters
-- Choice your Linux distribution (as long as a current cloud-init is available)
+- Choice of Linux distribution (as long as a current [cloud-init](https://cloudinit.readthedocs.io/en/latest/topics/examples.html) is available)
 
 ------
 
