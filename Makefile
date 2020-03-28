@@ -62,6 +62,10 @@ RBAC_ROOT ?= $(MANIFEST_ROOT)/rbac
 # Allow overriding the imagePullPolicy
 PULL_POLICY ?= Always
 
+# Enable docker buildkit as default for better build performance.
+DOCKER_BUILDKIT ?= 1
+export DOCKER_BUILDKIT
+
 ## --------------------------------------
 ##@ Help
 ## --------------------------------------
@@ -75,7 +79,7 @@ help:  ## Display this help
 
 .PHONY: test
 test: generate lint ## Run tests
-	go test -v ./...
+	go test -v ./api/... ./controllers/... ./pkg/...
 
 .PHONY: test-integration
 test-integration: ## Run integration tests
@@ -84,12 +88,12 @@ test-integration: ## Run integration tests
 .PHONY: test-e2e
 test-e2e: ## Run e2e tests
 	PULL_POLICY=IfNotPresent $(MAKE) docker-build
-	cd $(TEST_E2E_DIR); go test -v -tags=e2e -timeout=3h . -args -ginkgo.v -ginkgo.focus "functional tests" --managerImage $(CONTROLLER_IMG)-$(ARCH):$(TAG)
+	go test -v -timeout=1h ./$(TEST_E2E_DIR) -args -ginkgo.v -ginkgo.focus "functional tests" --managerImage $(CONTROLLER_IMG)-$(ARCH):$(TAG)
 
-.PHONY: test-conformance
-test-conformance: ## Run conformance test on workload cluster
+.PHONY: test-conformance	
+test-conformance: ## Run conformance test on workload cluster	
 	PULL_POLICY=IfNotPresent $(MAKE) docker-build
-	cd $(TEST_E2E_DIR); go test -v -tags=e2e -timeout=4h . -args -ginkgo.v -ginkgo.focus "conformance tests" --managerImage $(CONTROLLER_IMG)-$(ARCH):$(TAG)
+	go test -v -timeout=2h ./$(TEST_E2E_DIR) -args -ginkgo.v -ginkgo.focus "conformance tests" --managerImage $(CONTROLLER_IMG)-$(ARCH):$(TAG)
 
 ## --------------------------------------
 ##@ Binaries
