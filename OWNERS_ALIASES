@@ -18,5 +18,6 @@ aliases:
     - chuckha
   cluster-api-do-maintainers:
     - cpanato
+    - MorrisLaw
     - prksu
     - xmudrii
