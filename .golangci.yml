@@ -3,6 +3,7 @@ linters:
   disable:
     - dupl
     - funlen
+    - goerr113
     - gochecknoglobals
     - gochecknoinits
     - lll
