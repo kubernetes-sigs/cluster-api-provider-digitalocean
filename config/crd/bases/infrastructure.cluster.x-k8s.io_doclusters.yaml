@@ -21,7 +21,7 @@ spec:
     status: {}
   validation:
     openAPIV3Schema:
-      description: DOCluster is the Schema for the dOClusters API
+      description: DOCluster is the Schema for the dOClusters API.
       properties:
         apiVersion:
           description: 'APIVersion defines the versioned schema of this representation
@@ -36,7 +36,7 @@ spec:
         metadata:
           type: object
         spec:
-          description: DOClusterSpec defines the desired state of DOCluster
+          description: DOClusterSpec defines the desired state of DOCluster.
           properties:
             network:
               description: Network configurations
@@ -105,7 +105,7 @@ spec:
           - region
           type: object
         status:
-          description: DOClusterStatus defines the observed state of DOCluster
+          description: DOClusterStatus defines the observed state of DOCluster.
           properties:
             apiEndpoints:
               description: APIEndpoints represents the endpoints to communicate with
