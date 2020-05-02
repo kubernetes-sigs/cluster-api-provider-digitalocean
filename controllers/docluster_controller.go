@@ -37,7 +37,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
-// DOClusterReconciler reconciles a DOCluster object
+// DOClusterReconciler reconciles a DOCluster object.
 type DOClusterReconciler struct {
 	client.Client
 	Log      logr.Logger

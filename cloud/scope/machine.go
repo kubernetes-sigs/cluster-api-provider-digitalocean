@@ -159,7 +159,7 @@ func (m *MachineScope) SetInstanceStatus(v infrav1.DOResourceStatus) {
 	m.DOMachine.Status.InstanceStatus = &v
 }
 
-// SetReady sets the DOMachine Ready Status
+// SetReady sets the DOMachine Ready Status.
 func (m *MachineScope) SetReady() {
 	m.DOMachine.Status.Ready = true
 }

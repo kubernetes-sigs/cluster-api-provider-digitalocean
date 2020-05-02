@@ -30,7 +30,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
-// GetDroplet get a droplet instance
+// GetDroplet get a droplet instance.
 func (s *Service) GetDroplet(id string) (*godo.Droplet, error) {
 	if id == "" {
 		s.scope.Info("DOMachine does not have an instance id")
@@ -135,7 +135,7 @@ func (s *Service) DeleteDroplet(id string) error {
 	return nil
 }
 
-// GetDropletAddress convert droplet IPs to corev1.NodeAddresses
+// GetDropletAddress convert droplet IPs to corev1.NodeAddresses.
 func (s *Service) GetDropletAddress(droplet *godo.Droplet) ([]corev1.NodeAddress, error) {
 	addresses := []corev1.NodeAddress{}
 	privatev4, err := droplet.PrivateIPv4()

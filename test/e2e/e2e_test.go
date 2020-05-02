@@ -68,7 +68,7 @@ var _ = Describe("functional tests", func() {
 				kubeConfigData, err := kubeconfig.FromSecret(kindclient, cluster)
 				Expect(err).NotTo(HaveOccurred())
 				kubeConfigPath := path.Join(testTmpDir, clusterName+".kubeconfig")
-				Expect(ioutil.WriteFile(kubeConfigPath, kubeConfigData, 0640)).To(Succeed())
+				Expect(ioutil.WriteFile(kubeConfigPath, kubeConfigData, 0600)).To(Succeed())
 
 				By("Deploying CNI")
 				ApplyYaml(kubeConfigPath, "https://docs.projectcalico.org/manifests/calico.yaml")

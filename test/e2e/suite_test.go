@@ -180,7 +180,7 @@ func buildCAPDOComponents(manifest *string) {
 
 	// write out the manifests
 	manifestFile := path.Join(suiteTmpDir, "infrastructure-components.yaml")
-	Expect(ioutil.WriteFile(manifestFile, []byte(manifestsContent), 0644)).To(Succeed())
+	Expect(ioutil.WriteFile(manifestFile, []byte(manifestsContent), 0600)).To(Succeed())
 	*manifest = manifestFile
 }
 
@@ -191,7 +191,7 @@ func buildCloudControllerManager(manifest *string) {
 	// envsubst the credentials
 	manifestsContent := os.ExpandEnv(string(ccmManifests))
 	manifestFile := path.Join(suiteTmpDir, "digitalocean-cloud-controller-manager.yaml")
-	Expect(ioutil.WriteFile(manifestFile, []byte(manifestsContent), 0644)).To(Succeed())
+	Expect(ioutil.WriteFile(manifestFile, []byte(manifestsContent), 0600)).To(Succeed())
 	*manifest = manifestFile
 }
 

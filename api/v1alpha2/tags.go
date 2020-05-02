@@ -34,18 +34,18 @@ const (
 )
 
 // ClusterNameTag generates the tag with prefix `NameDigitalOceanProviderPrefix`
-// for resources associated with a cluster. It will generated tag like `sigs-k8s-io:capdo:{clusterName}`
+// for resources associated with a cluster. It will generated tag like `sigs-k8s-io:capdo:{clusterName}`.
 func ClusterNameTag(clusterName string) string {
 	return fmt.Sprintf("%s:%s", NameDigitalOceanProviderPrefix, clusterName)
 }
 
 // ClusterNameRoleTag generates the tag with prefix `NameDigitalOceanProviderPrefix` and `RoleValue` as suffix
-// It will generated tag like `sigs-k8s-io:capdo:{clusterName}:{role}`
+// It will generated tag like `sigs-k8s-io:capdo:{clusterName}:{role}`.
 func ClusterNameRoleTag(clusterName, role string) string {
 	return fmt.Sprintf("%s:%s:%s", NameDigitalOceanProviderPrefix, clusterName, role)
 }
 
-// NameTagFromName returns DigitalOcean safe name tag from name
+// NameTagFromName returns DigitalOcean safe name tag from name.
 func NameTagFromName(name string) string {
 	return fmt.Sprintf("name:%s", DOSafeName(name))
 }
@@ -63,7 +63,7 @@ type BuildTagParams struct {
 	Additional Tags
 }
 
-// Build builds tags including the cluster tag and returns them in map form.
+// BuildTags builds tags including the cluster tag and returns them in map form.
 func BuildTags(params BuildTagParams) Tags {
 	var tags Tags
 	tags = append(tags, ClusterNameTag(params.ClusterName))

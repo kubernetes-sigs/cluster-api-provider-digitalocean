@@ -30,7 +30,7 @@ const (
 	MachineFinalizer = "domachine.infrastructure.cluster.x-k8s.io"
 )
 
-// DOMachineSpec defines the desired state of DOMachine
+// DOMachineSpec defines the desired state of DOMachine.
 type DOMachineSpec struct {
 	// ProviderID is the unique identifier as specified by the cloud provider.
 	// +optional
@@ -47,7 +47,7 @@ type DOMachineSpec struct {
 	AdditionalTags Tags `json:"additionalTags,omitempty"`
 }
 
-// DOMachineStatus defines the observed state of DOMachine
+// DOMachineStatus defines the observed state of DOMachine.
 type DOMachineStatus struct {
 	// Ready is true when the provider resource is ready.
 	// +optional
@@ -100,7 +100,7 @@ type DOMachineStatus struct {
 // +kubebuilder:storageversion
 // +kubebuilder:subresource:status
 
-// DOMachine is the Schema for the domachines API
+// DOMachine is the Schema for the domachines API.
 type DOMachine struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -111,7 +111,7 @@ type DOMachine struct {
 
 // +kubebuilder:object:root=true
 
-// DOMachineList contains a list of DOMachine
+// DOMachineList contains a list of DOMachine.
 type DOMachineList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`

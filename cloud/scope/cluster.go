@@ -129,7 +129,7 @@ func (s *ClusterScope) Network() *infrav1.DONetworkResource {
 	return &s.DOCluster.Status.Network
 }
 
-// SetReady sets the DOCluster Ready Status
+// SetReady sets the DOCluster Ready Status.
 func (s *ClusterScope) SetReady() {
 	s.DOCluster.Status.Ready = true
 }
