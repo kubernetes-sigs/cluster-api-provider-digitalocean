@@ -21,7 +21,7 @@ spec:
     status: {}
   validation:
     openAPIV3Schema:
-      description: DOMachine is the Schema for the domachines API
+      description: DOMachine is the Schema for the domachines API.
       properties:
         apiVersion:
           description: 'APIVersion defines the versioned schema of this representation
@@ -36,7 +36,7 @@ spec:
         metadata:
           type: object
         spec:
-          description: DOMachineSpec defines the desired state of DOMachine
+          description: DOMachineSpec defines the desired state of DOMachine.
           properties:
             additionalTags:
               description: AdditionalTags is an optional set of tags to add to DigitalOcean
@@ -73,7 +73,7 @@ spec:
           - sshKeys
           type: object
         status:
-          description: DOMachineStatus defines the observed state of DOMachine
+          description: DOMachineStatus defines the observed state of DOMachine.
           properties:
             addresses:
               description: Addresses contains the DigitalOcean droplet associated

@@ -42,7 +42,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 )
 
-// DOMachineReconciler reconciles a DOMachine object
+// DOMachineReconciler reconciles a DOMachine object.
 type DOMachineReconciler struct {
 	client.Client
 	Log      logr.Logger

@@ -20,7 +20,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// DOMachineTemplateSpec defines the desired state of DOMachineTemplate
+// DOMachineTemplateSpec defines the desired state of DOMachineTemplate.
 type DOMachineTemplateSpec struct {
 	Template DOMachineTemplateResource `json:"template"`
 }
@@ -29,7 +29,7 @@ type DOMachineTemplateSpec struct {
 // +kubebuilder:resource:path=domachinetemplates,scope=Namespaced,categories=cluster-api
 // +kubebuilder:storageversion
 
-// DOMachineTemplate is the Schema for the domachinetemplates API
+// DOMachineTemplate is the Schema for the domachinetemplates API.
 type DOMachineTemplate struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -39,7 +39,7 @@ type DOMachineTemplate struct {
 
 // +kubebuilder:object:root=true
 
-// DOMachineTemplateList contains a list of DOMachineTemplate
+// DOMachineTemplateList contains a list of DOMachineTemplate.
 type DOMachineTemplateList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`

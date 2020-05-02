@@ -66,7 +66,7 @@ type DONetworkResource struct {
 	APIServerLoadbalancersRef DOResourceReference `json:"apiServerLoadbalancersRef,omitempty"`
 }
 
-// DOMachineTemplateResource describes the data needed to create am DOMachine from a template
+// DOMachineTemplateResource describes the data needed to create am DOMachine from a template.
 type DOMachineTemplateResource struct {
 	// Spec is the specification of the desired behavior of the machine.
 	Spec DOMachineSpec `json:"spec"`

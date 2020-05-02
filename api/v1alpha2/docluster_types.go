@@ -26,7 +26,7 @@ const (
 	ClusterFinalizer = "docluster.infrastructure.cluster.x-k8s.io"
 )
 
-// DOClusterSpec defines the desired state of DOCluster
+// DOClusterSpec defines the desired state of DOCluster.
 type DOClusterSpec struct {
 	// The DigitalOcean Region the cluster lives in.
 	// It must be one of available region on DigitalOcean. See https://developers.digitalocean.com/documentation/v2/#list-all-regions
@@ -36,7 +36,7 @@ type DOClusterSpec struct {
 	Network DONetwork `json:"network,omitempty"`
 }
 
-// DOClusterStatus defines the observed state of DOCluster
+// DOClusterStatus defines the observed state of DOCluster.
 type DOClusterStatus struct {
 	// Ready denotes that the cluster (infrastructure) is ready.
 	// +optional
@@ -54,7 +54,7 @@ type DOClusterStatus struct {
 // +kubebuilder:storageversion
 // +kubebuilder:subresource:status
 
-// DOCluster is the Schema for the dOClusters API
+// DOCluster is the Schema for the dOClusters API.
 type DOCluster struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -65,7 +65,7 @@ type DOCluster struct {
 
 // +kubebuilder:object:root=true
 
-// DOClusterList contains a list of DOCluster
+// DOClusterList contains a list of DOCluster.
 type DOClusterList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
