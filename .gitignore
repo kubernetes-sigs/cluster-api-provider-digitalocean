@@ -58,4 +58,7 @@ junit.*.xml
 
 .DS_Store
 
+# Tilt files.
 .tiltbuild
+/tilt.d
+tilt-settings.json

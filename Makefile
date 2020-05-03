@@ -66,6 +66,9 @@ PULL_POLICY ?= Always
 DOCKER_BUILDKIT ?= 1
 export DOCKER_BUILDKIT
 
+KIND_CLUSTER_NAME ?= capdo
+
+
 ## --------------------------------------
 ##@ Help
 ## --------------------------------------
@@ -90,8 +93,8 @@ test-e2e: ## Run e2e tests
 	PULL_POLICY=IfNotPresent $(MAKE) docker-build
 	go test -v -timeout=1h ./$(TEST_E2E_DIR) -args -ginkgo.v -ginkgo.focus "functional tests" --managerImage $(CONTROLLER_IMG)-$(ARCH):$(TAG)
 
-.PHONY: test-conformance	
-test-conformance: ## Run conformance test on workload cluster	
+.PHONY: test-conformance
+test-conformance: ## Run conformance test on workload cluster
 	PULL_POLICY=IfNotPresent $(MAKE) docker-build
 	go test -v -timeout=2h ./$(TEST_E2E_DIR) -args -ginkgo.v -ginkgo.focus "conformance tests" --managerImage $(CONTROLLER_IMG)-$(ARCH):$(TAG)
 
@@ -291,7 +294,9 @@ CLUSTER_NAME ?= test1
 
 .PHONY: create-cluster-management
 create-cluster-management: $(CLUSTERCTL) ## Create a development Kubernetes cluster on DigitalOcean in a KIND management cluster.
-	kind create cluster --name=clusterapi
+	## Create kind management cluster.
+	$(MAKE) kind-create
+
 	@if [ ! -z "${LOAD_IMAGE}" ]; then \
 		echo "loading ${LOAD_IMAGE} into kind cluster ..." && \
 		kind --name="clusterapi" load docker-image "${LOAD_IMAGE}"; \
@@ -328,8 +333,10 @@ create-cluster-management: $(CLUSTERCTL) ## Create a development Kubernetes clus
 		--kubeconfig=$$(kind get kubeconfig-path --name="clusterapi") \
 		create -f examples/_out/machinedeployment.yaml
 
-.PHONY: delete-cluster
-delete-cluster: $(CLUSTERCTL) ## Deletes the development Kubernetes Cluster "$CLUSTER_NAME"
+
+.PHONY: delete-workload-cluster
+delete-workload-cluster: $(CLUSTERCTL) ## Deletes the development Kubernetes Cluster "$CLUSTER_NAME"
+	@echo 'Your DO resources will now be deleted, this can take some minutes'
 	$(CLUSTERCTL) \
 	delete cluster -v 4 \
 	--bootstrap-type kind \
@@ -338,9 +345,17 @@ delete-cluster: $(CLUSTERCTL) ## Deletes the development Kubernetes Cluster "$CL
 	--kubeconfig ./kubeconfig \
 	-p ./examples/_out/provider-components.yaml \
 
+.PHONY: kind-create
+kind-create: ## create capdo kind cluster if needed
+	./scripts/kind-with-registry.sh
+
+.PHONY: delete-cluster
+delete-cluster: delete-workload-cluster  ## Deletes the example kind cluster "capdo"
+	kind delete cluster --name=$(KIND_CLUSTER_NAME)
+
 .PHONY: kind-reset
-kind-reset: ## Destroys the "clusterapi" kind cluster.
-	kind delete cluster --name=clusterapi || true
+kind-reset: ## Destroys the "capdo" kind cluster.
+	kind delete cluster --name=$(KIND_CLUSTER_NAME) || true
 
 ## --------------------------------------
 ##@ Verification
