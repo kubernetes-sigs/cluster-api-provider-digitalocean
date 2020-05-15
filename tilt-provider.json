@@ -1,0 +1,15 @@
+{
+  "name": "digitalocean",
+  "config": {
+    "image": "gcr.io/k8s-staging-cluster-api-do/cluster-api-digitalocean-controller",
+    "live_reload_deps": [
+      "main.go",
+      "go.mod",
+      "go.sum",
+      "api",
+      "cloud",
+      "controllers",
+      "pkg"
+    ]
+  }
+}
