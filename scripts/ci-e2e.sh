@@ -31,13 +31,15 @@ source "${REPO_ROOT}/hack/ensure-go.sh"
 source "${REPO_ROOT}/hack/ensure-kind.sh"
 # shellcheck source=../hack/ensure-kubectl.sh
 source "${REPO_ROOT}/hack/ensure-kubectl.sh"
+# shellcheck source=../hack/ensure-kustomize.sh
+source "${REPO_ROOT}/hack/ensure-kustomize.sh"
 # shellcheck source=../hack/ensure-doctl.sh
 source "${REPO_ROOT}/hack/ensure-doctl.sh"
 
 ARTIFACTS="${ARTIFACTS:-${PWD}/_artifacts}"
 mkdir -p "${ARTIFACTS}/logs/"
 
-SSH_KEY_NAME=capdo-e2e-test
+SSH_KEY_NAME=capdo-e2e-$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 12 ; echo '')
 SSH_KEY_PATH=/tmp/${SSH_KEY_NAME}
 create_ssh_key() {
     echo "generating new ssh key"
