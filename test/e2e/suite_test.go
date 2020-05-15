@@ -150,9 +150,9 @@ var _ = AfterSuite(func() {
 	// If running in prow, output the logs to the artifacts path
 	artifactPath, exists := os.LookupEnv("ARTIFACTS")
 	if exists {
-		ioutil.WriteFile(path.Join(artifactPath, "capi.log"), []byte(capiLogs), 0644)   // nolint
-		ioutil.WriteFile(path.Join(artifactPath, "cabpk.log"), []byte(cabpkLogs), 0644) // nolint
-		ioutil.WriteFile(path.Join(artifactPath, "capdo.log"), []byte(capdoLogs), 0644) // nolint
+		ioutil.WriteFile(path.Join(artifactPath, "/logs/capi.log"), []byte(capiLogs), 0644)   // nolint
+		ioutil.WriteFile(path.Join(artifactPath, "/logs/cabpk.log"), []byte(cabpkLogs), 0644) // nolint
+		ioutil.WriteFile(path.Join(artifactPath, "/logs/capdo.log"), []byte(capdoLogs), 0644) // nolint
 		return
 	}
 
