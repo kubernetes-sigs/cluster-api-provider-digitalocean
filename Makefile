@@ -47,9 +47,9 @@ RELEASE_NOTES := $(TOOLS_DIR)/$(RELEASE_NOTES_BIN)
 
 # Define Docker related variables. Releases should modify and double check these vars.
 REGISTRY ?= gcr.io/$(shell gcloud config get-value project)
-STAGING_REGISTRY := gcr.io/k8s-staging-cluster-api-digitalocean
-PROD_REGISTRY := us.gcr.io/k8s-artifacts-prod/cluster-api-digitalocean
-IMAGE_NAME ?= cluster-api-digitalocean-controller
+STAGING_REGISTRY := gcr.io/k8s-staging-cluster-api-do
+PROD_REGISTRY := us.gcr.io/k8s-artifacts-prod/cluster-api-do
+IMAGE_NAME ?= cluster-api-do-controller
 CONTROLLER_IMG ?= $(REGISTRY)/$(IMAGE_NAME)
 TAG ?= dev
 ARCH ?= amd64
