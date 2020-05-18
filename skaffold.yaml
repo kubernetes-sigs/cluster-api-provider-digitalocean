@@ -4,7 +4,7 @@ build:
   local:
     useBuildkit: true
   artifacts:
-  - image: cluster-api-digitalocean-controller
+  - image: cluster-api-do-controller
     docker:
       buildArgs:
         ARCH: amd64
