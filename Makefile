@@ -64,12 +64,7 @@ RBAC_ROOT ?= $(MANIFEST_ROOT)/rbac
 # Allow overriding the imagePullPolicy
 PULL_POLICY ?= Always
 
-# Enable docker buildkit as default for better build performance.
-DOCKER_BUILDKIT ?= 1
-export DOCKER_BUILDKIT
-
 KIND_CLUSTER_NAME ?= capdo
-
 
 ## --------------------------------------
 ##@ Help
