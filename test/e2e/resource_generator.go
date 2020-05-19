@@ -147,3 +147,90 @@ func (gen MachineGenerator) Generate(namespace, clusterName string, isControlPla
 
 	return machine, kubeadmconfig, domachine
 }
+
+type MachineDeploymentGenerator struct{}
+
+func (gen MachineDeploymentGenerator) Generate(namespace, clusterName string) (*clusterv1.MachineDeployment, *bootstrapkubeadmv1.KubeadmConfigTemplate, *infrav1.DOMachineTemplate) {
+	name := clusterName + "-md-0-" + util.RandomString(6)
+	kubeadmConfigTemplte := &bootstrapkubeadmv1.KubeadmConfigTemplate{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: namespace,
+			Name:      name,
+		},
+		Spec: bootstrapkubeadmv1.KubeadmConfigTemplateSpec{
+			Template: bootstrapkubeadmv1.KubeadmConfigTemplateResource{
+				Spec: bootstrapkubeadmv1.KubeadmConfigSpec{
+					JoinConfiguration: &kubeadmv1beta1.JoinConfiguration{
+						NodeRegistration: kubeadmv1beta1.NodeRegistrationOptions{
+							Name: `{{ ds.meta_data["local_hostname"] }}`,
+							KubeletExtraArgs: map[string]string{
+								"cloud-provider": "external",
+								"provider-id":    `digitalocean://{{ ds.meta_data["instance_id"] }}`,
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	domachineTemplate := &infrav1.DOMachineTemplate{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: namespace,
+			Name:      name,
+		},
+		Spec: infrav1.DOMachineTemplateSpec{
+			Template: infrav1.DOMachineTemplateResource{
+				Spec: infrav1.DOMachineSpec{
+					Size:           machineSize,
+					Image:          intstr.Parse(machineImage),
+					SSHKeys:        []intstr.IntOrString{intstr.Parse(machineSSHKey)},
+					AdditionalTags: infrav1.Tags{"e2e-test"},
+				},
+			},
+		},
+	}
+
+	replicas := int32(1)
+	machineDeployment := &clusterv1.MachineDeployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: namespace,
+			Name:      name,
+			Labels: map[string]string{
+				clusterv1.MachineClusterLabelName: clusterName,
+				"nodepool":                        "nodepool-0",
+			},
+		},
+		Spec: clusterv1.MachineDeploymentSpec{
+			Replicas: &replicas,
+			Template: clusterv1.MachineTemplateSpec{
+				ObjectMeta: clusterv1.ObjectMeta{
+					Namespace: namespace,
+					Labels: map[string]string{
+						clusterv1.MachineClusterLabelName: clusterName,
+						"nodepool":                        "nodepool-0",
+					},
+				},
+				Spec: clusterv1.MachineSpec{
+					Version: kubernetesVersion,
+					Bootstrap: clusterv1.Bootstrap{
+						ConfigRef: &corev1.ObjectReference{
+							APIVersion: bootstrapkubeadmv1.GroupVersion.String(),
+							Kind:       TypeToKind(kubeadmConfigTemplte),
+							Namespace:  kubeadmConfigTemplte.GetNamespace(),
+							Name:       kubeadmConfigTemplte.GetName(),
+						},
+					},
+					InfrastructureRef: corev1.ObjectReference{
+						APIVersion: infrav1.GroupVersion.String(),
+						Kind:       TypeToKind(domachineTemplate),
+						Namespace:  domachineTemplate.GetNamespace(),
+						Name:       domachineTemplate.GetName(),
+					},
+				},
+			},
+		},
+	}
+
+	return machineDeployment, kubeadmConfigTemplte, domachineTemplate
+}
