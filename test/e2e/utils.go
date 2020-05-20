@@ -121,6 +121,22 @@ func WaitForMachineNodeRef(client crclient.Client, namespace, name string) {
 	}, pollTimeout, pollInterval).ShouldNot(BeNil())
 }
 
+func WaitForMachineDeploymentRunning(client crclient.Client, namespace, name string, expectedReplicas int32) {
+	Eventually(func() (bool, error) {
+		machineDeployment := &clusterv1.MachineDeployment{}
+		err := client.Get(context.TODO(), crclient.ObjectKey{Namespace: namespace, Name: name}, machineDeployment)
+		if err != nil {
+			return false, err
+		}
+
+		if machineDeployment.Status.ReadyReplicas == expectedReplicas {
+			return true, nil
+		}
+
+		return false, nil
+	}, pollTimeout, pollInterval).Should(BeTrue())
+}
+
 func WaitForDeletion(client crclient.Client, obj runtime.Object, namespace, name string) {
 	Eventually(func() bool {
 		err := client.Get(context.TODO(), crclient.ObjectKey{Namespace: namespace, Name: name}, obj)
