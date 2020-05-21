@@ -64,6 +64,11 @@ RBAC_ROOT ?= $(MANIFEST_ROOT)/rbac
 # Allow overriding the imagePullPolicy
 PULL_POLICY ?= Always
 
+# Docker buildkit disabled for now until we figure out how to fix when
+# building the image in the post stage
+DOCKER_BUILDKIT ?= 0
+export DOCKER_BUILDKIT
+
 KIND_CLUSTER_NAME ?= capdo
 
 ## --------------------------------------
