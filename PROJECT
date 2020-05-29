@@ -10,4 +10,13 @@ resources:
 - group: infrastructure
   kind: DOMachineTemplate
   version: v1alpha2
+- group: infrastructure
+  kind: DOCluster
+  version: v1alpha3
+- group: infrastructure
+  kind: DOMachine
+  version: v1alpha3
+- group: infrastructure
+  kind: DOMachineTemplate
+  version: v1alpha3
 version: "2"

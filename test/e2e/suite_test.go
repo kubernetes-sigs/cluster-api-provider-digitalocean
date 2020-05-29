@@ -38,9 +38,9 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 
-	infrav1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha2"
+	infrav1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha3"
 
-	bootstrapkubeadmv1 "sigs.k8s.io/cluster-api/bootstrap/kubeadm/api/v1alpha2"
+	bootstrapkubeadmv1 "sigs.k8s.io/cluster-api/bootstrap/kubeadm/api/v1alpha3"
 	"sigs.k8s.io/cluster-api/test/helpers/components"
 	capiFlag "sigs.k8s.io/cluster-api/test/helpers/flag"
 	"sigs.k8s.io/cluster-api/test/helpers/kind"
@@ -50,22 +50,18 @@ import (
 )
 
 const (
-	CAPIVERSION  = "v0.2.9"
-	CABPKVERSION = "v0.1.6"
-
-	capiNamespace       = "capi-system"
-	capiDeploymentName  = "capi-controller-manager"
-	cabpkNamespace      = "cabpk-system"
-	cabpkDeploymentName = "cabpk-controller-manager"
-	capdoNamespace      = "capdo-system"
-	capdoDeploymentName = "capdo-controller-manager"
-	setupTimeout        = 10 * 60
+	certManager          = "https://github.com/jetstack/cert-manager/releases/download/v0.11.0/cert-manager.yaml"
+	capiComponents       = "https://github.com/kubernetes-sigs/cluster-api/releases/download/v0.3.6/cluster-api-components.yaml"
+	certManagerNamespace = "cert-manager"
+	capiNamespace        = "capi-system"
+	cabpkNamespace       = "capi-kubeadm-bootstrap-system"
+	capdoNamespace       = "capdo-system"
+	capiWebhookNamespace = "capi-webhook-system"
+	setupTimeout         = 10 * 60
 )
 
 var (
 	managerImage      = capiFlag.DefineOrLookupStringFlag("managerImage", "", "Docker image to load into the kind cluster for testing")
-	capiComponents    = capiFlag.DefineOrLookupStringFlag("capiComponents", "https://github.com/kubernetes-sigs/cluster-api/releases/download/"+CAPIVERSION+"/cluster-api-components.yaml", "URL to CAPI components to load")
-	cabpkComponents   = capiFlag.DefineOrLookupStringFlag("cabpkComponents", "https://github.com/kubernetes-sigs/cluster-api-bootstrap-provider-kubeadm/releases/download/"+CABPKVERSION+"/bootstrap-components.yaml", "URL to CAPI components to load")
 	capdoComponents   = capiFlag.DefineOrLookupStringFlag("capdoComponents", "", "capdo components to load")
 	kustomizeBinary   = capiFlag.DefineOrLookupStringFlag("kustomizeBinary", "kustomize", "path to the kustomize binary")
 	kubernetesVersion = capiFlag.DefineOrLookupStringFlag("kubernetesVersion", "v1.16.2", "kubernetes version to test on")
@@ -124,17 +120,22 @@ var _ = BeforeSuite(func() {
 	kindclient, err = crclient.New(kindcluster.RestConfig(), crclient.Options{Scheme: s})
 	Expect(err).NotTo(HaveOccurred())
 
-	kindcluster.ApplyYAML(*capiComponents)
-	kindcluster.ApplyYAML(*cabpkComponents)
+	kindcluster.ApplyYAML(certManager)
+	components.WaitDeployment(kindclient, certManagerNamespace, "cert-manager-webhook")
+
+	kindcluster.ApplyYAML(capiComponents)
 
 	if capdoComponents == nil || *capdoComponents == "" {
 		buildCAPDOComponents(capdoComponents)
 	}
 	kindcluster.ApplyYAML(*capdoComponents)
 
-	components.WaitDeployment(kindclient, capiNamespace, capiDeploymentName)
-	components.WaitDeployment(kindclient, cabpkNamespace, cabpkDeploymentName)
-	components.WaitDeployment(kindclient, capdoNamespace, capdoDeploymentName)
+	components.WaitDeployment(kindclient, capiNamespace, "capi-controller-manager")
+	components.WaitDeployment(kindclient, cabpkNamespace, "capi-kubeadm-bootstrap-controller-manager")
+	components.WaitDeployment(kindclient, capdoNamespace, "capdo-controller-manager")
+
+	components.WaitDeployment(kindclient, capiWebhookNamespace, "capi-controller-manager")
+	components.WaitDeployment(kindclient, capiWebhookNamespace, "capi-kubeadm-bootstrap-controller-manager")
 
 	// Recreate kindclient so that it knows about the cluster api types
 	kindclient, err = crclient.New(kindcluster.RestConfig(), crclient.Options{Scheme: s})
@@ -143,9 +144,9 @@ var _ = BeforeSuite(func() {
 
 var _ = AfterSuite(func() {
 	fmt.Fprintf(GinkgoWriter, "Tearing down kind cluster\n")
-	capiLogs := retrieveLogs(capiNamespace, capiDeploymentName)
-	cabpkLogs := retrieveLogs(cabpkNamespace, cabpkDeploymentName)
-	capdoLogs := retrieveLogs(capdoNamespace, capdoDeploymentName)
+	capiLogs := retrieveLogs(capiNamespace, "capi-controller-manager")
+	cabpkLogs := retrieveLogs(cabpkNamespace, "capi-kubeadm-bootstrap-controller-manager")
+	capdoLogs := retrieveLogs(capdoNamespace, "capdo-controller-manager")
 
 	// If running in prow, output the logs to the artifacts path
 	artifactPath, exists := os.LookupEnv("ARTIFACTS")
@@ -165,7 +166,7 @@ var _ = AfterSuite(func() {
 })
 
 func buildCAPDOComponents(manifest *string) {
-	capdoManifests, err := exec.Command(*kustomizeBinary, "build", "../../config/default").Output() // nolint
+	capdoManifests, err := exec.Command(*kustomizeBinary, "build", "../../config").Output() // nolint
 	if err != nil {
 		if exitError, ok := err.(*exec.ExitError); ok {
 			fmt.Fprintf(GinkgoWriter, "Error: %s\n", string(exitError.Stderr))

@@ -21,7 +21,7 @@ import (
 
 	"github.com/digitalocean/godo"
 
-	infrav1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha2"
+	infrav1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha3"
 )
 
 func (s *Service) GetLoadBalancer(id string) (*godo.LoadBalancer, error) {

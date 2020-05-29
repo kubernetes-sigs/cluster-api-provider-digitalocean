@@ -22,11 +22,11 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 
-	infrav1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha2"
+	infrav1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha3"
 
 	"k8s.io/klog/klogr"
 
-	clusterv1 "sigs.k8s.io/cluster-api/api/v1alpha2"
+	clusterv1 "sigs.k8s.io/cluster-api/api/v1alpha3"
 	"sigs.k8s.io/cluster-api/util/patch"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -134,9 +134,9 @@ func (s *ClusterScope) SetReady() {
 	s.DOCluster.Status.Ready = true
 }
 
-// SetAPIEndpoint sets the DOCluster status APIEndpoints.
-func (s *ClusterScope) SetAPIEndpoint(apiEndpoint []infrav1.APIEndpoint) {
-	s.DOCluster.Status.APIEndpoints = apiEndpoint
+// SetControlPlaneEndpoint sets the DOCluster status APIEndpoints.
+func (s *ClusterScope) SetControlPlaneEndpoint(apiEndpoint clusterv1.APIEndpoint) {
+	s.DOCluster.Spec.ControlPlaneEndpoint = apiEndpoint
 }
 
 // APIServerLoadbalancers get the DOCluster Spec Network APIServerLoadbalancers.

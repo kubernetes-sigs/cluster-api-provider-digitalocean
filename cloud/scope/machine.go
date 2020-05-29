@@ -22,13 +22,14 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 
-	infrav1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha2"
+	infrav1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha3"
 
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/klog/klogr"
 	"k8s.io/utils/pointer"
 
-	clusterv1 "sigs.k8s.io/cluster-api/api/v1alpha2"
+	clusterv1 "sigs.k8s.io/cluster-api/api/v1alpha3"
 	"sigs.k8s.io/cluster-api/controllers/noderefutil"
 	capierrors "sigs.k8s.io/cluster-api/errors"
 	"sigs.k8s.io/cluster-api/util"
@@ -164,14 +165,14 @@ func (m *MachineScope) SetReady() {
 	m.DOMachine.Status.Ready = true
 }
 
-// SetErrorMessage sets the DOMachine status error message.
-func (m *MachineScope) SetErrorMessage(v error) {
-	m.DOMachine.Status.ErrorMessage = pointer.StringPtr(v.Error())
+// SetFailureMessage sets the DOMachine status error message.
+func (m *MachineScope) SetFailureMessage(v error) {
+	m.DOMachine.Status.FailureMessage = pointer.StringPtr(v.Error())
 }
 
-// SetErrorReason sets the DOMachine status error reason.
-func (m *MachineScope) SetErrorReason(v capierrors.MachineStatusError) {
-	m.DOMachine.Status.ErrorReason = &v
+// SetFailureReason sets the DOMachine status error reason.
+func (m *MachineScope) SetFailureReason(v capierrors.MachineStatusError) {
+	m.DOMachine.Status.FailureReason = &v
 }
 
 // SetAddresses sets the address status.
@@ -186,4 +187,23 @@ func (m *MachineScope) AdditionalTags() infrav1.Tags {
 	}
 
 	return m.DOMachine.Spec.AdditionalTags.DeepCopy()
+}
+
+// GetBootstrapData returns the bootstrap data from the secret in the Machine's bootstrap.dataSecretName.
+func (m *MachineScope) GetBootstrapData() (string, error) {
+	if m.Machine.Spec.Bootstrap.DataSecretName == nil {
+		return "", errors.New("error retrieving bootstrap data: linked Machine's bootstrap.dataSecretName is nil")
+	}
+
+	secret := &corev1.Secret{}
+	key := types.NamespacedName{Namespace: m.Namespace(), Name: *m.Machine.Spec.Bootstrap.DataSecretName}
+	if err := m.client.Get(context.TODO(), key, secret); err != nil {
+		return "", errors.Wrapf(err, "failed to retrieve bootstrap data secret for DOMachine %s/%s", m.Namespace(), m.Name())
+	}
+
+	value, ok := secret.Data["value"]
+	if !ok {
+		return "", errors.New("error retrieving bootstrap data: secret value key is missing")
+	}
+	return string(value), nil
 }
