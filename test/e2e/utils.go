@@ -110,6 +110,7 @@ func WaitForDOMachineReady(client crclient.Client, namespace, name string) {
 }
 
 func WaitForMachineNodeRef(client crclient.Client, namespace, name string) {
+	timeout := 10 * time.Minute
 	Eventually(func() *corev1.ObjectReference {
 		machine := &clusterv1.Machine{}
 		err := client.Get(context.TODO(), crclient.ObjectKey{Namespace: namespace, Name: name}, machine)
@@ -118,7 +119,7 @@ func WaitForMachineNodeRef(client crclient.Client, namespace, name string) {
 		}
 
 		return machine.Status.NodeRef
-	}, pollTimeout, pollInterval).ShouldNot(BeNil())
+	}, timeout, pollInterval).ShouldNot(BeNil())
 }
 
 func WaitForMachineDeploymentRunning(client crclient.Client, namespace, name string, expectedReplicas int32) {
