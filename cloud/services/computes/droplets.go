@@ -17,14 +17,13 @@ limitations under the License.
 package computes
 
 import (
-	"encoding/base64"
 	"net/http"
 	"strconv"
 
 	"github.com/digitalocean/godo"
 	"github.com/pkg/errors"
 
-	infrav1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha2"
+	infrav1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha3"
 	"sigs.k8s.io/cluster-api-provider-digitalocean/cloud/scope"
 
 	corev1 "k8s.io/api/core/v1"
@@ -61,7 +60,7 @@ func (s *Service) GetDroplet(id string) (*godo.Droplet, error) {
 func (s *Service) CreateDroplet(scope *scope.MachineScope) (*godo.Droplet, error) {
 	s.scope.V(2).Info("Creating an instance for a machine")
 
-	bootstrapData, err := base64.StdEncoding.DecodeString(*scope.Machine.Spec.Bootstrap.Data)
+	bootstrapData, err := scope.GetBootstrapData()
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to decode bootstrap data")
 	}
@@ -94,7 +93,7 @@ func (s *Service) CreateDroplet(scope *scope.MachineScope) (*godo.Droplet, error
 		Image: godo.DropletCreateImage{
 			ID: image.ID,
 		},
-		UserData:          string(bootstrapData),
+		UserData:          bootstrapData,
 		PrivateNetworking: true,
 	}
 

@@ -24,12 +24,13 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"k8s.io/apimachinery/pkg/types"
 
-	infrav1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha2"
+	infrav1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha3"
 	crclient "sigs.k8s.io/controller-runtime/pkg/client"
 
-	clusterv1 "sigs.k8s.io/cluster-api/api/v1alpha2"
-	bootstrapkubeadmv1 "sigs.k8s.io/cluster-api/bootstrap/kubeadm/api/v1alpha2"
+	clusterv1 "sigs.k8s.io/cluster-api/api/v1alpha3"
+	bootstrapkubeadmv1 "sigs.k8s.io/cluster-api/bootstrap/kubeadm/api/v1alpha3"
 	"sigs.k8s.io/cluster-api/util"
 	"sigs.k8s.io/cluster-api/util/kubeconfig"
 )
@@ -66,7 +67,7 @@ var _ = Describe("functional tests", func() {
 			WaitForClusterControlplaneInitialized(kindclient, cluster.Namespace, cluster.Name)
 
 			By("Exporting Cluster kubeconfig")
-			kubeConfigData, err := kubeconfig.FromSecret(kindclient, cluster)
+			kubeConfigData, err := kubeconfig.FromSecret(context.Background(), kindclient, types.NamespacedName{Name: cluster.Name, Namespace: cluster.Namespace})
 			Expect(err).NotTo(HaveOccurred())
 			kubeConfigPath := path.Join(testTmpDir, clusterName+".kubeconfig")
 			Expect(ioutil.WriteFile(kubeConfigPath, kubeConfigData, 0600)).To(Succeed())

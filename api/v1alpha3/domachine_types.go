@@ -14,14 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package v1alpha2
+package v1alpha3
 
 import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
-
-	capierrors "sigs.k8s.io/cluster-api/errors"
+	"sigs.k8s.io/cluster-api/errors"
 )
 
 const (
@@ -52,12 +51,15 @@ type DOMachineStatus struct {
 	// Ready is true when the provider resource is ready.
 	// +optional
 	Ready bool `json:"ready"`
+
 	// Addresses contains the DigitalOcean droplet associated addresses.
 	Addresses []corev1.NodeAddress `json:"addresses,omitempty"`
+
 	// InstanceStatus is the status of the DigitalOcean droplet instance for this machine.
 	// +optional
 	InstanceStatus *DOResourceStatus `json:"instanceStatus,omitempty"`
-	// ErrorReason will be set in the event that there is a terminal problem
+
+	// FailureReason will be set in the event that there is a terminal problem
 	// reconciling the Machine and will contain a succinct value suitable
 	// for machine interpretation.
 	//
@@ -74,8 +76,9 @@ type DOMachineStatus struct {
 	// can be added as events to the Machine object and/or logged in the
 	// controller's output.
 	// +optional
-	ErrorReason *capierrors.MachineStatusError `json:"errorReason,omitempty"`
-	// ErrorMessage will be set in the event that there is a terminal problem
+	FailureReason *errors.MachineStatusError `json:"failureReason,omitempty"`
+
+	// FailureMessage will be set in the event that there is a terminal problem
 	// reconciling the Machine and will contain a more verbose string suitable
 	// for logging and human consumption.
 	//
@@ -92,12 +95,18 @@ type DOMachineStatus struct {
 	// can be added as events to the Machine object and/or logged in the
 	// controller's output.
 	// +optional
-	ErrorMessage *string `json:"errorMessage,omitempty"`
+	FailureMessage *string `json:"failureMessage,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 // +kubebuilder:resource:path=domachines,scope=Namespaced,categories=cluster-api
+// +kubebuilder:storageversion
 // +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="Cluster",type="string",JSONPath=".metadata.labels.cluster\\.x-k8s\\.io/cluster-name",description="Cluster to which this DOMachine belongs"
+// +kubebuilder:printcolumn:name="State",type="string",JSONPath=".status.instanceStatus",description="DigitalOcean droplet instance state"
+// +kubebuilder:printcolumn:name="Ready",type="string",JSONPath=".status.ready",description="Machine ready status"
+// +kubebuilder:printcolumn:name="InstanceID",type="string",JSONPath=".spec.providerID",description="DigitalOcean droplet instance ID"
+// +kubebuilder:printcolumn:name="Machine",type="string",JSONPath=".metadata.ownerReferences[?(@.kind==\"Machine\")].name",description="Machine object which owns with this DOMachine"
 
 // DOMachine is the Schema for the domachines API.
 type DOMachine struct {

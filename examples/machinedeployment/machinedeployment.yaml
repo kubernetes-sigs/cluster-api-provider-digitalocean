@@ -1,4 +1,4 @@
-apiVersion: cluster.x-k8s.io/v1alpha2
+apiVersion: cluster.x-k8s.io/v1alpha3
 kind: MachineDeployment
 metadata:
   name: ${CLUSTER_NAME}-md-0
@@ -21,14 +21,14 @@ spec:
       bootstrap:
         configRef:
           name: ${CLUSTER_NAME}-md-0
-          apiVersion: bootstrap.cluster.x-k8s.io/v1alpha2
+          apiVersion: bootstrap.cluster.x-k8s.io/v1alpha3
           kind: KubeadmConfigTemplate
       infrastructureRef:
         name: ${CLUSTER_NAME}-md-0
-        apiVersion: infrastructure.cluster.x-k8s.io/v1alpha2
+        apiVersion: infrastructure.cluster.x-k8s.io/v1alpha3
         kind: DOMachineTemplate
 ---
-apiVersion: infrastructure.cluster.x-k8s.io/v1alpha2
+apiVersion: infrastructure.cluster.x-k8s.io/v1alpha3
 kind: DOMachineTemplate
 metadata:
   name: ${CLUSTER_NAME}-md-0
@@ -40,7 +40,7 @@ spec:
       sshKeys:
         - ${SSH_KEY_FINGERPRINT}
 ---
-apiVersion: bootstrap.cluster.x-k8s.io/v1alpha2
+apiVersion: bootstrap.cluster.x-k8s.io/v1alpha3
 kind: KubeadmConfigTemplate
 metadata:
   name: ${CLUSTER_NAME}-md-0

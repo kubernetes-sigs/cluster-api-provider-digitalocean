@@ -24,7 +24,7 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 
-	infrav1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha2"
+	infrav1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha3"
 	"sigs.k8s.io/cluster-api-provider-digitalocean/cloud/scope"
 	"sigs.k8s.io/cluster-api-provider-digitalocean/cloud/services/computes"
 
@@ -32,11 +32,12 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/client-go/tools/record"
 
-	clusterv1 "sigs.k8s.io/cluster-api/api/v1alpha2"
+	clusterv1 "sigs.k8s.io/cluster-api/api/v1alpha3"
 	capierrors "sigs.k8s.io/cluster-api/errors"
 	"sigs.k8s.io/cluster-api/util"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
@@ -84,7 +85,7 @@ func (r *DOMachineReconciler) DOClusterToDOMachines(o handler.MapObject) []ctrl.
 		return result
 	}
 
-	labels := map[string]string{clusterv1.MachineClusterLabelName: cluster.Name}
+	labels := map[string]string{clusterv1.ClusterLabelName: cluster.Name}
 	machineList := &clusterv1.MachineList{}
 	if err := r.List(context.TODO(), machineList, client.InNamespace(c.Namespace), client.MatchingLabels(labels)); err != nil {
 		log.Error(err, "failed to list Machines")
@@ -197,15 +198,13 @@ func (r *DOMachineReconciler) reconcile(ctx context.Context, machineScope *scope
 	machineScope.Info("Reconciling DOMachine")
 	domachine := machineScope.DOMachine
 	// If the DOMachine is in an error state, return early.
-	if domachine.Status.ErrorReason != nil || domachine.Status.ErrorMessage != nil {
+	if domachine.Status.FailureReason != nil || domachine.Status.FailureMessage != nil {
 		machineScope.Info("Error state detected, skipping reconciliation")
 		return reconcile.Result{}, nil
 	}
 
 	// If the DOMachine doesn't have our finalizer, add it.
-	if !util.Contains(domachine.Finalizers, infrav1.MachineFinalizer) {
-		domachine.Finalizers = append(domachine.Finalizers, infrav1.MachineFinalizer)
-	}
+	controllerutil.AddFinalizer(domachine, infrav1.MachineFinalizer)
 
 	if !machineScope.Cluster.Status.InfrastructureReady {
 		machineScope.Info("Cluster infrastructure is not ready yet")
@@ -213,8 +212,8 @@ func (r *DOMachineReconciler) reconcile(ctx context.Context, machineScope *scope
 	}
 
 	// Make sure bootstrap data is available and populated.
-	if machineScope.Machine.Spec.Bootstrap.Data == nil {
-		machineScope.Info("Bootstrap data is not yet available")
+	if machineScope.Machine.Spec.Bootstrap.DataSecretName == nil {
+		machineScope.Info("Bootstrap data secret reference is not yet available")
 		return reconcile.Result{}, nil
 	}
 
@@ -227,8 +226,8 @@ func (r *DOMachineReconciler) reconcile(ctx context.Context, machineScope *scope
 		droplet, err = computesvc.CreateDroplet(machineScope)
 		if err != nil {
 			errs := errors.Errorf("Failed to create droplet instance for DOMachine %s/%s: %v", domachine.Namespace, domachine.Name, err)
-			machineScope.SetErrorReason(capierrors.CreateMachineError)
-			machineScope.SetErrorMessage(errs)
+			machineScope.SetFailureReason(capierrors.CreateMachineError)
+			machineScope.SetFailureMessage(errs)
 			r.Recorder.Event(domachine, corev1.EventTypeWarning, "InstanceCreatingError", errs.Error())
 			return reconcile.Result{}, errs
 		}
@@ -240,7 +239,7 @@ func (r *DOMachineReconciler) reconcile(ctx context.Context, machineScope *scope
 
 	addrs, err := computesvc.GetDropletAddress(droplet)
 	if err != nil {
-		machineScope.SetErrorMessage(errors.New("failed to getting droplet address"))
+		machineScope.SetFailureMessage(errors.New("failed to getting droplet address"))
 		return reconcile.Result{}, err
 	}
 	machineScope.SetAddresses(addrs)
@@ -256,8 +255,8 @@ func (r *DOMachineReconciler) reconcile(ctx context.Context, machineScope *scope
 		r.Recorder.Eventf(domachine, corev1.EventTypeNormal, "DOMachineReady", "DOMachine %s - has ready status", droplet.Name)
 		return reconcile.Result{}, nil
 	default:
-		machineScope.SetErrorReason(capierrors.UpdateMachineError)
-		machineScope.SetErrorMessage(errors.Errorf("Instance status %q is unexpected", droplet.Status))
+		machineScope.SetFailureReason(capierrors.UpdateMachineError)
+		machineScope.SetFailureMessage(errors.Errorf("Instance status %q is unexpected", droplet.Status))
 		return reconcile.Result{}, nil
 	}
 }
@@ -283,6 +282,6 @@ func (r *DOMachineReconciler) reconcileDelete(ctx context.Context, machineScope 
 	}
 
 	r.Recorder.Eventf(domachine, corev1.EventTypeNormal, "InstanceDeleted", "Deleted a instance - %s", droplet.Name)
-	domachine.Finalizers = util.Filter(domachine.Finalizers, infrav1.MachineFinalizer)
+	controllerutil.RemoveFinalizer(domachine, infrav1.MachineFinalizer)
 	return reconcile.Result{}, nil
 }

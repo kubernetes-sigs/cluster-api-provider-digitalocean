@@ -17,16 +17,16 @@ limitations under the License.
 package e2e
 
 import (
-	infrav1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha2"
+	infrav1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha3"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
-	clusterv1 "sigs.k8s.io/cluster-api/api/v1alpha2"
-	bootstrapkubeadmv1 "sigs.k8s.io/cluster-api/bootstrap/kubeadm/api/v1alpha2"
-	kubeadmv1beta1 "sigs.k8s.io/cluster-api/bootstrap/kubeadm/kubeadm/v1beta1"
+	clusterv1 "sigs.k8s.io/cluster-api/api/v1alpha3"
+	bootstrapkubeadmv1 "sigs.k8s.io/cluster-api/bootstrap/kubeadm/api/v1alpha3"
+	kubeadmv1beta1 "sigs.k8s.io/cluster-api/bootstrap/kubeadm/types/v1beta1"
 	"sigs.k8s.io/cluster-api/util"
 )
 
@@ -116,11 +116,10 @@ func (gen MachineGenerator) Generate(namespace, clusterName string, isControlPla
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: namespace,
 			Name:      name,
-			Labels: map[string]string{
-				clusterv1.MachineClusterLabelName: clusterName,
-			},
 		},
 		Spec: clusterv1.MachineSpec{
+			ClusterName: clusterName,
+			Version:     &kubernetesVersion,
 			Bootstrap: clusterv1.Bootstrap{
 				ConfigRef: &corev1.ObjectReference{
 					APIVersion: bootstrapkubeadmv1.GroupVersion.String(),
@@ -135,7 +134,6 @@ func (gen MachineGenerator) Generate(namespace, clusterName string, isControlPla
 				Namespace:  domachine.GetNamespace(),
 				Name:       domachine.GetName(),
 			},
-			Version: &kubernetesVersion,
 		},
 	}
 
@@ -197,22 +195,27 @@ func (gen MachineDeploymentGenerator) Generate(namespace, clusterName string) (*
 			Namespace: namespace,
 			Name:      name,
 			Labels: map[string]string{
-				clusterv1.MachineClusterLabelName: clusterName,
-				"nodepool":                        "nodepool-0",
+				"nodepool": "nodepool-0",
 			},
 		},
 		Spec: clusterv1.MachineDeploymentSpec{
-			Replicas: &replicas,
+			ClusterName: clusterName,
+			Replicas:    &replicas,
+			Selector: metav1.LabelSelector{
+				MatchLabels: map[string]string{
+					"nodepool": "nodepool-0",
+				},
+			},
 			Template: clusterv1.MachineTemplateSpec{
 				ObjectMeta: clusterv1.ObjectMeta{
 					Namespace: namespace,
 					Labels: map[string]string{
-						clusterv1.MachineClusterLabelName: clusterName,
-						"nodepool":                        "nodepool-0",
+						"nodepool": "nodepool-0",
 					},
 				},
 				Spec: clusterv1.MachineSpec{
-					Version: kubernetesVersion,
+					ClusterName: clusterName,
+					Version:     kubernetesVersion,
 					Bootstrap: clusterv1.Bootstrap{
 						ConfigRef: &corev1.ObjectReference{
 							APIVersion: bootstrapkubeadmv1.GroupVersion.String(),

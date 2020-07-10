@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package v1alpha2
+package v1alpha3
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -27,6 +27,7 @@ type DOMachineTemplateSpec struct {
 
 // +kubebuilder:object:root=true
 // +kubebuilder:resource:path=domachinetemplates,scope=Namespaced,categories=cluster-api
+// +kubebuilder:storageversion
 
 // DOMachineTemplate is the Schema for the domachinetemplates API.
 type DOMachineTemplate struct {

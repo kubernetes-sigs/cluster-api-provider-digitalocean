@@ -8,6 +8,5 @@ spec:
     spec:
       containers:
       # Change the value of image field below to your controller image URL
-      - image: cluster-api-do-controller
+      - image: gcr.io/k8s-staging-cluster-api-do/cluster-api-do-controller
         name: manager
-        imagePullPolicy: IfNotPresent

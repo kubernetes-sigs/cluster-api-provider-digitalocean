@@ -23,7 +23,7 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 
-	infrav1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha2"
+	infrav1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha3"
 	"sigs.k8s.io/cluster-api-provider-digitalocean/cloud/scope"
 	"sigs.k8s.io/cluster-api-provider-digitalocean/cloud/services/networking"
 
@@ -31,9 +31,11 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/client-go/tools/record"
 
+	clusterv1 "sigs.k8s.io/cluster-api/api/v1alpha3"
 	"sigs.k8s.io/cluster-api/util"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
@@ -110,9 +112,7 @@ func (r *DOClusterReconciler) reconcile(ctx context.Context, clusterScope *scope
 	clusterScope.Info("Reconciling DOCluster")
 	docluster := clusterScope.DOCluster
 	// If the DOCluster doesn't have our finalizer, add it.
-	if !util.Contains(docluster.Finalizers, infrav1.ClusterFinalizer) {
-		docluster.Finalizers = append(docluster.Finalizers, infrav1.ClusterFinalizer)
-	}
+	controllerutil.AddFinalizer(docluster, infrav1.ClusterFinalizer)
 
 	networkingsvc := networking.NewService(ctx, clusterScope)
 	apiServerLoadbalancer := clusterScope.APIServerLoadbalancers()
@@ -141,11 +141,9 @@ func (r *DOClusterReconciler) reconcile(ctx context.Context, clusterScope *scope
 	}
 
 	r.Recorder.Eventf(docluster, corev1.EventTypeNormal, "LoadBalancerReady", "LoadBalancer got an IP Address - %s", loadbalancer.IP)
-	clusterScope.SetAPIEndpoint([]infrav1.APIEndpoint{
-		{
-			Host: loadbalancer.IP,
-			Port: apiServerLoadbalancer.Port,
-		},
+	clusterScope.SetControlPlaneEndpoint(clusterv1.APIEndpoint{
+		Host: loadbalancer.IP,
+		Port: int32(apiServerLoadbalancer.Port),
 	})
 
 	clusterScope.Info("Set DOCluster status to ready")
@@ -176,6 +174,7 @@ func (r *DOClusterReconciler) reconcileDelete(ctx context.Context, clusterScope 
 	}
 
 	r.Recorder.Eventf(docluster, corev1.EventTypeNormal, "LoadBalancerDeleted", "Deleted a instance - %s", loadbalancer.Name)
-	docluster.Finalizers = util.Filter(docluster.Finalizers, infrav1.ClusterFinalizer)
+	// Cluster is deleted so remove the finalizer.
+	controllerutil.RemoveFinalizer(docluster, infrav1.ClusterFinalizer)
 	return reconcile.Result{}, nil
 }
