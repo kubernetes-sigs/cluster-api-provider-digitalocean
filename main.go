@@ -22,7 +22,8 @@ import (
 
 	// +kubebuilder:scaffold:imports
 	"github.com/spf13/pflag"
-	infrav1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha3"
+	infrav1alpha2 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha2"
+	infrav1alpha3 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha3"
 	"sigs.k8s.io/cluster-api-provider-digitalocean/controllers"
 
 	"k8s.io/apimachinery/pkg/runtime"
@@ -44,7 +45,8 @@ var (
 func init() {
 	_ = clientgoscheme.AddToScheme(scheme)
 
-	_ = infrav1.AddToScheme(scheme)
+	_ = infrav1alpha2.AddToScheme(scheme)
+	_ = infrav1alpha3.AddToScheme(scheme)
 	_ = clusterv1.AddToScheme(scheme)
 	// +kubebuilder:scaffold:scheme
 }
