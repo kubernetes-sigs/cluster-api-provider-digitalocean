@@ -84,7 +84,7 @@ help:  ## Display this help
 
 .PHONY: test
 test: generate lint ## Run tests
-	go test -v ./api/... ./controllers/... ./pkg/...
+	go test -v ./api/... ./controllers/... ./cloud/...
 
 .PHONY: test-integration
 test-integration: ## Run integration tests
