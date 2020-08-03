@@ -53,10 +53,13 @@ func main() {
 		metricsAddr             string
 		enableLeaderElection    bool
 		leaderElectionNamespace string
+		healthAddr              string
 	)
+
 	flag.StringVar(&metricsAddr, "metrics-addr", ":8080", "The address the metric endpoint binds to.")
 	flag.BoolVar(&enableLeaderElection, "enable-leader-election", false, "Enable leader election for controller manager. Enabling this will ensure there is only one active controller manager.")
 	flag.StringVar(&leaderElectionNamespace, "leader-election-namespace", "", "Namespace that the controller performs leader election in. If unspecified, the controller will discover which namespace it is running in.")
+	flag.StringVar(&healthAddr, "health-addr", ":9440", "The address the health endpoint binds to.")
 	flag.Parse()
 
 	ctrl.SetLogger(zap.New(func(o *zap.Options) {
@@ -70,7 +73,7 @@ func main() {
 		LeaderElectionID:        "controller-leader-election-capdo",
 		LeaderElectionNamespace: leaderElectionNamespace,
 		Port:                    9443,
-		HealthProbeBindAddress:  ":9440",
+		HealthProbeBindAddress:  healthAddr,
 	})
 	if err != nil {
 		setupLog.Error(err, "unable to start manager")
