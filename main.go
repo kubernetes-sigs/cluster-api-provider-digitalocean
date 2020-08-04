@@ -24,6 +24,8 @@ import (
 
 	// +kubebuilder:scaffold:imports
 	"github.com/spf13/pflag"
+	"k8s.io/klog"
+	"k8s.io/klog/klogr"
 	infrav1alpha2 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha2"
 	infrav1alpha3 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha3"
 	"sigs.k8s.io/cluster-api-provider-digitalocean/controllers"
@@ -36,7 +38,6 @@ import (
 	"sigs.k8s.io/cluster-api/util/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 )
 
 var (
@@ -45,8 +46,9 @@ var (
 )
 
 func init() {
-	_ = clientgoscheme.AddToScheme(scheme)
+	klog.InitFlags(nil)
 
+	_ = clientgoscheme.AddToScheme(scheme)
 	_ = infrav1alpha2.AddToScheme(scheme)
 	_ = infrav1alpha3.AddToScheme(scheme)
 	_ = clusterv1.AddToScheme(scheme)
@@ -87,9 +89,7 @@ func main() {
 		}()
 	}
 
-	ctrl.SetLogger(zap.New(func(o *zap.Options) {
-		o.Development = true
-	}))
+	ctrl.SetLogger(klogr.New())
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:                  scheme,
