@@ -18,6 +18,8 @@ package main
 
 import (
 	"flag"
+	"net/http"
+	_ "net/http/pprof" //nolint
 	"os"
 
 	// +kubebuilder:scaffold:imports
@@ -57,6 +59,7 @@ var (
 	leaderElectionNamespace string
 	healthAddr              string
 	watchNamespace          string
+	profilerAddress         string
 )
 
 func InitFlags(fs *pflag.FlagSet) {
@@ -65,6 +68,7 @@ func InitFlags(fs *pflag.FlagSet) {
 	fs.StringVar(&leaderElectionNamespace, "leader-election-namespace", "", "Namespace that the controller performs leader election in. If unspecified, the controller will discover which namespace it is running in.")
 	fs.StringVar(&healthAddr, "health-addr", ":9440", "The address the health endpoint binds to.")
 	fs.StringVar(&watchNamespace, "namespace", "", "Namespace that the controller watches to reconcile cluster-api objects. If unspecified, the controller watches for cluster-api objects across all namespaces.")
+	fs.StringVar(&profilerAddress, "profiler-address", "", "Bind address to expose the pprof profiler (e.g. localhost:6060)")
 }
 
 func main() {
@@ -74,6 +78,13 @@ func main() {
 
 	if watchNamespace != "" {
 		setupLog.Info("Watching cluster-api objects only in namespace for reconciliation", "namespace", watchNamespace)
+	}
+
+	if profilerAddress != "" {
+		setupLog.Info("Profiler listening for requests", "profiler-address", profilerAddress)
+		go func() {
+			setupLog.Error(http.ListenAndServe(profilerAddress, nil), "listen and serve error")
+		}()
 	}
 
 	ctrl.SetLogger(zap.New(func(o *zap.Options) {
