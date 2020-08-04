@@ -21,6 +21,7 @@ import (
 	"os"
 
 	// +kubebuilder:scaffold:imports
+	"github.com/spf13/pflag"
 	infrav1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha3"
 	"sigs.k8s.io/cluster-api-provider-digitalocean/controllers"
 
@@ -48,19 +49,30 @@ func init() {
 	// +kubebuilder:scaffold:scheme
 }
 
-func main() {
-	var (
-		metricsAddr             string
-		enableLeaderElection    bool
-		leaderElectionNamespace string
-		healthAddr              string
-	)
+var (
+	metricsAddr             string
+	enableLeaderElection    bool
+	leaderElectionNamespace string
+	healthAddr              string
+	watchNamespace          string
+)
 
-	flag.StringVar(&metricsAddr, "metrics-addr", ":8080", "The address the metric endpoint binds to.")
-	flag.BoolVar(&enableLeaderElection, "enable-leader-election", false, "Enable leader election for controller manager. Enabling this will ensure there is only one active controller manager.")
-	flag.StringVar(&leaderElectionNamespace, "leader-election-namespace", "", "Namespace that the controller performs leader election in. If unspecified, the controller will discover which namespace it is running in.")
-	flag.StringVar(&healthAddr, "health-addr", ":9440", "The address the health endpoint binds to.")
-	flag.Parse()
+func InitFlags(fs *pflag.FlagSet) {
+	fs.StringVar(&metricsAddr, "metrics-addr", ":8080", "The address the metric endpoint binds to.")
+	fs.BoolVar(&enableLeaderElection, "enable-leader-election", false, "Enable leader election for controller manager. Enabling this will ensure there is only one active controller manager.")
+	fs.StringVar(&leaderElectionNamespace, "leader-election-namespace", "", "Namespace that the controller performs leader election in. If unspecified, the controller will discover which namespace it is running in.")
+	fs.StringVar(&healthAddr, "health-addr", ":9440", "The address the health endpoint binds to.")
+	fs.StringVar(&watchNamespace, "namespace", "", "Namespace that the controller watches to reconcile cluster-api objects. If unspecified, the controller watches for cluster-api objects across all namespaces.")
+}
+
+func main() {
+	InitFlags(pflag.CommandLine)
+	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
+	pflag.Parse()
+
+	if watchNamespace != "" {
+		setupLog.Info("Watching cluster-api objects only in namespace for reconciliation", "namespace", watchNamespace)
+	}
 
 	ctrl.SetLogger(zap.New(func(o *zap.Options) {
 		o.Development = true
@@ -72,6 +84,7 @@ func main() {
 		LeaderElection:          enableLeaderElection,
 		LeaderElectionID:        "controller-leader-election-capdo",
 		LeaderElectionNamespace: leaderElectionNamespace,
+		Namespace:               watchNamespace,
 		Port:                    9443,
 		HealthProbeBindAddress:  healthAddr,
 	})
