@@ -21,6 +21,7 @@ import (
 	"net/http"
 	_ "net/http/pprof" //nolint
 	"os"
+	"time"
 
 	// +kubebuilder:scaffold:imports
 	"github.com/spf13/pflag"
@@ -62,6 +63,7 @@ var (
 	healthAddr              string
 	watchNamespace          string
 	profilerAddress         string
+	syncPeriod              time.Duration
 )
 
 func InitFlags(fs *pflag.FlagSet) {
@@ -71,6 +73,7 @@ func InitFlags(fs *pflag.FlagSet) {
 	fs.StringVar(&healthAddr, "health-addr", ":9440", "The address the health endpoint binds to.")
 	fs.StringVar(&watchNamespace, "namespace", "", "Namespace that the controller watches to reconcile cluster-api objects. If unspecified, the controller watches for cluster-api objects across all namespaces.")
 	fs.StringVar(&profilerAddress, "profiler-address", "", "Bind address to expose the pprof profiler (e.g. localhost:6060)")
+	fs.DurationVar(&syncPeriod, "sync-period", 10*time.Minute, "The minimum interval at which watched resources are reconciled (e.g. 10m)")
 }
 
 func main() {
@@ -98,6 +101,7 @@ func main() {
 		LeaderElectionID:        "controller-leader-election-capdo",
 		LeaderElectionNamespace: leaderElectionNamespace,
 		Namespace:               watchNamespace,
+		SyncPeriod:              &syncPeriod,
 		Port:                    9443,
 		HealthProbeBindAddress:  healthAddr,
 	})
