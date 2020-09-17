@@ -19,192 +19,116 @@ package e2e
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
-	"path"
+	"os"
+	"path/filepath"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"k8s.io/apimachinery/pkg/types"
 
-	infrav1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha3"
-	crclient "sigs.k8s.io/controller-runtime/pkg/client"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/utils/pointer"
 
 	clusterv1 "sigs.k8s.io/cluster-api/api/v1alpha3"
-	bootstrapkubeadmv1 "sigs.k8s.io/cluster-api/bootstrap/kubeadm/api/v1alpha3"
+	capie2e "sigs.k8s.io/cluster-api/test/e2e"
+	"sigs.k8s.io/cluster-api/test/framework"
+	"sigs.k8s.io/cluster-api/test/framework/clusterctl"
 	"sigs.k8s.io/cluster-api/util"
-	"sigs.k8s.io/cluster-api/util/kubeconfig"
 )
 
-var _ = Describe("functional tests", func() {
-	Describe("cluster lifecycle", func() {
-		var (
-			clusterName                string
-			clusterNamespace           string
-			clusterGenenerator         ClusterGenerator
-			machineGenerator           MachineGenerator
-			machineDeploymentGenerator MachineDeploymentGenerator
-		)
+var _ = Describe("Cluster Creation", func() {
+	By("Creating single-node control plane with one worker node")
 
-		BeforeEach(func() {
-			var err error
-			clusterName = "capdo-test-" + util.RandomString(6)
-			clusterNamespace = "default"
+	var (
+		ctx                 = context.TODO()
+		specName            = "quick-start"
+		input               capie2e.QuickStartSpecInput
+		namespace           *corev1.Namespace
+		cancelWatches       context.CancelFunc
+		cluster             *clusterv1.Cluster
+		clusterctlLogFolder string
+	)
 
-			testTmpDir, err = ioutil.TempDir(suiteTmpDir, "e2e-test")
-			Expect(err).NotTo(HaveOccurred())
+	BeforeEach(func() {
+		input = capie2e.QuickStartSpecInput{
+			E2EConfig:             e2eConfig,
+			ClusterctlConfigPath:  clusterctlConfigPath,
+			BootstrapClusterProxy: bootstrapClusterProxy,
+			ArtifactFolder:        artifactFolder,
+			SkipCleanup:           skipCleanup,
+		}
+		Expect(input.E2EConfig).ToNot(BeNil(), "Invalid argument. input.E2EConfig can't be nil when calling %s spec", specName)
+		Expect(input.ClusterctlConfigPath).To(BeAnExistingFile(), "Invalid argument. input.ClusterctlConfigPath must be an existing file when calling %s spec", specName)
+		Expect(input.BootstrapClusterProxy).ToNot(BeNil(), "Invalid argument. input.BootstrapClusterProxy can't be nil when calling %s spec", specName)
+		Expect(os.MkdirAll(input.ArtifactFolder, 0755)).To(Succeed(), "Invalid argument. input.ArtifactFolder can't be created for %s spec", specName)
+
+		Expect(input.E2EConfig.Variables).To(HaveKey(KubernetesVersion))
+
+		// Setup a Namespace where to host objects for this spec and create a watcher for the namespace events.
+		namespace, cancelWatches = framework.CreateNamespaceAndWatchEvents(ctx, framework.CreateNamespaceAndWatchEventsInput{
+			Creator:   input.BootstrapClusterProxy.GetClient(),
+			ClientSet: input.BootstrapClusterProxy.GetClientSet(),
+			Name:      fmt.Sprintf("%s-%s", specName, util.RandomString(6)),
+			LogFolder: filepath.Join(artifactFolder, "clusters", input.BootstrapClusterProxy.GetName()),
 		})
 
-		It("It should be creatable, scalable and deletable", func() {
-			By("Create a cluster")
-			cluster, docluster := clusterGenenerator.Generate(clusterNamespace, clusterName)
-			createCluster(cluster, docluster)
+		// We need to override clusterctl apply log folder to avoid getting our credentials exposed.
+		clusterctlLogFolder = filepath.Join(os.TempDir(), "clusters", input.BootstrapClusterProxy.GetName())
+	})
 
-			By("Create a single controlplane")
-			controlPlaneMachine, controlPlaneKubeadmconfig, controlPlaneDomachine := machineGenerator.Generate(clusterNamespace, clusterName, true)
-			createMachine(controlPlaneMachine, controlPlaneKubeadmconfig, controlPlaneDomachine)
+	It("Should create a workload cluster", func() {
+		By("Creating a workload cluster")
 
-			By("Ensuring Cluster Controlplane Initialized")
-			WaitForClusterControlplaneInitialized(kindclient, cluster.Namespace, cluster.Name)
-
-			By("Exporting Cluster kubeconfig")
-			kubeConfigData, err := kubeconfig.FromSecret(context.Background(), kindclient, types.NamespacedName{Name: cluster.Name, Namespace: cluster.Namespace})
-			Expect(err).NotTo(HaveOccurred())
-			kubeConfigPath := path.Join(testTmpDir, clusterName+".kubeconfig")
-			Expect(ioutil.WriteFile(kubeConfigPath, kubeConfigData, 0600)).To(Succeed())
-
-			By("Deploying CNI")
-			ApplyYaml(kubeConfigPath, "https://docs.projectcalico.org/manifests/calico.yaml")
-
-			By("Deploying Cloud Controller Manager")
-			var ccmManifest string
-			buildCloudControllerManager(&ccmManifest)
-			ApplyYaml(kubeConfigPath, ccmManifest)
-
-			By("Create worker machine deployment")
-			machindeDeployment, kubeadmConfigTemplate, domachineTemplate := machineDeploymentGenerator.Generate(clusterNamespace, clusterName)
-			createMachineDeployment(machindeDeployment, kubeadmConfigTemplate, domachineTemplate)
-
-			By("Scale worker machine deployment")
-			scaleMachineDeployment(machindeDeployment, 3)
-
-			By("Delete worker machine deployment")
-			deleteMachineDeployment(machindeDeployment, kubeadmConfigTemplate, domachineTemplate)
-
-			By("Delete controlplane")
-			deleteMachine(controlPlaneMachine, controlPlaneKubeadmconfig, controlPlaneDomachine)
-
-			By("Delete cluster")
-			deleteCluster(cluster, docluster)
+		cluster, _, _ = clusterctl.ApplyClusterTemplateAndWait(ctx, clusterctl.ApplyClusterTemplateAndWaitInput{
+			ClusterProxy: input.BootstrapClusterProxy,
+			ConfigCluster: clusterctl.ConfigClusterInput{
+				LogFolder:                clusterctlLogFolder,
+				ClusterctlConfigPath:     input.ClusterctlConfigPath,
+				KubeconfigPath:           input.BootstrapClusterProxy.GetKubeconfigPath(),
+				InfrastructureProvider:   clusterctl.DefaultInfrastructureProvider,
+				Flavor:                   clusterctl.DefaultFlavor,
+				Namespace:                namespace.Name,
+				ClusterName:              fmt.Sprintf("cluster-%s", util.RandomString(6)),
+				KubernetesVersion:        input.E2EConfig.GetVariable(KubernetesVersion),
+				ControlPlaneMachineCount: pointer.Int64Ptr(1),
+				WorkerMachineCount:       pointer.Int64Ptr(1),
+			},
+			WaitForClusterIntervals:      input.E2EConfig.GetIntervals(specName, "wait-cluster"),
+			WaitForControlPlaneIntervals: input.E2EConfig.GetIntervals(specName, "wait-control-plane"),
+			WaitForMachineDeployments:    input.E2EConfig.GetIntervals(specName, "wait-worker-nodes"),
 		})
+
+		By("PASSED!")
+	})
+
+	AfterEach(func() {
+		// Remove clusterctl apply log folder
+		Expect(os.RemoveAll(clusterctlLogFolder)).ShouldNot(HaveOccurred())
+
+		// Dumps all the resources in the spec namespace, then cleanups the cluster object and the spec namespace itself.
+		By(fmt.Sprintf("Dumping all the Cluster API resources in the %q namespace", namespace.Name))
+		// Dump all Cluster API related resources to artifacts before deleting them.
+		framework.DumpAllResources(ctx, framework.DumpAllResourcesInput{
+			Lister:    input.BootstrapClusterProxy.GetClient(),
+			Namespace: namespace.Name,
+			LogPath:   filepath.Join(artifactFolder, "clusters", input.BootstrapClusterProxy.GetName(), "resources"),
+		})
+
+		if !skipCleanup {
+			By(fmt.Sprintf("Deleting cluster %s/%s", cluster.Namespace, cluster.Name))
+			// While https://github.com/kubernetes-sigs/cluster-api/issues/2955 is addressed in future iterations, there is a chance
+			// that cluster variable is not set even if the cluster exists, so we are calling DeleteAllClustersAndWait
+			// instead of DeleteClusterAndWait
+			framework.DeleteAllClustersAndWait(ctx, framework.DeleteAllClustersAndWaitInput{
+				Client:    input.BootstrapClusterProxy.GetClient(),
+				Namespace: namespace.Name,
+			}, input.E2EConfig.GetIntervals(specName, "wait-delete-cluster")...)
+
+			By(fmt.Sprintf("Deleting namespace used for hosting the %q test spec", specName))
+			framework.DeleteNamespace(ctx, framework.DeleteNamespaceInput{
+				Deleter: input.BootstrapClusterProxy.GetClient(),
+				Name:    namespace.Name,
+			})
+		}
+		cancelWatches()
 	})
 })
-
-func createCluster(cluster *clusterv1.Cluster, docluster *infrav1.DOCluster) {
-	By("Creating a Cluster")
-	Expect(kindclient.Create(context.TODO(), cluster)).To(Succeed())
-
-	By("Creating a DOCluster")
-	Expect(kindclient.Create(context.TODO(), docluster)).To(Succeed())
-
-	By("Ensuring Cluster Infrastructure is Ready")
-	WaitForClusterInfrastructureReady(kindclient, cluster.Namespace, cluster.Name)
-}
-
-func deleteCluster(cluster *clusterv1.Cluster, docluster *infrav1.DOCluster) {
-	By("Deleting a DOCluster")
-	Expect(kindclient.Delete(context.TODO(), docluster)).To(Succeed())
-	WaitForDeletion(kindclient, docluster, docluster.Namespace, docluster.Name)
-
-	By("Deleting a Cluster")
-	Expect(kindclient.Delete(context.TODO(), cluster)).To(Succeed())
-	WaitForDeletion(kindclient, cluster, cluster.Namespace, cluster.Name)
-}
-
-func createMachine(machine *clusterv1.Machine, kubeadmConfig *bootstrapkubeadmv1.KubeadmConfig, domachine *infrav1.DOMachine) {
-	role := "worker"
-	if util.IsControlPlaneMachine(machine) {
-		role = "controlplane"
-	}
-
-	By(fmt.Sprintf("Creating %s KubeadmConfig", role))
-	Expect(kindclient.Create(context.TODO(), kubeadmConfig)).To(Succeed())
-
-	By(fmt.Sprintf("Creating %s DOMachine", role))
-	Expect(kindclient.Create(context.TODO(), domachine)).To(Succeed())
-
-	By(fmt.Sprintf("Creating %s Machine", role))
-	Expect(kindclient.Create(context.TODO(), machine)).To(Succeed())
-
-	By(fmt.Sprintf("Ensuring %s Machine Bootstrap is Ready", role))
-	WaitForMachineBootstrapReady(kindclient, machine.Namespace, machine.Name)
-
-	By(fmt.Sprintf("Ensuring %s DOMachine is Running", role))
-	WaitForDOMachineRunning(kindclient, domachine.Namespace, domachine.Name)
-
-	By(fmt.Sprintf("Ensuring %s DOMachine is Ready", role))
-	WaitForDOMachineReady(kindclient, domachine.Namespace, domachine.Name)
-
-	By(fmt.Sprintf("Ensuring %s MachineNodeRef is Already Set", role))
-	WaitForMachineNodeRef(kindclient, machine.Namespace, machine.Name)
-}
-
-func deleteMachine(machine *clusterv1.Machine, kubeadmConfig *bootstrapkubeadmv1.KubeadmConfig, domachine *infrav1.DOMachine) {
-	role := "worker"
-	if util.IsControlPlaneMachine(machine) {
-		role = "controlplane"
-	}
-
-	By(fmt.Sprintf("Deleting %s KubeadmConfig", role))
-	Expect(kindclient.Delete(context.TODO(), kubeadmConfig)).To(Succeed())
-	WaitForDeletion(kindclient, kubeadmConfig, kubeadmConfig.Namespace, kubeadmConfig.Name)
-
-	By(fmt.Sprintf("Deleting %s DOMachine", role))
-	Expect(kindclient.Delete(context.TODO(), domachine)).To(Succeed())
-	WaitForDeletion(kindclient, domachine, domachine.Namespace, domachine.Name)
-
-	By(fmt.Sprintf("Deleting %s Machine", role))
-	Expect(kindclient.Delete(context.TODO(), machine)).To(Succeed())
-	WaitForDeletion(kindclient, machine, machine.Namespace, machine.Name)
-}
-
-func createMachineDeployment(machineDeployment *clusterv1.MachineDeployment, kubeadmConfigTemplate *bootstrapkubeadmv1.KubeadmConfigTemplate, domachineTemplate *infrav1.DOMachineTemplate) {
-	By("Creating kubeadmConfigTemplate")
-	Expect(kindclient.Create(context.TODO(), kubeadmConfigTemplate)).To(Succeed())
-
-	By("Creating domachineTemplate")
-	Expect(kindclient.Create(context.TODO(), domachineTemplate)).To(Succeed())
-
-	By("Creating machineDeployment")
-	Expect(kindclient.Create(context.TODO(), machineDeployment)).To(Succeed())
-
-	By("Ensuring machineDeployment running with expected replicas")
-	WaitForMachineDeploymentRunning(kindclient, machineDeployment.Namespace, machineDeployment.Name, 1)
-}
-
-func scaleMachineDeployment(machineDeployment *clusterv1.MachineDeployment, replicas int32) {
-	By("Scaling machineDeployment")
-	md := &clusterv1.MachineDeployment{}
-	Expect(kindclient.Get(context.TODO(), crclient.ObjectKey{Namespace: machineDeployment.Namespace, Name: machineDeployment.Name}, md))
-	md.Spec.Replicas = &replicas
-	Expect(kindclient.Update(context.TODO(), md)).NotTo(HaveOccurred())
-
-	By("Ensuring machineDeployment running with expected replicas")
-	WaitForMachineDeploymentRunning(kindclient, machineDeployment.Namespace, machineDeployment.Name, replicas)
-}
-
-func deleteMachineDeployment(machineDeployment *clusterv1.MachineDeployment, kubeadmConfigTemplate *bootstrapkubeadmv1.KubeadmConfigTemplate, domachineTemplate *infrav1.DOMachineTemplate) {
-	By("Scaling down machineDeployment")
-	scaleMachineDeployment(machineDeployment, 0)
-
-	By("Deleting kubeadmConfigTemplate")
-	Expect(kindclient.Delete(context.TODO(), kubeadmConfigTemplate)).To(Succeed())
-	WaitForDeletion(kindclient, kubeadmConfigTemplate, kubeadmConfigTemplate.Namespace, kubeadmConfigTemplate.Name)
-
-	By("Deleting domachineTemplate")
-	Expect(kindclient.Delete(context.TODO(), domachineTemplate)).To(Succeed())
-	WaitForDeletion(kindclient, domachineTemplate, domachineTemplate.Namespace, domachineTemplate.Name)
-
-	By("Deleting machineDeployment")
-	Expect(kindclient.Delete(context.TODO(), machineDeployment)).To(Succeed())
-	WaitForDeletion(kindclient, machineDeployment, machineDeployment.Namespace, machineDeployment.Name)
-}

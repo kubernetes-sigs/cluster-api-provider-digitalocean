@@ -8,18 +8,18 @@ In order to run the e2e tests the following requirements must be met:
 
 * Ginkgo
 * Docker
-* Kind v0.6.0+ (*Kind v0.7.0+ not working due upstream dependencies*)
+* Kind v0.7.0+
 
 ### Environment variables
 
 The first step to running the e2e tests is setting up the required environment variables:
 
-| Environment variable          | Description                                                                                           |
-| ----------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `DIGITALOCEAN_ACCESS_TOKEN`   | The DigitalOcean API V2 access token                                                                  |
-| `MACHINE_TYPE`                | The DigitalOcean Droplet size                                                                         |
-| `MACHINE_IMAGE`               | The DigitalOcean Image id or slug                                                                     |
-| `MACHINE_SSHKEY`              | The ssh key id or fingerprint (Should already registered in the DigitalOcean Account)                 |
+| Environment variable              | Description                                                                                           |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `DIGITALOCEAN_ACCESS_TOKEN`       | The DigitalOcean API V2 access token                                                                  |
+| `DO_CONTROL_PLANE_MACHINE_IMAGE`  | The DigitalOcean Image id or slug                                                                     |
+| `DO_NODE_MACHINE_IMAGE`           | The DigitalOcean Image id or slug                                                                     |
+| `DO_SSH_KEY_FINGERPRINT`          | The ssh key id or fingerprint (Should be already registered in the DigitalOcean Account)    
 
 ### Running e2e test
 
