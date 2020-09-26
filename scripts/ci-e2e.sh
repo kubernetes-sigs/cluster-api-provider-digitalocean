@@ -22,22 +22,16 @@
 set -o nounset
 set -o pipefail
 
-REPO_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
-cd "${REPO_ROOT}" || exit 1
+export PATH=${PWD}/hack/tools/bin:${PATH}
+REPO_ROOT=$(git rev-parse --show-toplevel)
 
 # shellcheck source=../hack/ensure-go.sh
 source "${REPO_ROOT}/hack/ensure-go.sh"
-# shellcheck source=../hack/ensure-kind.sh
-source "${REPO_ROOT}/hack/ensure-kind.sh"
-# shellcheck source=../hack/ensure-kubectl.sh
-source "${REPO_ROOT}/hack/ensure-kubectl.sh"
-# shellcheck source=../hack/ensure-kustomize.sh
-source "${REPO_ROOT}/hack/ensure-kustomize.sh"
 # shellcheck source=../hack/ensure-doctl.sh
 source "${REPO_ROOT}/hack/ensure-doctl.sh"
 
-ARTIFACTS="${ARTIFACTS:-${PWD}/_artifacts}"
-mkdir -p "${ARTIFACTS}/logs/"
+export ARTIFACTS="${ARTIFACTS:-${REPO_ROOT}/_artifacts}"
+export E2E_CONF_FILE="${REPO_ROOT}/test/e2e/config/digitalocean-ci.yaml"
 
 SSH_KEY_NAME=capdo-e2e-$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 12 ; echo '')
 SSH_KEY_PATH=/tmp/${SSH_KEY_NAME}
@@ -59,9 +53,7 @@ create_ssh_key
 SSH_KEY_FINGERPRINT=$(ssh-keygen -E md5 -lf "${SSH_KEY_PATH}" | awk '{ print $2 }' | cut -c 5-)
 trap 'remove_ssh_key ${SSH_KEY_FINGERPRINT}' EXIT
 
-export MACHINE_TYPE=${MACHINE_TYPE:-s-2vcpu-2gb}
-export MACHINE_IMAGE=${MACHINE_IMAGE:-63624555} # default is capi do-default image (cluster-api-ubuntu-1804-v1.16.2) from image-builder https://github.com/kubernetes-sigs/image-builder/tree/master/images/capi/packer/digitalocean 
-export MACHINE_SSHKEY=${SSH_KEY_FINGERPRINT}
+export DO_SSH_KEY_FINGERPRINT=${SSH_KEY_FINGERPRINT}
 
-make test-e2e ARTIFACTS=${ARTIFACTS}
+make test-e2e
 test_status="${?}"
