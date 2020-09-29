@@ -82,8 +82,6 @@ providers:
 
 variables:
   KUBERNETES_VERSION: "v1.17.11"
-  CONTROL_PLANE_MACHINE_COUNT: 1
-  WORKER_MACHINE_COUNT: 1
   EXP_CLUSTER_RESOURCE_SET: "true"
   # Cluster Addons
   CNI: "./data/cni/calico/calico.yaml"
@@ -96,13 +94,13 @@ variables:
   DO_NODE_MACHINE_IMAGE: "63624555"
   
 intervals:
-  default/wait-cluster: ["20m", "10s"]
-  default/wait-control-plane: ["10m", "10s"]
-  default/wait-worker-nodes: ["10m", "10s"]
-  conformance/wait-control-plane: ["30m", "10s"]
-  conformance/wait-worker-nodes: ["30m", "10s"]
   default/wait-controllers: ["3m", "10s"]
+  default/wait-cluster: ["20m", "10s"]
+  default/wait-control-plane: ["30m", "10s"]
+  default/wait-worker-nodes: ["30m", "10s"]
   default/wait-delete-cluster: ["20m", "10s"]
-  default/wait-machine-upgrade: ["20m", "10s"]
-  default/wait-machine-status: ["20m", "10s"]
-  default/wait-infra-subnets: ["5m", "30s"]
+  default/wait-machine-upgrade: ["50m", "10s"]
+  default/wait-machine-remediation: ["30m", "10s"]
+  default/wait-deployment: ["5m", "10s"]
+  default/wait-job: ["5m", "10s"]
+  default/wait-service: ["3m", "10s"]
