@@ -99,10 +99,6 @@ $(ARTIFACTS):
 test: generate lint ## Run tests
 	go test -v ./api/... ./controllers/... ./cloud/...
 
-.PHONY: test-integration
-test-integration: ## Run integration tests
-	go test -v -tags=integration ./test/integration/...
-
 .PHONY: test-e2e ## Run e2e tests using clusterctl
 test-e2e: $(GINKGO) $(KIND) $(KUSTOMIZE) e2e-image ## Run e2e tests
 	time $(GINKGO) -trace -progress -v -tags=e2e -focus=$(E2E_FOCUS) $(GINKGO_ARGS) ./test/e2e/... -- -e2e.config="$(E2E_CONF_FILE)" -e2e.artifacts-folder="$(ARTIFACTS)" $(E2E_ARGS)
