@@ -31,12 +31,15 @@ export GOPROXY
 export GO111MODULE=on
 
 # Directories.
+ROOT_DIR:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 TOOLS_DIR := hack/tools
 TOOLS_BIN_DIR := $(TOOLS_DIR)/bin
 BIN_DIR := bin
 TEST_E2E_DIR := test/e2e
 REPO_ROOT := $(shell git rev-parse --show-toplevel)
 ARTIFACTS ?= $(REPO_ROOT)/_artifacts
+E2E_DATA_DIR ?= $(ROOT_DIR)/$(TEST_E2E_DIR)/data
+KUBETEST_CONF_PATH ?= $(abspath $(E2E_DATA_DIR)/kubetest/conformance.yaml)
 
 # Files
 E2E_CONF_FILE ?= $(REPO_ROOT)/test/e2e/config/digitalocean-dev.yaml
@@ -71,6 +74,12 @@ CRD_ROOT ?= $(MANIFEST_ROOT)/crd/bases
 WEBHOOK_ROOT ?= $(MANIFEST_ROOT)/webhook
 RBAC_ROOT ?= $(MANIFEST_ROOT)/rbac
 
+
+# Allow overriding the e2e configurations
+GINKGO_FOCUS ?= Workload cluster creation
+GINKGO_NODES ?= 3
+GINKGO_NOCOLOR ?= false
+
 # Allow overriding the imagePullPolicy
 PULL_POLICY ?= Always
 
@@ -101,12 +110,16 @@ test: generate lint ## Run tests
 
 .PHONY: test-e2e ## Run e2e tests using clusterctl
 test-e2e: $(GINKGO) $(KIND) $(KUSTOMIZE) e2e-image ## Run e2e tests
-	time $(GINKGO) -trace -progress -v -tags=e2e -focus=$(E2E_FOCUS) $(GINKGO_ARGS) ./test/e2e/... -- -e2e.config="$(E2E_CONF_FILE)" -e2e.artifacts-folder="$(ARTIFACTS)" $(E2E_ARGS)
+	time $(GINKGO) -trace -progress -v -tags=e2e -focus=$(GINKGO_FOCUS) -nodes=$(GINKGO_NODES) --noColor=$(GINKGO_NOCOLOR) ./test/e2e/... -- \
+			-e2e.config="$(E2E_CONF_FILE)" \
+			-e2e.artifacts-folder="$(ARTIFACTS)" $(E2E_ARGS)
 
 .PHONY: test-conformance
-test-conformance: ## Run conformance test on workload cluster
-	PULL_POLICY=IfNotPresent $(MAKE) docker-build
-	go test -v -timeout=2h ./$(TEST_E2E_DIR) -args -ginkgo.v -ginkgo.focus "conformance tests" --managerImage $(CONTROLLER_IMG)-$(ARCH):$(TAG)
+test-conformance:  $(GINKGO) $(KIND) $(KUSTOMIZE) e2e-image ## Run conformance test on workload cluster
+	$(GINKGO) -v -trace -stream -progress -tags=e2e -focus=$(GINKGO_FOCUS) -nodes=$(GINKGO_NODES) --noColor=$(GINKGO_NOCOLOR) ./test/e2e/... -- \
+			-e2e.config="$(E2E_CONF_FILE)" \
+			-kubetest.config-file=$(KUBETEST_CONF_PATH) \
+			-e2e.artifacts-folder="$(ARTIFACTS)" $(E2E_ARGS)
 
 .PHONY: e2e-image
 e2e-image:

@@ -12,11 +12,11 @@
 
 images:
   # Use local dev images built source tree;
-  - name: gcr.io/k8s-staging-cluster-api/cluster-api-controller-amd64:v0.3.9
+  - name: gcr.io/k8s-staging-cluster-api/cluster-api-controller-amd64:v0.3.10
     loadBehavior: tryLoad
-  - name: gcr.io/k8s-staging-cluster-api/kubeadm-bootstrap-controller-amd64:v0.3.9
+  - name: gcr.io/k8s-staging-cluster-api/kubeadm-bootstrap-controller-amd64:v0.3.10
     loadBehavior: tryLoad
-  - name: gcr.io/k8s-staging-cluster-api/kubeadm-control-plane-controller-amd64:v0.3.9
+  - name: gcr.io/k8s-staging-cluster-api/kubeadm-control-plane-controller-amd64:v0.3.10
     loadBehavior: tryLoad
   - name: gcr.io/k8s-staging-cluster-api/capdo-manager:e2e
     loadBehavior: mustLoad
@@ -31,9 +31,9 @@ providers:
   - name: cluster-api
     type: CoreProvider
     versions:
-      - name: v0.3.9
+      - name: v0.3.10
         # Use manifest from source files
-        value: "https://github.com/kubernetes-sigs/cluster-api/releases/download/v0.3.9/core-components.yaml"
+        value: "https://github.com/kubernetes-sigs/cluster-api/releases/download/v0.3.10/core-components.yaml"
         type: "url"
         replacements:
           - old: "imagePullPolicy: Always"
@@ -43,9 +43,9 @@ providers:
   - name: kubeadm
     type: BootstrapProvider
     versions:
-      - name: v0.3.9
+      - name: v0.3.10
         # Use manifest from source files
-        value: "https://github.com/kubernetes-sigs/cluster-api/releases/download/v0.3.9/bootstrap-components.yaml"
+        value: "https://github.com/kubernetes-sigs/cluster-api/releases/download/v0.3.10/bootstrap-components.yaml"
         type: "url"
         replacements:
           - old: "imagePullPolicy: Always"
@@ -55,9 +55,9 @@ providers:
   - name: kubeadm
     type: ControlPlaneProvider
     versions:
-      - name: v0.3.9
+      - name: v0.3.10
         # Use manifest from source files
-        value: "https://github.com/kubernetes-sigs/cluster-api/releases/download/v0.3.9/control-plane-components.yaml"
+        value: "https://github.com/kubernetes-sigs/cluster-api/releases/download/v0.3.10/control-plane-components.yaml"
         type: "url"
         replacements:
           - old: "imagePullPolicy: Always"
@@ -81,7 +81,7 @@ providers:
       - sourcePath: "../data/infrastructure-digitalocean/metadata.yaml"
 
 variables:
-  KUBERNETES_VERSION: "v1.17.11"
+  KUBERNETES_VERSION: "v1.18.10"
   EXP_CLUSTER_RESOURCE_SET: "true"
   # Cluster Addons
   CNI: "./data/cni/calico/calico.yaml"
@@ -92,7 +92,10 @@ variables:
   DO_CONTROL_PLANE_MACHINE_IMAGE: "63624555"
   DO_NODE_MACHINE_TYPE: "s-2vcpu-2gb"
   DO_NODE_MACHINE_IMAGE: "63624555"
-  
+  CONFORMANCE_CI_ARTIFACTS_KUBERNETES_VERSION: "v1.18.10"
+  CONFORMANCE_WORKER_MACHINE_COUNT: "5"
+  CONFORMANCE_CONTROL_PLANE_MACHINE_COUNT: "1"
+
 intervals:
   default/wait-controllers: ["3m", "10s"]
   default/wait-cluster: ["20m", "10s"]
