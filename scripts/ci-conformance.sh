@@ -47,6 +47,8 @@ remove_ssh_key() {
     echo "removing ssh key"
     doctl compute ssh-key delete ${ssh_fingerprint} --force
     rm -f ${SSH_KEY_PATH}
+
+    ${REPO_ROOT}/hack/log/redact.sh || true
 }
 
 create_ssh_key
