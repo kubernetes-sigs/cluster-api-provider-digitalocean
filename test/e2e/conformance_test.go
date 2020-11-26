@@ -31,7 +31,6 @@ import (
 	"k8s.io/utils/pointer"
 	clusterv1 "sigs.k8s.io/cluster-api/api/v1alpha3"
 	capi_e2e "sigs.k8s.io/cluster-api/test/e2e"
-	"sigs.k8s.io/cluster-api/test/framework"
 	"sigs.k8s.io/cluster-api/test/framework/clusterctl"
 	"sigs.k8s.io/cluster-api/test/framework/kubetest"
 	"sigs.k8s.io/cluster-api/util"
@@ -63,12 +62,7 @@ var _ = Describe("Conformance Tests", func() {
 		clusterName = fmt.Sprintf("capdo-conf-%s", util.RandomString(6))
 
 		// Setup a Namespace where to host objects for this spec and create a watcher for the namespace events.
-		namespace, cancelWatches = framework.CreateNamespaceAndWatchEvents(ctx, framework.CreateNamespaceAndWatchEventsInput{
-			Creator:   bootstrapClusterProxy.GetClient(),
-			ClientSet: bootstrapClusterProxy.GetClientSet(),
-			Name:      fmt.Sprintf("%s-%s", specName, util.RandomString(6)),
-			LogFolder: filepath.Join(artifactFolder, "clusters", bootstrapClusterProxy.GetName()),
-		})
+		namespace, cancelWatches = setupSpecNamespace(ctx, specName, bootstrapClusterProxy, artifactFolder)
 
 		// We need to override clusterctl apply log folder to avoid getting our credentials exposed.
 		clusterctlLogFolder = filepath.Join(os.TempDir(), "clusters", bootstrapClusterProxy.GetName())
@@ -120,39 +114,7 @@ var _ = Describe("Conformance Tests", func() {
 	}, 1)
 
 	AfterEach(func() {
-		/// Remove clusterctl apply log folder
-		Expect(os.RemoveAll(clusterctlLogFolder)).ShouldNot(HaveOccurred())
-
-		// Dumps all the resources in the spec namespace, then cleanups the cluster object and the spec namespace itself.
-		By(fmt.Sprintf("Dumping all the Cluster API resources in the %q namespace", namespace.Name))
-		// Dump all Cluster API related resources to artifacts before deleting them.
-		framework.DumpAllResources(ctx, framework.DumpAllResourcesInput{
-			Lister:    bootstrapClusterProxy.GetClient(),
-			Namespace: namespace.Name,
-			LogPath:   filepath.Join(artifactFolder, "clusters", bootstrapClusterProxy.GetName(), "resources"),
-		})
-
-		if !skipCleanup {
-			By(fmt.Sprintf("Deleting cluster %s/%s", cluster.Namespace, cluster.Name))
-			// While https://github.com/kubernetes-sigs/cluster-api/issues/2955 is addressed in future iterations, there is a chance
-			// that cluster variable is not set even if the cluster exists, so we are calling DeleteAllClustersAndWait
-			// instead of DeleteClusterAndWait
-			framework.DeleteAllClustersAndWait(ctx, framework.DeleteAllClustersAndWaitInput{
-				Client:    bootstrapClusterProxy.GetClient(),
-				Namespace: namespace.Name,
-			}, e2eConfig.GetIntervals(specName, "wait-delete-cluster")...)
-
-			By(fmt.Sprintf("Deleting namespace used for hosting the %q test spec", specName))
-			framework.DeleteNamespace(ctx, framework.DeleteNamespaceInput{
-				Deleter: bootstrapClusterProxy.GetClient(),
-				Name:    namespace.Name,
-			})
-
-			// Will call the clean resources just to make sure we clean everything
-			By(fmt.Sprintf("Making sure there is no leftover running for %s", cluster.Name))
-			Expect(CleanDOResources(clusterName)).ShouldNot(HaveOccurred())
-		}
-		cancelWatches()
+		dumpSpecResourcesAndCleanup(ctx, specName, bootstrapClusterProxy, artifactFolder, namespace, cancelWatches, cluster, e2eConfig.GetIntervals, clusterName, clusterctlLogFolder, skipCleanup)
 	})
 
 })
