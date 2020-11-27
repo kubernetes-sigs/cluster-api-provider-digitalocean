@@ -65,3 +65,4 @@ tilt-settings.json
 
 # test results
 _artifacts
+/test/e2e/config/digitalocean-dev-envsubst.yaml

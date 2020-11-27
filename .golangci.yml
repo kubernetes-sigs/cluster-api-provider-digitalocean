@@ -1,17 +1,21 @@
 linters:
-  enable-all: true
-  disable:
-    - dupl
-    - funlen
-    - goerr113
-    - gochecknoglobals
-    - gochecknoinits
-    - lll
-    - godox
-    - wsl
-    - whitespace
-    - gocognit
-    - gomnd
+  disable-all: true
+  enable:
+    - deadcode
+    - goconst
+    - gofmt
+    - golint
+    - gosec
+    - govet
+    - ineffassign
+    - interfacer
+    - maligned
+    - misspell
+    - nakedret
+    - prealloc
+    - structcheck
+    - unconvert
+    - varcheck
   # Run with --fast=false for more extensive checks
   fast: true
 issues:
