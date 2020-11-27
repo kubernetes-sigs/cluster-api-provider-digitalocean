@@ -34,7 +34,7 @@ export GO111MODULE=on
 ROOT_DIR:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 TOOLS_DIR := hack/tools
 TOOLS_BIN_DIR := $(abspath $(TOOLS_DIR)/bin)
-BIN_DIR := bin
+BIN_DIR := $(abspath $(ROOT_DIR)/bin)
 TEST_E2E_DIR := test/e2e
 REPO_ROOT := $(shell git rev-parse --show-toplevel)
 ARTIFACTS ?= $(REPO_ROOT)/_artifacts
@@ -85,35 +85,6 @@ KIND_CLUSTER_NAME ?= capdo
 help:  ## Display this help
 	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z0-9_-]+:.*?##/ { printf "  \033[36m%-25s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
 
-## --------------------------------------
-##@ Testing
-## --------------------------------------
-
-$(ARTIFACTS):
-	mkdir -p $@
-
-.PHONY: test
-test: generate lint ## Run tests
-	go test -v ./api/... ./controllers/... ./cloud/...
-
-.PHONY: test-e2e ## Run e2e tests using clusterctl
-test-e2e: $(ENVSUBST) $(GINKGO) $(KIND) $(KUSTOMIZE) e2e-image ## Run e2e tests
-	$(ENVSUBST) < $(E2E_CONF_FILE) > $(E2E_CONF_FILE_ENVSUBST) && \
-	time $(GINKGO) -trace -progress -v -tags=e2e -focus=$(GINKGO_FOCUS) -nodes=$(GINKGO_NODES) --noColor=$(GINKGO_NOCOLOR) ./test/e2e/... -- \
-			-e2e.config="$(E2E_CONF_FILE_ENVSUBST)" \
-			-e2e.artifacts-folder="$(ARTIFACTS)" $(E2E_ARGS)
-
-.PHONY: test-conformance
-test-conformance: $(ENVSUBST) $(GINKGO) $(KIND) $(KUSTOMIZE) e2e-image ## Run conformance test on workload cluster
-	$(ENVSUBST) < $(E2E_CONF_FILE) > $(E2E_CONF_FILE_ENVSUBST) && \
-	time $(GINKGO) -v -trace -stream -progress -tags=e2e -focus=$(GINKGO_FOCUS) -nodes=$(GINKGO_NODES) --noColor=$(GINKGO_NOCOLOR) ./test/e2e/... -- \
-			-e2e.config="$(E2E_CONF_FILE_ENVSUBST)" \
-			-kubetest.config-file=$(KUBETEST_CONF_PATH) \
-			-e2e.artifacts-folder="$(ARTIFACTS)" $(E2E_ARGS)
-
-.PHONY: e2e-image
-e2e-image:
-	docker build --build-arg ldflags="$(LDFLAGS)" --tag="gcr.io/k8s-staging-cluster-api/capdo-manager:e2e" .
 
 ## --------------------------------------
 ##@ Binaries
@@ -156,6 +127,35 @@ KUBECTL_VER := v1.16.13
 KUBECTL_BIN := kubectl
 KUBECTL := $(TOOLS_BIN_DIR)/$(KUBECTL_BIN)-$(KUBECTL_VER)
 
+## --------------------------------------
+##@ Testing
+## --------------------------------------
+
+$(ARTIFACTS):
+	mkdir -p $@
+
+.PHONY: test
+test: generate lint ## Run tests
+	go test -v ./api/... ./controllers/... ./cloud/...
+
+.PHONY: test-e2e ## Run e2e tests using clusterctl
+test-e2e: e2e-image $(ENVSUBST) $(GINKGO) $(KIND) $(KUSTOMIZE)  ## Run e2e tests
+	$(ENVSUBST) < $(E2E_CONF_FILE) > $(E2E_CONF_FILE_ENVSUBST) && \
+	time $(GINKGO) -trace -progress -v -tags=e2e -focus=$(GINKGO_FOCUS) -nodes=$(GINKGO_NODES) --noColor=$(GINKGO_NOCOLOR) ./test/e2e/... -- \
+			-e2e.config="$(E2E_CONF_FILE_ENVSUBST)" \
+			-e2e.artifacts-folder="$(ARTIFACTS)" $(E2E_ARGS)
+
+.PHONY: test-conformance
+test-conformance: e2e-image $(ENVSUBST) $(GINKGO) $(KIND) $(KUSTOMIZE) ## Run conformance test on workload cluster
+	$(ENVSUBST) < $(E2E_CONF_FILE) > $(E2E_CONF_FILE_ENVSUBST) && \
+	time $(GINKGO) -v -trace -stream -progress -tags=e2e -focus=$(GINKGO_FOCUS) -nodes=$(GINKGO_NODES) --noColor=$(GINKGO_NOCOLOR) ./test/e2e/... -- \
+			-e2e.config="$(E2E_CONF_FILE_ENVSUBST)" \
+			-kubetest.config-file=$(KUBETEST_CONF_PATH) \
+			-e2e.artifacts-folder="$(ARTIFACTS)" $(E2E_ARGS)
+
+.PHONY: e2e-image
+e2e-image:
+	docker build --build-arg ldflags="$(LDFLAGS)" --tag="gcr.io/k8s-staging-cluster-api/capdo-manager:e2e" .
 
 
 .PHONY: binaries
