@@ -43,6 +43,7 @@ KUBETEST_CONF_PATH ?= $(abspath $(E2E_DATA_DIR)/kubetest/conformance.yaml)
 
 # Files
 E2E_CONF_FILE ?= $(REPO_ROOT)/test/e2e/config/digitalocean-dev.yaml
+E2E_CONF_FILE_ENVSUBST := $(ROOT_DIR)/test/e2e/config/digitalocean-dev-envsubst.yaml
 
 # Binaries.
 CLUSTERCTL := $(BIN_DIR)/clusterctl
@@ -109,15 +110,17 @@ test: generate lint ## Run tests
 	go test -v ./api/... ./controllers/... ./cloud/...
 
 .PHONY: test-e2e ## Run e2e tests using clusterctl
-test-e2e: $(GINKGO) $(KIND) $(KUSTOMIZE) e2e-image ## Run e2e tests
+test-e2e: $(ENVSUBST) $(GINKGO) $(KIND) $(KUSTOMIZE) e2e-image ## Run e2e tests
+	$(ENVSUBST) < $(E2E_CONF_FILE) > $(E2E_CONF_FILE_ENVSUBST) && \
 	time $(GINKGO) -trace -progress -v -tags=e2e -focus=$(GINKGO_FOCUS) -nodes=$(GINKGO_NODES) --noColor=$(GINKGO_NOCOLOR) ./test/e2e/... -- \
-			-e2e.config="$(E2E_CONF_FILE)" \
+			-e2e.config="$(E2E_CONF_FILE_ENVSUBST)" \
 			-e2e.artifacts-folder="$(ARTIFACTS)" $(E2E_ARGS)
 
 .PHONY: test-conformance
-test-conformance:  $(GINKGO) $(KIND) $(KUSTOMIZE) e2e-image ## Run conformance test on workload cluster
-	$(GINKGO) -v -trace -stream -progress -tags=e2e -focus=$(GINKGO_FOCUS) -nodes=$(GINKGO_NODES) --noColor=$(GINKGO_NOCOLOR) ./test/e2e/... -- \
-			-e2e.config="$(E2E_CONF_FILE)" \
+test-conformance: $(ENVSUBST) $(GINKGO) $(KIND) $(KUSTOMIZE) e2e-image ## Run conformance test on workload cluster
+	$(ENVSUBST) < $(E2E_CONF_FILE) > $(E2E_CONF_FILE_ENVSUBST) && \
+	time $(GINKGO) -v -trace -stream -progress -tags=e2e -focus=$(GINKGO_FOCUS) -nodes=$(GINKGO_NODES) --noColor=$(GINKGO_NOCOLOR) ./test/e2e/... -- \
+			-e2e.config="$(E2E_CONF_FILE_ENVSUBST)" \
 			-kubetest.config-file=$(KUBETEST_CONF_PATH) \
 			-e2e.artifacts-folder="$(ARTIFACTS)" $(E2E_ARGS)
 
