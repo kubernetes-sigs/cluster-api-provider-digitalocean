@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: capdo-controller-manager
+  name: controller-manager
   namespace: capdo-system
 spec:
   template:
