@@ -27,19 +27,19 @@ doctl auth init --access-token ${DIGITALOCEAN_ACCESS_TOKEN}
 
 ## Building images
 
-Clone the image builder repository if you haven't already.
+Clone the image builder repository if you haven't already:
 
-    $ git clone https://sigs.k8s.io/image-builder.git image-builder
+    $ git clone https://github.com/kubernetes-sigs/image-builder.git
 
-Change directory to images/capi within the image builder repository
+Change directory to images/capi within the image builder repository:
 
     $ cd image-builder/images/capi
 
-Run the Make target to generate DigitalOcean images.
+Choose a DigitalOcean image build target from the list returned by `make | grep build-do` and generate a DigitalOcean image (choosing Ubuntu in the example below):
 
-    $ make build-do-default
+    $ make build-build-do-ubuntu-2004
 
-Check the image already available in your account.
+Verify that the image is available in your account and remember the corresponding image ID:
 
     $ doctl compute image list-user
 
@@ -55,7 +55,7 @@ export MACHINE_IMAGE=<image-id> # created in the step above.
 
 For the purpose of this tutorial, we’ll name our cluster `capdo-quickstart`.
 
-Generate examples files.
+Generate examples files. (Several parameters such as the target Kubernetes version or the machine types can be customized by setting specific environment variables; see the variable definitions in the `examples/generate.sh` file for the list of available options.)
 
 ```
 make generate-examples
@@ -93,7 +93,7 @@ kubectl --kubeconfig=./${CLUSTER_NAME}.kubeconfig apply -f https://docs.projectc
 Deploy DigitalOcean Cloud Controller Manager
 
 ```bash
-kubectl --kubeconfig=./${CLUSTER_NAME}.kubeconfig apply -f examples/digitalocean-ccm.yaml
+kubectl --kubeconfig=./${CLUSTER_NAME}.kubeconfig apply -f examples/digitalocean-cloud-controller-manager.yaml
 ```
 
 Optional Deploy DigitalOcean CSI
