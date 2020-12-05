@@ -6,6 +6,7 @@ metadata:
     cluster.x-k8s.io/cluster-name: ${CLUSTER_NAME}
     nodepool: nodepool-0
 spec:
+  clusterName: ${CLUSTER_NAME}
   replicas: 1
   selector:
     matchLabels:
@@ -23,6 +24,7 @@ spec:
           name: ${CLUSTER_NAME}-md-0
           apiVersion: bootstrap.cluster.x-k8s.io/v1alpha3
           kind: KubeadmConfigTemplate
+      clusterName: ${CLUSTER_NAME}
       infrastructureRef:
         name: ${CLUSTER_NAME}-md-0
         apiVersion: infrastructure.cluster.x-k8s.io/v1alpha3
