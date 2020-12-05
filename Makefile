@@ -507,3 +507,7 @@ clean-examples: ## Remove all the temporary files generated in the examples fold
 	rm -rf examples/_out/
 	rm -f examples/core-components/*-components.yaml
 	rm -f examples/provider-components/provider-components-*.yaml
+
+.PHONY: do-janitor
+do-janitor: ## Cleanup old resources in the DO account
+	go run hack/do-janitor/do-janitor.go
