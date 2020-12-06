@@ -31,7 +31,7 @@ func (s *Service) GetLoadBalancer(id string) (*godo.LoadBalancer, error) {
 
 	lb, res, err := s.scope.LoadBalancers.Get(s.ctx, id)
 	if err != nil {
-		if res.StatusCode == http.StatusNotFound {
+		if res != nil && res.StatusCode == http.StatusNotFound {
 			return nil, nil
 		}
 		return nil, err
