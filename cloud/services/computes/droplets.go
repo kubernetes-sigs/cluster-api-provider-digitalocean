@@ -44,16 +44,13 @@ func (s *Service) GetDroplet(id string) (*godo.Droplet, error) {
 
 	droplet, res, err := s.scope.Droplets.Get(s.ctx, dropletID)
 	if err != nil {
-		if res.StatusCode == http.StatusNotFound {
+		if res != nil && res.StatusCode == http.StatusNotFound {
 			return nil, nil
 		}
 		return nil, err
 	}
 
-	if droplet != nil {
-		return droplet, nil
-	}
-	return nil, nil
+	return droplet, nil
 }
 
 // CreateDroplet create a droplet instance.
