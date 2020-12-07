@@ -14,22 +14,24 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package e2e
+package main
 
 import (
 	"context"
+	"log"
 	"os"
-	"strings"
+	"time"
 
 	"github.com/digitalocean/godo"
-	"github.com/pkg/errors"
 )
 
-// CleanDOResources clean any resource leftover from the tests.
-func CleanDOResources(clusterName string) error {
+const timeToCleanInHours = 12
+
+func main() {
+	log.Println("Starting DO Janitor")
 	token := os.Getenv("DIGITALOCEAN_ACCESS_TOKEN")
 	if token == "" {
-		return errors.New("missing DO token")
+		log.Fatal("missing DO token")
 	}
 
 	ctx := context.Background()
@@ -37,33 +39,54 @@ func CleanDOResources(clusterName string) error {
 
 	droplets, err := dropletList(ctx, client)
 	if err != nil {
-		return errors.Wrap(err, "failed list droplets")
+		log.Fatalf("fail to list droplets: %+v", err.Error())
 	}
 
 	for _, droplet := range droplets {
-		if strings.Contains(droplet.Name, clusterName) {
+		dropletCreated, err := time.Parse(time.RFC3339, droplet.Created)
+		if err != nil {
+			log.Fatalf("failt parsing time: %+v", err.Error())
+		}
+
+		hours := time.Since(dropletCreated).Hours()
+		if hours >= timeToCleanInHours {
+			log.Printf("%s is older than %d hours will terminate\n", droplet.Name, timeToCleanInHours)
 			_, err := client.Droplets.Delete(ctx, droplet.ID)
 			if err != nil {
-				return errors.Wrapf(err, "failed delete droplet %d/%s", droplet.ID, droplet.Name)
+				log.Printf("fail to delete droplet %s: %+v\n", droplet.Name, err.Error())
+				continue
 			}
+
+			log.Printf("droplet %s terminated\n", droplet.Name)
 		}
 	}
 
 	lbs, err := lbList(ctx, client)
 	if err != nil {
-		return errors.Wrap(err, "failed list droplets")
+		log.Fatalf("fail to failed list LoadBalancer: %+v", err.Error())
 	}
 
 	for _, lb := range lbs {
-		if strings.Contains(lb.Name, clusterName) {
+		lbCreated, err := time.Parse(time.RFC3339, lb.Created)
+		if err != nil {
+			log.Fatalf("failt parsing time: %+v", err.Error())
+		}
+
+		hours := time.Since(lbCreated).Hours()
+		if hours >= timeToCleanInHours {
+			log.Printf("%s is older than %d hours will terminate\n", lb.Name, timeToCleanInHours)
 			_, err := client.LoadBalancers.Delete(ctx, lb.ID)
 			if err != nil {
-				return errors.Wrapf(err, "failed delete loadbalancer %s/%s", lb.ID, lb.Name)
+				log.Printf("fail to delete droplet %s: %+v\n", lb.Name, err.Error())
+				continue
 			}
+
+			log.Printf("droplet %s terminated\n", lb.Name)
 		}
 	}
 
-	return nil
+	log.Println("Done DO Janitor")
+	os.Exit(0)
 }
 
 func dropletList(ctx context.Context, client *godo.Client) ([]godo.Droplet, error) {

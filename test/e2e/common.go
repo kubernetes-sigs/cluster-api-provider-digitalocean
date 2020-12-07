@@ -87,6 +87,7 @@ func dumpSpecResourcesAndCleanup(ctx context.Context, specName string, clusterPr
 		By(fmt.Sprintf("Making sure there is no leftover running for %s", cluster.Name))
 		Expect(CleanDOResources(clusterName)).ShouldNot(HaveOccurred())
 	}
+
 	cancelWatches()
 	redactLogs()
 }
