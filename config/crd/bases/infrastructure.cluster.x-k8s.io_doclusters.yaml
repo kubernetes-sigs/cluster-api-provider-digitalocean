@@ -256,6 +256,10 @@ spec:
                         minimum: 1
                         type: integer
                     type: object
+                  vpc_uuid:
+                    description: VPCUUID defines the VPC UUID to use. An empty value
+                      implies using the default VPC.
+                    type: string
                 type: object
               region:
                 description: The DigitalOcean Region the cluster lives in. It must

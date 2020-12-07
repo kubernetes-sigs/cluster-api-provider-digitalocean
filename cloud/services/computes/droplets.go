@@ -107,6 +107,7 @@ func (s *Service) CreateDroplet(scope *scope.MachineScope) (*godo.Droplet, error
 		UserData:          bootstrapData,
 		PrivateNetworking: true,
 		Volumes:           volumes,
+		VPCUUID:           s.scope.VPCUUID(),
 	}
 
 	request.Tags = infrav1.BuildTags(infrav1.BuildTagParams{
