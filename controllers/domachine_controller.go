@@ -274,6 +274,7 @@ func (r *DOMachineReconciler) reconcileDelete(ctx context.Context, machineScope 
 	if droplet == nil {
 		clusterScope.V(2).Info("Unable to locate droplet instance")
 		r.Recorder.Eventf(domachine, corev1.EventTypeWarning, "NoInstanceFound", "Skip deleting")
+		controllerutil.RemoveFinalizer(domachine, infrav1.MachineFinalizer)
 		return reconcile.Result{}, nil
 	}
 
