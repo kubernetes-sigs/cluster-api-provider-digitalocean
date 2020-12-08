@@ -225,11 +225,10 @@ func (r *DOMachineReconciler) reconcile(ctx context.Context, machineScope *scope
 	if droplet == nil {
 		droplet, err = computesvc.CreateDroplet(machineScope)
 		if err != nil {
-			errs := errors.Errorf("Failed to create droplet instance for DOMachine %s/%s: %v", domachine.Namespace, domachine.Name, err)
-			machineScope.SetFailureReason(capierrors.CreateMachineError)
-			machineScope.SetFailureMessage(errs)
-			r.Recorder.Event(domachine, corev1.EventTypeWarning, "InstanceCreatingError", errs.Error())
-			return reconcile.Result{}, errs
+			err = errors.Errorf("Failed to create droplet instance for DOMachine %s/%s: %v", domachine.Namespace, domachine.Name, err)
+			r.Recorder.Event(domachine, corev1.EventTypeWarning, "InstanceCreatingError", err.Error())
+			machineScope.SetInstanceStatus(infrav1.DOResourceStatusErrored)
+			return reconcile.Result{}, err
 		}
 		r.Recorder.Eventf(domachine, corev1.EventTypeNormal, "InstanceCreated", "Created new droplet instance - %s", droplet.Name)
 	}
