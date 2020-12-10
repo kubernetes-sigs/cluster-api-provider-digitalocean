@@ -166,6 +166,7 @@ func (r *DOClusterReconciler) reconcileDelete(ctx context.Context, clusterScope 
 	if loadbalancer == nil {
 		clusterScope.V(2).Info("Unable to locate load balancer")
 		r.Recorder.Eventf(docluster, corev1.EventTypeWarning, "NoLoadBalancerFound", "Unable to find matching load balancer")
+		controllerutil.RemoveFinalizer(docluster, infrav1.ClusterFinalizer)
 		return reconcile.Result{}, nil
 	}
 
@@ -173,7 +174,7 @@ func (r *DOClusterReconciler) reconcileDelete(ctx context.Context, clusterScope 
 		return reconcile.Result{}, errors.Wrapf(err, "error deleting load balancer for DOCluster %s/%s", docluster.Namespace, docluster.Name)
 	}
 
-	r.Recorder.Eventf(docluster, corev1.EventTypeNormal, "LoadBalancerDeleted", "Deleted a instance - %s", loadbalancer.Name)
+	r.Recorder.Eventf(docluster, corev1.EventTypeNormal, "LoadBalancerDeleted", "Deleted an LoadBalancer - %s", loadbalancer.Name)
 	// Cluster is deleted so remove the finalizer.
 	controllerutil.RemoveFinalizer(docluster, infrav1.ClusterFinalizer)
 	return reconcile.Result{}, nil
