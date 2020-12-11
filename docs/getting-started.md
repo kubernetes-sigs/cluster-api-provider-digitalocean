@@ -37,7 +37,7 @@ Change directory to images/capi within the image builder repository:
 
 Choose a DigitalOcean image build target from the list returned by `make | grep build-do` and generate a DigitalOcean image (choosing Ubuntu in the example below):
 
-    $ make build-build-do-ubuntu-2004
+    $ make build-do-ubuntu-2004
 
 Verify that the image is available in your account and remember the corresponding image ID:
 
