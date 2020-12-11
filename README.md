@@ -3,7 +3,7 @@
 <p align="center"><img alt="capi" src="https://github.com/kubernetes-sigs/cluster-api/raw/master/docs/book/src/images/introduction.png" width="160x" /><img alt="capi" src="https://upload.wikimedia.org/wikipedia/commons/f/ff/DigitalOcean_logo.svg" width="192x" /></p>
 <p align="center">
 <!-- prow build badge, godoc, and go report card-->
-</a> <a href="https://godoc.org/sigs.k8s.io/cluster-api-provider-digitalocean"><img src="https://godoc.org/sigs.k8s.io/cluster-api-provider-digitalocean?status.svg"></a> <a href="https://goreportcard.com/report/sigs.k8s.io/cluster-api-provider-digitalocean"><img alt="Go Report Card" src="https://goreportcard.com/badge/sigs.k8s.io/cluster-api-provider-digitalocean" /></a></p>
+</a> <a href="https://pkg.go.dev/sigs.k8s.io/cluster-api-provider-digitalocean"><img src="https://pkg.go.dev/badge/sigs.k8s.io/cluster-api-provider-digitalocean.svg" alt="Go Reference"></a> <a href="https://goreportcard.com/report/sigs.k8s.io/cluster-api-provider-digitalocean"><img alt="Go Report Card" src="https://goreportcard.com/badge/sigs.k8s.io/cluster-api-provider-digitalocean" /></a></p>
 
 ------
 
@@ -40,19 +40,21 @@ Check out the [getting started guide](./docs/getting-started.md) for launching a
 
 This provider's versions are compatible with the following versions of Cluster API:
 
-||Cluster API v1alpha1 (v0.1)|Cluster API v1alpha2 (v0.2)|
-|-|-|-|
+||Cluster API v1alpha1 (v0.1)|Cluster API v1alpha2 (v0.2)|Cluster API v1alpha3 (v0.3)|
+|-|-|-|-|
 |DigitalOcean Provider v1alpha1 (v0.1)|✓|||
 |DigitalOcean Provider v1alpha1 (v0.2)|✓|||
 |DigitalOcean Provider v1alpha2 (v0.3)||✓||
+|DigitalOcean Provider v1alpha3 (v0.4)|||✓|
 
 This provider's versions are able to install and manage the following versions of Kubernetes:
 
-||Kubernetes 1.13|Kubernetes 1.14|Kubernetes 1.15|Kubernetes 1.16|Kubernetes 1.17|
-|-|-|-|-|-|-|
-|DigitalOcean Provider v1alpha1 (v0.1)|✓|✓|✓||||
-|DigitalOcean Provider v1alpha1 (v0.2)|✓|✓|✓||||
-|DigitalOcean Provider v1alpha2 (v0.3)||✓|✓|✓|✓||
+||Kubernetes 1.13|Kubernetes 1.14|Kubernetes 1.15|Kubernetes 1.16|Kubernetes 1.17|Kubernetes 1.18|Kubernetes 1.19|
+|-|-|-|-|-|-|-|-|
+|DigitalOcean Provider v1alpha1 (v0.1)|✓|✓|✓|||||
+|DigitalOcean Provider v1alpha1 (v0.2)|✓|✓|✓|||||
+|DigitalOcean Provider v1alpha2 (v0.3)||✓|✓|✓|✓|||
+|DigitalOcean Provider v1alpha3 (v0.4)||||✓|✓|✓|✓|
 
 **NOTE:** As the versioning for this project is tied to the versioning of Cluster API, future modifications to this policy may be made to more closely align with other providers in the Cluster API ecosystem.
 
