@@ -56,12 +56,6 @@ spec:
             cpu: 100m
             memory: 50Mi
         env:
-          - name: KUBERNETES_SERVICE_HOST
-            valueFrom:
-              fieldRef:
-                fieldPath: status.hostIP
-          - name: KUBERNETES_SERVICE_PORT
-            value: "6443"
           - name: DO_ACCESS_TOKEN
             valueFrom:
               secretKeyRef:
