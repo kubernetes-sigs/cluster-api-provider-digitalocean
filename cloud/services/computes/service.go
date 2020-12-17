@@ -22,6 +22,12 @@ import (
 	"sigs.k8s.io/cluster-api-provider-digitalocean/cloud/scope"
 )
 
+// TemporaryError is an error that is raised for temporary DO API errors that
+// could be retried in upper levels of the callstack.
+type TemporaryError struct {
+	error
+}
+
 // Service holds a collection of interfaces.
 type Service struct {
 	scope *scope.ClusterScope

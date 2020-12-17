@@ -38,6 +38,8 @@ type DOMachineSpec struct {
 	Size string `json:"size"`
 	// Droplet image can be image id or slug. See https://developers.digitalocean.com/documentation/v2/#list-all-images
 	Image intstr.IntOrString `json:"image"`
+	// DataDisks specifies the parameters that are used to add one or more data disks to the machine
+	DataDisks []DataDisk `json:"dataDisks,omitempty"`
 	// SSHKeys is the ssh key id or fingerprint to attach in DigitalOcean droplet.
 	// It must be available on DigitalOcean account. See https://developers.digitalocean.com/documentation/v2/#list-all-keys
 	SSHKeys []intstr.IntOrString `json:"sshKeys"`

@@ -184,6 +184,37 @@ spec:
                 items:
                   type: string
                 type: array
+              dataDisks:
+                description: DataDisks specifies the parameters that are used to add
+                  one or more data disks to the machine
+                items:
+                  description: DataDisk specifies the parameters that are used to
+                    add a data disk to the machine.
+                  properties:
+                    diskSizeGB:
+                      description: DiskSizeGB is the size in GB to assign to the data
+                        disk.
+                      format: int64
+                      type: integer
+                    filesystemLabel:
+                      description: 'FilesystemLabel is the label that is applied to
+                        the created filesystem. Character limits apply: 16 for ext4;
+                        12 for xfs. May only be used in conjunction with filesystemType.'
+                      type: string
+                    filesystemType:
+                      description: FilesystemType to be used on the volume. When provided
+                        the volume will be automatically formatted.
+                      type: string
+                    nameSuffix:
+                      description: NameSuffix is the suffix to be appended to the
+                        machine name to generate the disk name. Each disk name will
+                        be in format <dropletName>_<nameSuffix>.
+                      type: string
+                  required:
+                  - diskSizeGB
+                  - nameSuffix
+                  type: object
+                type: array
               image:
                 anyOf:
                 - type: integer

@@ -17,6 +17,7 @@ limitations under the License.
 package computes
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -82,6 +83,19 @@ func (s *Service) CreateDroplet(scope *scope.MachineScope) (*godo.Droplet, error
 		})
 	}
 
+	volumes := []godo.DropletCreateVolume{}
+	for _, disk := range scope.DOMachine.Spec.DataDisks {
+		volName := infrav1.DataDiskName(scope.DOMachine, disk.NameSuffix)
+		vol, err := s.GetVolumeByName(volName)
+		if err != nil {
+			return nil, fmt.Errorf("could not get volume to attach to droplet: %w", err)
+		}
+		if vol == nil {
+			return nil, fmt.Errorf("volume %q does not exist", volName)
+		}
+		volumes = append(volumes, godo.DropletCreateVolume{ID: vol.ID})
+	}
+
 	request := &godo.DropletCreateRequest{
 		Name:    instanceName,
 		Region:  s.scope.Region(),
@@ -92,6 +106,7 @@ func (s *Service) CreateDroplet(scope *scope.MachineScope) (*godo.Droplet, error
 		},
 		UserData:          bootstrapData,
 		PrivateNetworking: true,
+		Volumes:           volumes,
 	}
 
 	request.Tags = infrav1.BuildTags(infrav1.BuildTagParams{

@@ -18,6 +18,7 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -194,6 +195,29 @@ func (r *DOMachineReconciler) Reconcile(req ctrl.Request) (_ ctrl.Result, reterr
 	return r.reconcile(ctx, machineScope, clusterScope)
 }
 
+func (r *DOMachineReconciler) reconcileVolumes(ctx context.Context, mscope *scope.MachineScope, cscope *scope.ClusterScope) (reconcile.Result, error) {
+	mscope.Info("Reconciling DOMachine Volumes")
+	computesvc := computes.NewService(ctx, cscope)
+	for _, disk := range mscope.DOMachine.Spec.DataDisks {
+		volName := infrav1.DataDiskName(mscope.DOMachine, disk.NameSuffix)
+		vol, err := computesvc.GetVolumeByName(volName)
+		if err != nil {
+			if errors.As(err, &computes.TemporaryError{}) {
+				return reconcile.Result{Requeue: true}, err
+			}
+			return reconcile.Result{}, err
+		}
+		if vol == nil {
+			_, err = computesvc.CreateVolume(disk, volName)
+			if err != nil {
+				return reconcile.Result{}, err
+			}
+		}
+		// TODO(gottwald): reconcile disk resizes here (at least grow)
+	}
+	return reconcile.Result{}, nil
+}
+
 func (r *DOMachineReconciler) reconcile(ctx context.Context, machineScope *scope.MachineScope, clusterScope *scope.ClusterScope) (reconcile.Result, error) {
 	machineScope.Info("Reconciling DOMachine")
 	domachine := machineScope.DOMachine
@@ -215,6 +239,11 @@ func (r *DOMachineReconciler) reconcile(ctx context.Context, machineScope *scope
 	if machineScope.Machine.Spec.Bootstrap.DataSecretName == nil {
 		machineScope.Info("Bootstrap data secret reference is not yet available")
 		return reconcile.Result{}, nil
+	}
+
+	// Make sure the droplet volumes are reconciled
+	if result, err := r.reconcileVolumes(ctx, machineScope, clusterScope); err != nil {
+		return result, fmt.Errorf("failed to reconcile volumes: %w", err)
 	}
 
 	computesvc := computes.NewService(ctx, clusterScope)
@@ -259,6 +288,32 @@ func (r *DOMachineReconciler) reconcile(ctx context.Context, machineScope *scope
 		return reconcile.Result{}, nil
 	}
 }
+func (r *DOMachineReconciler) reconcileDeleteVolumes(ctx context.Context, mscope *scope.MachineScope, cscope *scope.ClusterScope) (reconcile.Result, error) {
+	mscope.Info("Reconciling delete DOMachine Volumes")
+	computesvc := computes.NewService(ctx, cscope)
+	domachine := mscope.DOMachine
+	for _, disk := range mscope.DOMachine.Spec.DataDisks {
+		volName := infrav1.DataDiskName(domachine, disk.NameSuffix)
+		vol, err := computesvc.GetVolumeByName(volName)
+		if err != nil {
+			if errors.As(err, &computes.TemporaryError{}) {
+				return reconcile.Result{Requeue: true}, err
+			}
+			return reconcile.Result{}, err
+		}
+		if vol == nil {
+			continue
+		}
+		if err = computesvc.DeleteVolume(vol.ID); err != nil {
+			if errors.As(err, &computes.TemporaryError{}) {
+				return reconcile.Result{Requeue: true}, err
+			}
+			return reconcile.Result{}, err
+		}
+		r.Recorder.Eventf(domachine, corev1.EventTypeNormal, "VolumeDeleted", "Deleted the storage volume - %s", vol.Name)
+	}
+	return reconcile.Result{}, nil
+}
 
 func (r *DOMachineReconciler) reconcileDelete(ctx context.Context, machineScope *scope.MachineScope, clusterScope *scope.ClusterScope) (reconcile.Result, error) {
 	machineScope.Info("Reconciling delete DOMachine")
@@ -270,18 +325,18 @@ func (r *DOMachineReconciler) reconcileDelete(ctx context.Context, machineScope 
 		return reconcile.Result{}, err
 	}
 
-	if droplet == nil {
+	if droplet != nil {
+		if err := computesvc.DeleteDroplet(machineScope.GetInstanceID()); err != nil {
+			return reconcile.Result{}, err
+		}
+	} else {
 		clusterScope.V(2).Info("Unable to locate droplet instance")
 		r.Recorder.Eventf(domachine, corev1.EventTypeWarning, "NoInstanceFound", "Skip deleting")
-		controllerutil.RemoveFinalizer(domachine, infrav1.MachineFinalizer)
-		return reconcile.Result{}, nil
 	}
-
-	if err := computesvc.DeleteDroplet(machineScope.GetInstanceID()); err != nil {
-		return reconcile.Result{}, err
+	if result, err := r.reconcileDeleteVolumes(ctx, machineScope, clusterScope); err != nil {
+		return result, fmt.Errorf("failed to reconcile delete volumes: %w", err)
 	}
-
-	r.Recorder.Eventf(domachine, corev1.EventTypeNormal, "InstanceDeleted", "Deleted a instance - %s", droplet.Name)
+	r.Recorder.Eventf(domachine, corev1.EventTypeNormal, "InstanceDeleted", "Deleted a instance - %s", machineScope.Name())
 	controllerutil.RemoveFinalizer(domachine, infrav1.MachineFinalizer)
 	return reconcile.Result{}, nil
 }
