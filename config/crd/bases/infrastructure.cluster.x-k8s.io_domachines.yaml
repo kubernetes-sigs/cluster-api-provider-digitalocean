@@ -208,7 +208,7 @@ spec:
                     nameSuffix:
                       description: NameSuffix is the suffix to be appended to the
                         machine name to generate the disk name. Each disk name will
-                        be in format <dropletName>_<nameSuffix>.
+                        be in format <dropletName>-<nameSuffix>.
                       type: string
                   required:
                   - diskSizeGB

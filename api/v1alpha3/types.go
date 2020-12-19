@@ -76,7 +76,7 @@ type DOMachineTemplateResource struct {
 }
 
 // DataDiskName is the volume name used for a data disk of a droplet.
-// It's in the form of <dropletName>_<dataDiskNameSuffix>.
+// It's in the form of <dropletName>-<dataDiskNameSuffix>.
 func DataDiskName(m *DOMachine, suffix string) string {
 	return DOSafeName(fmt.Sprintf("%s-%s", m.Name, suffix))
 }
@@ -84,7 +84,7 @@ func DataDiskName(m *DOMachine, suffix string) string {
 // DataDisk specifies the parameters that are used to add a data disk to the machine.
 type DataDisk struct {
 	// NameSuffix is the suffix to be appended to the machine name to generate the disk name.
-	// Each disk name will be in format <dropletName>_<nameSuffix>.
+	// Each disk name will be in format <dropletName>-<nameSuffix>.
 	NameSuffix string `json:"nameSuffix"`
 	// DiskSizeGB is the size in GB to assign to the data disk.
 	DiskSizeGB int64 `json:"diskSizeGB"`

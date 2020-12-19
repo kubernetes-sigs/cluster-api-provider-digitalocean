@@ -198,8 +198,9 @@ func (r *DOMachineReconciler) Reconcile(req ctrl.Request) (_ ctrl.Result, reterr
 func (r *DOMachineReconciler) reconcileVolumes(ctx context.Context, mscope *scope.MachineScope, cscope *scope.ClusterScope) (reconcile.Result, error) {
 	mscope.Info("Reconciling DOMachine Volumes")
 	computesvc := computes.NewService(ctx, cscope)
-	for _, disk := range mscope.DOMachine.Spec.DataDisks {
-		volName := infrav1.DataDiskName(mscope.DOMachine, disk.NameSuffix)
+	domachine := mscope.DOMachine
+	for _, disk := range domachine.Spec.DataDisks {
+		volName := infrav1.DataDiskName(domachine, disk.NameSuffix)
 		vol, err := computesvc.GetVolumeByName(volName)
 		if err != nil {
 			if errors.As(err, &computes.TemporaryError{}) {
@@ -292,7 +293,7 @@ func (r *DOMachineReconciler) reconcileDeleteVolumes(ctx context.Context, mscope
 	mscope.Info("Reconciling delete DOMachine Volumes")
 	computesvc := computes.NewService(ctx, cscope)
 	domachine := mscope.DOMachine
-	for _, disk := range mscope.DOMachine.Spec.DataDisks {
+	for _, disk := range domachine.Spec.DataDisks {
 		volName := infrav1.DataDiskName(domachine, disk.NameSuffix)
 		vol, err := computesvc.GetVolumeByName(volName)
 		if err != nil {
