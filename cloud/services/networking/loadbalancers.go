@@ -64,7 +64,7 @@ func (s *Service) CreateLoadBalancer(spec *infrav1.DOLoadBalancer) (*godo.LoadBa
 			HealthyThreshold:       spec.HealthCheck.HealthyThreshold,
 		},
 		Tag:     infrav1.ClusterNameRoleTag(clusterName, infrav1.APIServerRoleTagValue),
-		VPCUUID: s.scope.VPCUUID(),
+		VPCUUID: s.scope.VPC().VPCUUID,
 	}
 
 	lb, _, err := s.scope.LoadBalancers.Create(s.ctx, request)

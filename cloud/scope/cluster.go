@@ -153,7 +153,7 @@ func (s *ClusterScope) APIServerLoadbalancersRef() *infrav1.DOResourceReference 
 	return &s.DOCluster.Status.Network.APIServerLoadbalancersRef
 }
 
-// VPCUUID get the DOCluster Spec Network VPCUUID.
-func (s *ClusterScope) VPCUUID() string {
-	return s.DOCluster.Spec.Network.VPCUUID
+// VPC gets the DOCluster Spec Network VPC.
+func (s *ClusterScope) VPC() *infrav1.DOVPC {
+	return &s.DOCluster.Spec.Network.VPC
 }
