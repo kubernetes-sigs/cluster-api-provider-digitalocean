@@ -59,7 +59,7 @@ func dumpSpecResourcesAndCleanup(ctx context.Context, specName string, clusterPr
 	Expect(os.RemoveAll(clusterctlLogFolder)).ShouldNot(HaveOccurred())
 
 	// Dumps all the resources in the spec namespace, then cleanups the cluster object and the spec namespace itself.
-	By(fmt.Sprintf("Dumping all the Cluster API resources in the %q namespace", namespace.Name))
+	By(fmt.Sprintf("Dumping all of the Cluster API resources in the %q namespace", namespace.Name))
 	// Dump all Cluster API related resources to artifacts before deleting them.
 	framework.DumpAllResources(ctx, framework.DumpAllResourcesInput{
 		Lister:    bootstrapClusterProxy.GetClient(),
@@ -84,7 +84,7 @@ func dumpSpecResourcesAndCleanup(ctx context.Context, specName string, clusterPr
 		})
 
 		// Will call the clean resources just to make sure we clean everything
-		By(fmt.Sprintf("Making sure there is no leftover running for %s", cluster.Name))
+		By(fmt.Sprintf("Making sure that there are no remaining resources running for %s", cluster.Name))
 		Expect(CleanDOResources(clusterName)).ShouldNot(HaveOccurred())
 	}
 
@@ -93,7 +93,7 @@ func dumpSpecResourcesAndCleanup(ctx context.Context, specName string, clusterPr
 }
 
 func redactLogs() {
-	By("Redacting sensitive information from logs")
+	By("Redacting sensitive information from the logs")
 	Expect(e2eConfig.Variables).To(HaveKey(RedactLogScriptPath))
 	cmd := exec.Command(e2eConfig.GetVariable(RedactLogScriptPath))
 	cmd.Run()

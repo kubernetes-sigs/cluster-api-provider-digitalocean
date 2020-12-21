@@ -37,28 +37,28 @@ func CleanDOResources(clusterName string) error {
 
 	droplets, err := dropletList(ctx, client)
 	if err != nil {
-		return errors.Wrap(err, "failed list droplets")
+		return errors.Wrap(err, "failed to list droplets")
 	}
 
 	for _, droplet := range droplets {
 		if strings.Contains(droplet.Name, clusterName) {
 			_, err := client.Droplets.Delete(ctx, droplet.ID)
 			if err != nil {
-				return errors.Wrapf(err, "failed delete droplet %d/%s", droplet.ID, droplet.Name)
+				return errors.Wrapf(err, "failed to delete droplet %d/%s", droplet.ID, droplet.Name)
 			}
 		}
 	}
 
 	lbs, err := lbList(ctx, client)
 	if err != nil {
-		return errors.Wrap(err, "failed list droplets")
+		return errors.Wrap(err, "failed to list droplets")
 	}
 
 	for _, lb := range lbs {
 		if strings.Contains(lb.Name, clusterName) {
 			_, err := client.LoadBalancers.Delete(ctx, lb.ID)
 			if err != nil {
-				return errors.Wrapf(err, "failed delete loadbalancer %s/%s", lb.ID, lb.Name)
+				return errors.Wrapf(err, "failed to delete loadbalancer %s/%s", lb.ID, lb.Name)
 			}
 		}
 	}

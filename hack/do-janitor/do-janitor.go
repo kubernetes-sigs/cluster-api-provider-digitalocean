@@ -39,13 +39,13 @@ func main() {
 
 	droplets, err := dropletList(ctx, client)
 	if err != nil {
-		log.Fatalf("fail to list droplets: %+v", err.Error())
+		log.Fatalf("failed to list droplets: %+v", err.Error())
 	}
 
 	for _, droplet := range droplets {
 		dropletCreated, err := time.Parse(time.RFC3339, droplet.Created)
 		if err != nil {
-			log.Fatalf("failt parsing time: %+v", err.Error())
+			log.Fatalf("failed to parse time: %+v", err.Error())
 		}
 
 		hours := time.Since(dropletCreated).Hours()
@@ -53,7 +53,7 @@ func main() {
 			log.Printf("%s is older than %d hours will terminate\n", droplet.Name, timeToCleanInHours)
 			_, err := client.Droplets.Delete(ctx, droplet.ID)
 			if err != nil {
-				log.Printf("fail to delete droplet %s: %+v\n", droplet.Name, err.Error())
+				log.Printf("failed to delete droplet %s: %+v\n", droplet.Name, err.Error())
 				continue
 			}
 
@@ -63,13 +63,13 @@ func main() {
 
 	lbs, err := lbList(ctx, client)
 	if err != nil {
-		log.Fatalf("fail to failed list LoadBalancer: %+v", err.Error())
+		log.Fatalf("failed to list LoadBalancers: %+v", err.Error())
 	}
 
 	for _, lb := range lbs {
 		lbCreated, err := time.Parse(time.RFC3339, lb.Created)
 		if err != nil {
-			log.Fatalf("failt parsing time: %+v", err.Error())
+			log.Fatalf("failed to parse time: %+v", err.Error())
 		}
 
 		hours := time.Since(lbCreated).Hours()
@@ -77,7 +77,7 @@ func main() {
 			log.Printf("%s is older than %d hours will terminate\n", lb.Name, timeToCleanInHours)
 			_, err := client.LoadBalancers.Delete(ctx, lb.ID)
 			if err != nil {
-				log.Printf("fail to delete droplet %s: %+v\n", lb.Name, err.Error())
+				log.Printf("failed to delete droplet %s: %+v\n", lb.Name, err.Error())
 				continue
 			}
 
@@ -85,12 +85,11 @@ func main() {
 		}
 	}
 
-	log.Println("Done DO Janitor")
+	log.Println("Completed DO Janitor")
 	os.Exit(0)
 }
 
 func dropletList(ctx context.Context, client *godo.Client) ([]godo.Droplet, error) {
-	// create a list to hold our droplets
 	list := []godo.Droplet{}
 
 	// create options. initially, these will be blank
