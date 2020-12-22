@@ -2,8 +2,8 @@
 
 ## Prerequisites
 
-- Linux or MacOS (Windows isn't supported at the moment).
 - A [DigitalOcean][DigitalOcean] Account
+- Install [clusterctl][clusterctl]
 - Install [kubectl][kubectl]
 - Install [kustomize][kustomize] `v3.1.0+`
 - [Packer][Packer] and [Ansible][Ansible] to build images
@@ -17,12 +17,11 @@
 ## Setup Environment
 
 ```bash
-# Export the DigitalOcean access token and region
-export DIGITALOCEAN_ACCESS_TOKEN=<access_token>
-export DO_REGION=<region>
+# Export the DigitalOcean access token
+$ export DIGITALOCEAN_ACCESS_TOKEN=<access_token>
 
 # Init doctl
-doctl auth init --access-token ${DIGITALOCEAN_ACCESS_TOKEN}
+$ doctl auth init --access-token ${DIGITALOCEAN_ACCESS_TOKEN}
 ```
 
 ## Building images
@@ -44,74 +43,138 @@ Verify that the image is available in your account and remember the correspondin
     $ doctl compute image list-user
 
 
-## Cluster Creation
-
-> We assume you already have a running a management cluster
+## Initialize the management cluster
 
 ```bash
-export CLUSTER_NAME=capdo-quickstart # change this name as you prefer.
-export MACHINE_IMAGE=<image-id> # created in the step above.
+$ export DO_B64ENCODED_CREDENTIALS="$(echo -n "${DIGITALOCEAN_ACCESS_TOKEN}" | base64 | tr -d '\n')"
+
+# Initialize a management cluster with digitalocean infrastructure provider.
+$ clusterctl init --infrastructure digitalocean
 ```
 
-For the purpose of this tutorial, we’ll name our cluster `capdo-quickstart`.
-
-Generate examples files. (Several parameters such as the target Kubernetes version or the machine types can be customized by setting specific environment variables; see the variable definitions in the `examples/generate.sh` file for the list of available options.)
-
-```
-make generate-examples
-```
-
-Install core-component(CAPI & CABPK) and provider-component (CAPDO)
-
-```
-kubectl apply -f examples/_out/core-components.yaml
-kubectl apply -f examples/_out/provider-components.yaml
-```
-
-Create cluster and control plane machine
-
-```
-kubectl apply -f examples/_out/cluster.yaml
-kubectl apply -f examples/_out/controlplane.yaml
-```
-
-After the controlplane is up and running, Retrive cluster kubeconfig
+The output will be similar to this:
 
 ```bash
-kubectl --namespace=default get secret/${CLUSTER_NAME}-kubeconfig -o json \
-  | jq -r .data.value \
-  | base64 --decode \
-  > ./${CLUSTER_NAME}.kubeconfig
+Fetching providers
+Installing cert-manager Version="v0.16.1"
+Waiting for cert-manager to be available...
+Installing Provider="cluster-api" Version="v0.3.11" TargetNamespace="capi-system"
+Installing Provider="bootstrap-kubeadm" Version="v0.3.11" TargetNamespace="capi-kubeadm-bootstrap-system"
+Installing Provider="control-plane-kubeadm" Version="v0.3.11" TargetNamespace="capi-kubeadm-control-plane-system"
+Installing Provider="infrastructure-digitalocean" Version="v0.4.0" TargetNamespace="capdo-system"
+
+Your management cluster has been initialized successfully!
+
+You can now create your first workload cluster by running the following:
+
+  clusterctl config cluster [name] --kubernetes-version [version] | kubectl apply -f -
+
 ```
 
-Deploy a CNI solution, Calico is used here as an example.
+## Creating a workload cluster
+
+Setting up environment variable
 
 ```bash
-kubectl --kubeconfig=./${CLUSTER_NAME}.kubeconfig apply -f https://docs.projectcalico.org/v3.8/manifests/calico.yaml
+$ export DO_REGION=<region>
+$ export DO_SSH_KEY_FINGERPRINT=<your-ssh-key-fingerprint>
+$ export DO_CONTROL_PLANE_MACHINE_TYPE=<droplet-size>
+$ export DO_CONTROL_PLANE_MACHINE_IMAGE=<image-id> # created in the step above.
+$ export DO_NODE_MACHINE_TYPE=<droplet-size>
+$ export DO_NODE_MACHINE_IMAGE=<image-id> # created in the step above.
 ```
-
-Deploy DigitalOcean Cloud Controller Manager
+Generate templates for creating workload clusters.
 
 ```bash
-kubectl --kubeconfig=./${CLUSTER_NAME}.kubeconfig apply -f examples/digitalocean-cloud-controller-manager.yaml
+$ clusterctl config cluster capdo-quickstart \
+    --infrastructure digitalocean \
+    --kubernetes-version v1.17.11 \
+    --control-plane-machine-count 1 \
+    --worker-machine-count 3 > capdo-quickstart-cluster.yaml
 ```
 
-Optional Deploy DigitalOcean CSI
+*You may need to inspect and make some changes to the generated template.*
+
+Create the workload cluster on the management cluster.
 
 ```bash
-kubectl --kubeconfig=./${CLUSTER_NAME}.kubeconfig apply -f examples/digitalocean-csi.yaml
+$ kubectl apply -f capdo-quickstart-cluster.yaml
 ```
 
-Check the status of control-plane using kubectl get nodes
+You can see the workload cluster resources using
 
 ```bash
-kubectl --kubeconfig=./${CLUSTER_NAME}.kubeconfig get nodes
+$ kubectl get cluster-api
 ```
 
-Finishing up, we’ll create a single node MachineDeployment.
+> Note: The control planes won’t be ready until you install the CNI and DigitalOcean Cloud Controller Manager.
 
+To verify the first control plane is up:
+
+```bash
+$ kubectl get kubeadmcontrolplane
+
+NAME                                                                               INITIALIZED   API SERVER AVAILABLE   VERSION    REPLICAS   READY   UPDATED   UNAVAILABLE
+kubeadmcontrolplane.controlplane.cluster.x-k8s.io/capdo-quickstart-control-plane   true                                 v1.17.11   1                  1         1
 ```
-kubectl apply -f examples/_out/machinedeployment.yaml
+
+After the first control plane node has initialized status, you can retrieve the workload cluster Kubeconfig:
+
+```bash
+$ clusterctl get kubeconfig capdo-quickstart > capdo-quickstart.kubeconfig
+```
+
+You can verify the kubernetes node in the workload cluster
+
+```bash
+$ KUBECONFIG=capdo-quickstart.kubeconfig kubectl get node
+
+NAME                                   STATUS     ROLES    AGE     VERSION
+capdo-quickstart-control-plane-pt926   NotReady   master   10m     v1.17.11
+capdo-quickstart-md-0-2vnwv            NotReady   <none>   5m31s   v1.17.11
+capdo-quickstart-md-0-5295f            NotReady   <none>   5m30s   v1.17.11
+capdo-quickstart-md-0-pm8np            NotReady   <none>   5m28s   v1.17.11
+```
+
+### Deploy CNI
+
+Calico is used here as an example.
+
+```bash
+$ KUBECONFIG=capdo-quickstart.kubeconfig kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
+```
+
+### Deploy DigitalOcean CCM and CSI
+
+```bash
+# Create digitalocean secret
+$ KUBECONFIG=capdo-quickstart.kubeconfig kubectl create secret generic digitalocean --namespace kube-system --from-literal access-token=$DIGITALOCEAN_ACCESS_TOKEN
+
+# Deploy DigitalOcean Cloud Controller Manager
+$ KUBECONFIG=capdo-quickstart.kubeconfig kubectl apply -f https://raw.githubusercontent.com/digitalocean/digitalocean-cloud-controller-manager/master/releases/v0.1.27.yml
+
+# Deploy DigitalOcean CSI (optional)
+$ KUBECONFIG=capdo-quickstart.kubeconfig kubectl apply -f https://raw.githubusercontent.com/digitalocean/csi-digitalocean/master/deploy/kubernetes/releases/csi-digitalocean-v1.3.0.yaml
+```
+
+After CNI and CCM deployed, your workload cluster nodes should be in the ready state. You can verify using:
+
+```bash
+$ KUBECONFIG=capdo-quickstart.kubeconfig kubectl get node
+
+NAME                                   STATUS   ROLES    AGE   VERSION
+capdo-quickstart-control-plane-pt926   Ready    master   25m   v1.17.11
+capdo-quickstart-md-0-2vnwv            Ready    <none>   21m   v1.17.11
+capdo-quickstart-md-0-5295f            Ready    <none>   21m   v1.17.11
+capdo-quickstart-md-0-pm8np            Ready    <none>   21m   v1.17.11
+```
+
+## Deleting a workload cluster
+
+You can delete the workload cluster from the management cluster using:
+
+```bash
+$ kubectl delete cluster capdo-quickstart
 ```
 
 <!-- References -->
@@ -124,3 +187,4 @@ kubectl apply -f examples/_out/machinedeployment.yaml
 [Packer]: https://www.packer.io/intro/getting-started/install.html
 [Ansible]: https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html
 [DigitalOcean]: https://cloud.digitalocean.com/
+[clusterctl]: https://github.com/kubernetes-sigs/cluster-api/releases
