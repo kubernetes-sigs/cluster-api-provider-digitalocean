@@ -32,7 +32,7 @@ func (s *Service) GetVolumeByName(name string) (*godo.Volume, error) {
 		Region: s.scope.Region(),
 	})
 	if err != nil {
-		return nil, TemporaryError{fmt.Errorf("failed to list volumes: %w", err)}
+		return nil, fmt.Errorf("failed to list volumes: %w", err)
 	}
 	if len(vols) == 0 {
 		return nil, nil
@@ -60,10 +60,7 @@ func (s *Service) CreateVolume(disk infrav1.DataDisk, volName string) (*godo.Vol
 func (s *Service) DeleteVolume(id string) error {
 	s.scope.V(2).Info("Attempting to delete block storage volume", "volume-id", id)
 
-	if resp, err := s.scope.Storage.DeleteVolume(s.ctx, id); err != nil {
-		if resp.StatusCode >= 500 {
-			err = TemporaryError{err}
-		}
+	if _, err := s.scope.Storage.DeleteVolume(s.ctx, id); err != nil {
 		return fmt.Errorf("failed to delete instance with id %q: %w", id, err)
 	}
 

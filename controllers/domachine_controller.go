@@ -203,9 +203,6 @@ func (r *DOMachineReconciler) reconcileVolumes(ctx context.Context, mscope *scop
 		volName := infrav1.DataDiskName(domachine, disk.NameSuffix)
 		vol, err := computesvc.GetVolumeByName(volName)
 		if err != nil {
-			if errors.As(err, &computes.TemporaryError{}) {
-				return reconcile.Result{Requeue: true}, err
-			}
 			return reconcile.Result{}, err
 		}
 		if vol == nil {
@@ -297,18 +294,12 @@ func (r *DOMachineReconciler) reconcileDeleteVolumes(ctx context.Context, mscope
 		volName := infrav1.DataDiskName(domachine, disk.NameSuffix)
 		vol, err := computesvc.GetVolumeByName(volName)
 		if err != nil {
-			if errors.As(err, &computes.TemporaryError{}) {
-				return reconcile.Result{Requeue: true}, err
-			}
 			return reconcile.Result{}, err
 		}
 		if vol == nil {
 			continue
 		}
 		if err = computesvc.DeleteVolume(vol.ID); err != nil {
-			if errors.As(err, &computes.TemporaryError{}) {
-				return reconcile.Result{Requeue: true}, err
-			}
 			return reconcile.Result{}, err
 		}
 		r.Recorder.Eventf(domachine, corev1.EventTypeNormal, "VolumeDeleted", "Deleted the storage volume - %s", vol.Name)
