@@ -45,6 +45,14 @@ spec:
         kubeletExtraArgs:
           cloud-provider: external
         name: '{{ ds.meta_data["local_hostname"] }}'
+    clusterConfiguration:
+      etcd:
+        local:
+          dataDir: /var/lib/etcddata/etcd
+    mounts:
+      - - LABEL=etcd_data
+        - /var/lib/etcddata
+
   version: "${KUBERNETES_VERSION}"
 ---
 kind: DOMachineTemplate
@@ -54,6 +62,11 @@ metadata:
 spec:
   template:
     spec:
+      dataDisks:
+      - diskSizeGB: 256
+        nameSuffix: etcd
+        filesystemType: ext4
+        filesystemLabel: etcd_data
       size: "${DO_CONTROL_PLANE_MACHINE_TYPE}"
       image: ${DO_CONTROL_PLANE_MACHINE_IMAGE}
       sshKeys:
