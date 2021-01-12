@@ -16,7 +16,10 @@ limitations under the License.
 
 package v1alpha3
 
-import "strings"
+import (
+	"fmt"
+	"strings"
+)
 
 // APIEndpoint represents a reachable Kubernetes API endpoint.
 type APIEndpoint struct {
@@ -70,6 +73,28 @@ type DONetworkResource struct {
 type DOMachineTemplateResource struct {
 	// Spec is the specification of the desired behavior of the machine.
 	Spec DOMachineSpec `json:"spec"`
+}
+
+// DataDiskName is the volume name used for a data disk of a droplet.
+// It's in the form of <dropletName>-<dataDiskNameSuffix>.
+func DataDiskName(m *DOMachine, suffix string) string {
+	return DOSafeName(fmt.Sprintf("%s-%s", m.Name, suffix))
+}
+
+// DataDisk specifies the parameters that are used to add a data disk to the machine.
+type DataDisk struct {
+	// NameSuffix is the suffix to be appended to the machine name to generate the disk name.
+	// Each disk name will be in format <dropletName>-<nameSuffix>.
+	NameSuffix string `json:"nameSuffix"`
+	// DiskSizeGB is the size in GB to assign to the data disk.
+	DiskSizeGB int64 `json:"diskSizeGB"`
+	// FilesystemType to be used on the volume. When provided the volume will
+	// be automatically formatted.
+	FilesystemType string `json:"filesystemType,omitempty"`
+	// FilesystemLabel is the label that is applied to the created filesystem.
+	// Character limits apply: 16 for ext4; 12 for xfs.
+	// May only be used in conjunction with filesystemType.
+	FilesystemLabel string `json:"filesystemLabel,omitempty"`
 }
 
 // DONetwork encapsulates DigitalOcean networking configuration.

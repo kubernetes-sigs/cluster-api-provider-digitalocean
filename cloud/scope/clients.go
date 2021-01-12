@@ -22,6 +22,7 @@ import (
 type DOClients struct {
 	Actions       godo.ActionsService
 	Droplets      godo.DropletsService
+	Storage       godo.StorageService
 	Images        godo.ImagesService
 	Keys          godo.KeysService
 	LoadBalancers godo.LoadBalancersService

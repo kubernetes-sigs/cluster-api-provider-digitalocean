@@ -66,6 +66,10 @@ func NewClusterScope(params ClusterScopeParams) (*ClusterScope, error) {
 		params.DOClients.Droplets = session.Droplets
 	}
 
+	if params.DOClients.Storage == nil {
+		params.DOClients.Storage = session.Storage
+	}
+
 	if params.DOClients.Images == nil {
 		params.DOClients.Images = session.Images
 	}
