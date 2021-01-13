@@ -152,3 +152,8 @@ func (s *ClusterScope) APIServerLoadbalancers() *infrav1.DOLoadBalancer {
 func (s *ClusterScope) APIServerLoadbalancersRef() *infrav1.DOResourceReference {
 	return &s.DOCluster.Status.Network.APIServerLoadbalancersRef
 }
+
+// VPC gets the DOCluster Spec Network VPC.
+func (s *ClusterScope) VPC() *infrav1.DOVPC {
+	return &s.DOCluster.Spec.Network.VPC
+}

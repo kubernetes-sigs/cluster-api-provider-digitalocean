@@ -102,6 +102,9 @@ type DONetwork struct {
 	// Configures an API Server loadbalancers
 	// +optional
 	APIServerLoadbalancers DOLoadBalancer `json:"apiServerLoadbalancers,omitempty"`
+	// VPC defines the VPC configuration.
+	// +optional
+	VPC DOVPC `json:"vpc,omitempty"`
 }
 
 // DOLoadBalancer define the DigitalOcean loadbalancers configurations.
@@ -119,6 +122,14 @@ type DOLoadBalancer struct {
 	// An object specifying health check settings for the Load Balancer. If omitted, default values will be provided.
 	// +optional
 	HealthCheck DOLoadBalancerHealthCheck `json:"healthCheck,omitempty"`
+}
+
+// DOVPC define the DigitalOcean VPC configuration.
+type DOVPC struct {
+	// VPCUUID defines the VPC UUID to use. An empty value implies using the
+	// default VPC.
+	// +optional
+	VPCUUID string `json:"vpc_uuid,omitempty"`
 }
 
 var (
