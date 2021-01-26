@@ -254,10 +254,6 @@ generate-manifests: $(CONTROLLER_GEN) ## Generate manifests e.g. CRD, RBAC etc.
 		output:rbac:dir=$(RBAC_ROOT) \
 		rbac:roleName=manager-role
 
-.PHONY: generate-examples
-generate-examples: clean-examples ## Generate examples configurations to run a cluster.
-	./examples/generate.sh
-
 ## --------------------------------------
 ##@ Docker
 ## --------------------------------------
