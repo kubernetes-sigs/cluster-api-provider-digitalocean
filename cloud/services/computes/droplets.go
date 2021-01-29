@@ -112,6 +112,7 @@ func (s *Service) CreateDroplet(scope *scope.MachineScope) (*godo.Droplet, error
 
 	request.Tags = infrav1.BuildTags(infrav1.BuildTagParams{
 		ClusterName: clusterName,
+		ClusterUID:  s.scope.UID(),
 		Name:        instanceName,
 		Role:        scope.Role(),
 		Additional:  scope.AdditionalTags(),
