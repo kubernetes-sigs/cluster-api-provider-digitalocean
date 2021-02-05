@@ -35,11 +35,17 @@ func TestBuildTags(t *testing.T) {
 			args: args{
 				params: BuildTagParams{
 					ClusterName: "foo",
+					ClusterUID:  "155bd6ca-c6a9-45a8-8c9c-05e09b36bc42",
 					Name:        "bar",
 					Role:        APIServerRoleTagValue,
 				},
 			},
-			want: Tags{ClusterNameTag("foo"), ClusterNameRoleTag("foo", APIServerRoleTagValue), "name:" + "bar"},
+			want: Tags{
+				ClusterNameTag("foo"),
+				ClusterNameRoleTag("foo", APIServerRoleTagValue),
+				ClusterNameUIDRoleTag("foo", "155bd6ca-c6a9-45a8-8c9c-05e09b36bc42", APIServerRoleTagValue),
+				NameTagFromName("bar"),
+			},
 		},
 	}
 	for _, tt := range tests {

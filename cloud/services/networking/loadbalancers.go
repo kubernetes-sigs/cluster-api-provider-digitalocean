@@ -42,7 +42,7 @@ func (s *Service) GetLoadBalancer(id string) (*godo.LoadBalancer, error) {
 
 func (s *Service) CreateLoadBalancer(spec *infrav1.DOLoadBalancer) (*godo.LoadBalancer, error) {
 	clusterName := infrav1.DOSafeName(s.scope.Name())
-	name := clusterName + "-" + infrav1.APIServerRoleTagValue
+	name := clusterName + "-" + infrav1.APIServerRoleTagValue + "-" + s.scope.UID()
 	request := &godo.LoadBalancerRequest{
 		Name:      name,
 		Algorithm: spec.Algorithm,
@@ -63,7 +63,7 @@ func (s *Service) CreateLoadBalancer(spec *infrav1.DOLoadBalancer) (*godo.LoadBa
 			UnhealthyThreshold:     spec.HealthCheck.UnhealthyThreshold,
 			HealthyThreshold:       spec.HealthCheck.HealthyThreshold,
 		},
-		Tag:     infrav1.ClusterNameRoleTag(clusterName, infrav1.APIServerRoleTagValue),
+		Tag:     infrav1.ClusterNameUIDRoleTag(clusterName, s.scope.UID(), infrav1.APIServerRoleTagValue),
 		VPCUUID: s.scope.VPC().VPCUUID,
 	}
 

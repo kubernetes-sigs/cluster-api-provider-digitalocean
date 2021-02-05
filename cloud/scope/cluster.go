@@ -123,6 +123,10 @@ func (s *ClusterScope) Namespace() string {
 	return s.Cluster.GetNamespace()
 }
 
+func (s *ClusterScope) UID() string {
+	return string(s.Cluster.UID)
+}
+
 // Region returns the cluster region.
 func (s *ClusterScope) Region() string {
 	return s.DOCluster.Spec.Region
