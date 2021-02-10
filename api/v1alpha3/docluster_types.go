@@ -29,15 +29,22 @@ const (
 
 // DOClusterSpec defines the desired state of DOCluster.
 type DOClusterSpec struct {
-	// The DigitalOcean Region the cluster lives in.
-	// It must be one of available region on DigitalOcean. See https://developers.digitalocean.com/documentation/v2/#list-all-regions
+	// The DigitalOcean Region the cluster lives in. It must be one of available
+	// region on DigitalOcean. See
+	// https://developers.digitalocean.com/documentation/v2/#list-all-regions
 	Region string `json:"region"`
 	// Network configurations
 	// +optional
 	Network DONetwork `json:"network,omitempty"`
-	// ControlPlaneEndpoint represents the endpoint used to communicate with the control plane.
+	// ControlPlaneEndpoint represents the endpoint used to communicate with the
+	// control plane. If ControlPlaneDNSRecord is unset, the DO load-balancer IP
+	// of the KAS is used.
 	// +optional
 	ControlPlaneEndpoint clusterv1.APIEndpoint `json:"controlPlaneEndpoint"`
+	// ControlPlaneDNSRecord is a managed DNS record that points to the
+	// load-balancer IP used for the ControlPlaneEndpoint.
+	// +optional
+	ControlPlaneDNSRecord *DOControlPlaneDNSRecord `json:"controlPlaneDNSRecord"`
 }
 
 // DOClusterStatus defines the observed state of DOCluster.
@@ -48,6 +55,14 @@ type DOClusterStatus struct {
 	// Network encapsulates all things related to DigitalOcean network.
 	// +optional
 	Network DONetworkResource `json:"network,omitempty"`
+}
+
+type DOControlPlaneDNSRecord struct {
+	// Domain is the DO domain that this record should live in.
+	// It must be pre-existing in your DO account.
+	Domain string `json:"domain"`
+	// Name is the DNS short name of the record (non-FQDN)
+	Name string `json:"name"`
 }
 
 // +kubebuilder:object:root=true

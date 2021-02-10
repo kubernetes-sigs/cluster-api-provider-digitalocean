@@ -183,9 +183,25 @@ spec:
           spec:
             description: DOClusterSpec defines the desired state of DOCluster.
             properties:
+              controlPlaneDNSRecord:
+                description: ControlPlaneDNSRecord is a managed DNS record that points
+                  to the load-balancer IP used for the ControlPlaneEndpoint.
+                properties:
+                  domain:
+                    description: Domain is the DO domain that this record should live
+                      in. It must be pre-existing in your DO account.
+                    type: string
+                  name:
+                    description: Name is the DNS short name of the record (non-FQDN)
+                    type: string
+                required:
+                - domain
+                - name
+                type: object
               controlPlaneEndpoint:
                 description: ControlPlaneEndpoint represents the endpoint used to
-                  communicate with the control plane.
+                  communicate with the control plane. If ControlPlaneDNSRecord is
+                  unset, the DO load-balancer IP of the KAS is used.
                 properties:
                   host:
                     description: The hostname on which the API server is serving.

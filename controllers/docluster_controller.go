@@ -18,6 +18,7 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/go-logr/logr"
@@ -141,8 +142,38 @@ func (r *DOClusterReconciler) reconcile(ctx context.Context, clusterScope *scope
 	}
 
 	r.Recorder.Eventf(docluster, corev1.EventTypeNormal, "LoadBalancerReady", "LoadBalancer got an IP Address - %s", loadbalancer.IP)
+
+	var cpEndpointHost = loadbalancer.IP
+	if docluster.Spec.ControlPlaneDNSRecord != nil {
+		clusterScope.Info("Verifying LB DNS Record")
+		// ensure DNS record is created and use it as control plane endpoint
+		recordSpec := docluster.Spec.ControlPlaneDNSRecord
+		cpEndpointHost = fmt.Sprintf("%s.%s", recordSpec.Name, recordSpec.Domain)
+		dRecord, err := networkingsvc.GetDomainRecord(
+			recordSpec.Domain,
+			recordSpec.Name,
+			"A",
+		)
+		if err != nil {
+			return reconcile.Result{}, errors.Wrapf(err, "failed verify DNS record for LB Name %s.%s",
+				recordSpec.Name, recordSpec.Domain)
+		}
+		if dRecord == nil || dRecord.Data != loadbalancer.IP {
+			clusterScope.Info("Ensuring LB DNS Record is in place")
+			if err := networkingsvc.UpsertDomainRecord(
+				recordSpec.Domain,
+				recordSpec.Name,
+				"A",
+				loadbalancer.IP,
+			); err != nil {
+				return reconcile.Result{}, errors.Wrap(err, "failed to reconcile LB DNS record")
+			}
+		}
+		r.Recorder.Eventf(docluster, corev1.EventTypeNormal, "DomainRecordReady", "DNS Record '%s.%s' with IP '%s'", recordSpec.Name, recordSpec.Domain, loadbalancer.IP)
+	}
+
 	clusterScope.SetControlPlaneEndpoint(clusterv1.APIEndpoint{
-		Host: loadbalancer.IP,
+		Host: cpEndpointHost,
 		Port: int32(apiServerLoadbalancer.Port),
 	})
 
@@ -157,6 +188,13 @@ func (r *DOClusterReconciler) reconcileDelete(ctx context.Context, clusterScope 
 	docluster := clusterScope.DOCluster
 	networkingsvc := networking.NewService(ctx, clusterScope)
 	apiServerLoadbalancerRef := clusterScope.APIServerLoadbalancersRef()
+
+	if docluster.Spec.ControlPlaneDNSRecord != nil {
+		recordSpec := docluster.Spec.ControlPlaneDNSRecord
+		if err := networkingsvc.DeleteDomainRecord(recordSpec.Domain, recordSpec.Name, "A"); err != nil {
+			return reconcile.Result{}, err
+		}
+	}
 
 	loadbalancer, err := networkingsvc.GetLoadBalancer(apiServerLoadbalancerRef.ResourceID)
 	if err != nil {

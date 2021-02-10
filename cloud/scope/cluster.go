@@ -82,6 +82,10 @@ func NewClusterScope(params ClusterScopeParams) (*ClusterScope, error) {
 		params.DOClients.LoadBalancers = session.LoadBalancers
 	}
 
+	if params.DOClients.Domains == nil {
+		params.DOClients.Domains = session.Domains
+	}
+
 	helper, err := patch.NewHelper(params.DOCluster, params.Client)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to init patch helper")
