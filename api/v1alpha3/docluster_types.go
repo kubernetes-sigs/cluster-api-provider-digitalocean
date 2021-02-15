@@ -52,6 +52,10 @@ type DOClusterStatus struct {
 	// Ready denotes that the cluster (infrastructure) is ready.
 	// +optional
 	Ready bool `json:"ready"`
+	// ControlPlaneDNSRecordReady denotes that the DNS record is ready and
+	// propagated to the DO DNS servers.
+	// +optional
+	ControlPlaneDNSRecordReady bool `json:"controlPlaneDNSRecordReady,omitempty"`
 	// Network encapsulates all things related to DigitalOcean network.
 	// +optional
 	Network DONetworkResource `json:"network,omitempty"`

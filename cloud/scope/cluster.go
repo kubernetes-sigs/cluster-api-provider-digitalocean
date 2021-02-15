@@ -142,6 +142,11 @@ func (s *ClusterScope) SetReady() {
 	s.DOCluster.Status.Ready = true
 }
 
+// SetControlPlaneDNSRecordReady sets the DOCluster ControlPlaneDNSRecordReady Status.
+func (s *ClusterScope) SetControlPlaneDNSRecordReady(ready bool) {
+	s.DOCluster.Status.ControlPlaneDNSRecordReady = ready
+}
+
 // SetControlPlaneEndpoint sets the DOCluster status APIEndpoints.
 func (s *ClusterScope) SetControlPlaneEndpoint(apiEndpoint clusterv1.APIEndpoint) {
 	s.DOCluster.Spec.ControlPlaneEndpoint = apiEndpoint
