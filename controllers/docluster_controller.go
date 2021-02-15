@@ -147,10 +147,10 @@ func (r *DOClusterReconciler) reconcile(ctx context.Context, clusterScope *scope
 	r.Recorder.Eventf(docluster, corev1.EventTypeNormal, "LoadBalancerReady", "LoadBalancer got an IP Address - %s", loadbalancer.IP)
 
 	var cpEndpointHost = loadbalancer.IP
-	if docluster.Spec.ControlPlaneDNSRecord != nil {
+	if docluster.Spec.ControlPlaneDNS != nil {
 		clusterScope.Info("Verifying LB DNS Record")
 		// ensure DNS record is created and use it as control plane endpoint
-		recordSpec := docluster.Spec.ControlPlaneDNSRecord
+		recordSpec := docluster.Spec.ControlPlaneDNS
 		cpEndpointHost = fmt.Sprintf("%s.%s", recordSpec.Name, recordSpec.Domain)
 		dRecord, err := networkingsvc.GetDomainRecord(
 			recordSpec.Domain,
@@ -268,8 +268,8 @@ func (r *DOClusterReconciler) reconcileDelete(ctx context.Context, clusterScope 
 	networkingsvc := networking.NewService(ctx, clusterScope)
 	apiServerLoadbalancerRef := clusterScope.APIServerLoadbalancersRef()
 
-	if docluster.Spec.ControlPlaneDNSRecord != nil {
-		recordSpec := docluster.Spec.ControlPlaneDNSRecord
+	if docluster.Spec.ControlPlaneDNS != nil {
+		recordSpec := docluster.Spec.ControlPlaneDNS
 		if err := networkingsvc.DeleteDomainRecord(recordSpec.Domain, recordSpec.Name, "A"); err != nil {
 			return reconcile.Result{}, err
 		}

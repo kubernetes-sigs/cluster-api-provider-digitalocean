@@ -37,14 +37,14 @@ type DOClusterSpec struct {
 	// +optional
 	Network DONetwork `json:"network,omitempty"`
 	// ControlPlaneEndpoint represents the endpoint used to communicate with the
-	// control plane. If ControlPlaneDNSRecord is unset, the DO load-balancer IP
-	// of the KAS is used.
+	// control plane. If ControlPlaneDNS is unset, the DO load-balancer IP
+	// of the Kubernetes API Server is used.
 	// +optional
 	ControlPlaneEndpoint clusterv1.APIEndpoint `json:"controlPlaneEndpoint"`
-	// ControlPlaneDNSRecord is a managed DNS record that points to the
-	// load-balancer IP used for the ControlPlaneEndpoint.
+	// ControlPlaneDNS is a managed DNS name that points to the load-balancer
+	// IP used for the ControlPlaneEndpoint.
 	// +optional
-	ControlPlaneDNSRecord *DOControlPlaneDNSRecord `json:"controlPlaneDNSRecord"`
+	ControlPlaneDNS *DOControlPlaneDNS `json:"controlPlaneDNS"`
 }
 
 // DOClusterStatus defines the observed state of DOCluster.
@@ -61,7 +61,7 @@ type DOClusterStatus struct {
 	Network DONetworkResource `json:"network,omitempty"`
 }
 
-type DOControlPlaneDNSRecord struct {
+type DOControlPlaneDNS struct {
 	// Domain is the DO domain that this record should live in.
 	// It must be pre-existing in your DO account.
 	Domain string `json:"domain"`

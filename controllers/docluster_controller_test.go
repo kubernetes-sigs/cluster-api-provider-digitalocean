@@ -90,7 +90,7 @@ func TestDNSPropagationCheck(t *testing.T) {
 			desc: "non-propagated DNS record",
 			fakeDNS: newFakeResolver([]*dns.Msg{
 				newDNSTypeSOAMsg(host, fakeAuthoritativeNSName),
-				&dns.Msg{},
+				{},
 			}),
 			wantPropagated: false,
 			shouldSucc:     true,
@@ -107,7 +107,7 @@ func TestDNSPropagationCheck(t *testing.T) {
 		{
 			desc: "missing authority section",
 			fakeDNS: newFakeResolver([]*dns.Msg{
-				&dns.Msg{},
+				{},
 			}),
 			wantPropagated: false,
 			shouldSucc:     false,

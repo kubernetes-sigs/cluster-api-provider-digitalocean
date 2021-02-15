@@ -183,9 +183,9 @@ spec:
           spec:
             description: DOClusterSpec defines the desired state of DOCluster.
             properties:
-              controlPlaneDNSRecord:
-                description: ControlPlaneDNSRecord is a managed DNS record that points
-                  to the load-balancer IP used for the ControlPlaneEndpoint.
+              controlPlaneDNS:
+                description: ControlPlaneDNS is a managed DNS name that points to
+                  the load-balancer IP used for the ControlPlaneEndpoint.
                 properties:
                   domain:
                     description: Domain is the DO domain that this record should live
@@ -200,8 +200,8 @@ spec:
                 type: object
               controlPlaneEndpoint:
                 description: ControlPlaneEndpoint represents the endpoint used to
-                  communicate with the control plane. If ControlPlaneDNSRecord is
-                  unset, the DO load-balancer IP of the KAS is used.
+                  communicate with the control plane. If ControlPlaneDNS is unset,
+                  the DO load-balancer IP of the Kubernetes API Server is used.
                 properties:
                   host:
                     description: The hostname on which the API server is serving.
@@ -291,6 +291,10 @@ spec:
           status:
             description: DOClusterStatus defines the observed state of DOCluster.
             properties:
+              controlPlaneDNSRecordReady:
+                description: ControlPlaneDNSRecordReady denotes that the DNS record
+                  is ready and propagated to the DO DNS servers.
+                type: boolean
               network:
                 description: Network encapsulates all things related to DigitalOcean
                   network.
