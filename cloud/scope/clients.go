@@ -26,4 +26,5 @@ type DOClients struct {
 	Images        godo.ImagesService
 	Keys          godo.KeysService
 	LoadBalancers godo.LoadBalancersService
+	Domains       godo.DomainsService
 }
