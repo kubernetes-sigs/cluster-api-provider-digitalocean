@@ -5,6 +5,7 @@ go 1.16
 require (
 	github.com/digitalocean/godo v1.54.0
 	github.com/go-logr/logr v0.4.0
+	github.com/golang/mock v1.4.4
 	github.com/miekg/dns v1.1.3
 	github.com/onsi/ginkgo v1.15.2
 	github.com/onsi/gomega v1.11.0
