@@ -67,6 +67,7 @@ var (
 	watchNamespace          string
 	profilerAddress         string
 	syncPeriod              time.Duration
+	webhookPort             int
 )
 
 func InitFlags(fs *pflag.FlagSet) {
@@ -77,6 +78,7 @@ func InitFlags(fs *pflag.FlagSet) {
 	fs.StringVar(&watchNamespace, "namespace", "", "Namespace that the controller watches to reconcile cluster-api objects. If unspecified, the controller watches for cluster-api objects across all namespaces.")
 	fs.StringVar(&profilerAddress, "profiler-address", "", "Bind address to expose the pprof profiler (e.g. localhost:6060)")
 	fs.DurationVar(&syncPeriod, "sync-period", 10*time.Minute, "The minimum interval at which watched resources are reconciled (e.g. 10m)")
+	fs.IntVar(&webhookPort, "webhook-port", 0, "Webhook Server port, disabled by default. When enabled, the manager will only work as webhook server, no reconcilers are installed.")
 }
 
 func main() {
@@ -122,23 +124,39 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err = (&controllers.DOClusterReconciler{
-		Client:   mgr.GetClient(),
-		Log:      ctrl.Log.WithName("controllers").WithName("DOCluster"),
-		Recorder: mgr.GetEventRecorderFor("docluster-controller"),
-		DNS:      dns,
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "DOCluster")
-		os.Exit(1)
+	if webhookPort == 0 {
+		if err = (&controllers.DOClusterReconciler{
+			Client:   mgr.GetClient(),
+			Log:      ctrl.Log.WithName("controllers").WithName("DOCluster"),
+			Recorder: mgr.GetEventRecorderFor("docluster-controller"),
+			DNS:      dns,
+		}).SetupWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create controller", "controller", "DOCluster")
+			os.Exit(1)
+		}
+		if err = (&controllers.DOMachineReconciler{
+			Client:   mgr.GetClient(),
+			Log:      ctrl.Log.WithName("controllers").WithName("DOMachine"),
+			Recorder: mgr.GetEventRecorderFor("domachine-controller"),
+		}).SetupWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create controller", "controller", "DOMachine")
+			os.Exit(1)
+		}
+	} else {
+		if err := (&infrav1alpha3.DOCluster{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "DOCluster")
+			os.Exit(1)
+		}
+		if err := (&infrav1alpha3.DOMachine{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "DOMachine")
+			os.Exit(1)
+		}
+		if err := (&infrav1alpha3.DOMachineTemplate{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "DOMachineTemplate")
+			os.Exit(1)
+		}
 	}
-	if err = (&controllers.DOMachineReconciler{
-		Client:   mgr.GetClient(),
-		Log:      ctrl.Log.WithName("controllers").WithName("DOMachine"),
-		Recorder: mgr.GetEventRecorderFor("domachine-controller"),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "DOMachine")
-		os.Exit(1)
-	}
+
 	// +kubebuilder:scaffold:builder
 
 	if err := mgr.AddReadyzCheck("ping", healthz.Ping); err != nil {
