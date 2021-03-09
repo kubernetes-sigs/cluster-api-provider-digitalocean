@@ -44,7 +44,7 @@ type DOClusterSpec struct {
 	// ControlPlaneDNS is a managed DNS name that points to the load-balancer
 	// IP used for the ControlPlaneEndpoint.
 	// +optional
-	ControlPlaneDNS *DOControlPlaneDNS `json:"controlPlaneDNS"`
+	ControlPlaneDNS *DOControlPlaneDNS `json:"controlPlaneDNS,omitempty"`
 }
 
 // DOClusterStatus defines the observed state of DOCluster.
