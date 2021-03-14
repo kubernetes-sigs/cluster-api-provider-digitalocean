@@ -57,7 +57,7 @@ providers:
     versions:
       - name: v0.4.1
         # Use manifest from source files
-        value: ../../../config
+        value: ${PWD}/config
         replacements:
           - old: gcr.io/k8s-staging-cluster-api-do/cluster-api-do-controller:master
             new: gcr.io/k8s-staging-cluster-api/capdo-manager:e2e
@@ -65,15 +65,16 @@ providers:
             new: "imagePullPolicy: IfNotPresent"
     files:
       # Add a cluster template
-      - sourcePath: "../data/infrastructure-digitalocean/cluster-template.yaml"
-      - sourcePath: "../data/infrastructure-digitalocean/metadata.yaml"
+      - sourcePath: "${PWD}/test/e2e/data/infrastructure-digitalocean/cluster-template.yaml"
+      - sourcePath: "${PWD}/test/e2e/data/infrastructure-digitalocean/metadata.yaml"
 
 variables:
-  KUBERNETES_VERSION: "v1.17.11"
+  REDACT_LOG_SCRIPT: "${PWD}/hack/log/redact.sh"
+  KUBERNETES_VERSION: "v1.18.16"
   EXP_CLUSTER_RESOURCE_SET: "true"
   # Cluster Addons
-  CNI: "./data/cni/calico/calico.yaml"
-  CCM: "./data/ccm/digitalocean-cloud-controller-manager.yaml"
+  CNI: "${PWD}/test/e2e/data/cni/calico/calico.yaml"
+  CCM: "${PWD}/test/e2e/data/ccm/digitalocean-cloud-controller-manager.yaml"
   # Following CAPDO variables should be set before testing
   DO_REGION: "nyc1"
   DO_CONTROL_PLANE_MACHINE_TYPE: "s-2vcpu-2gb"

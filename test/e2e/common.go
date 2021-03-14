@@ -21,7 +21,6 @@ package e2e
 import (
 	"context"
 	"fmt"
-	"os"
 	"os/exec"
 	"path/filepath"
 
@@ -36,6 +35,9 @@ import (
 // Test suite constants for e2e config variables
 const (
 	RedactLogScriptPath = "REDACT_LOG_SCRIPT"
+	KubernetesVersion   = "KUBERNETES_VERSION"
+	CCMPath             = "CCM"
+	CCMResources        = "CCM_RESOURCES"
 )
 
 func Byf(format string, a ...interface{}) {
@@ -45,56 +47,52 @@ func Byf(format string, a ...interface{}) {
 func setupSpecNamespace(ctx context.Context, specName string, clusterProxy framework.ClusterProxy, artifactFolder string) (*corev1.Namespace, context.CancelFunc) {
 	Byf("Creating a namespace for hosting the %q test spec", specName)
 	namespace, cancelWatches := framework.CreateNamespaceAndWatchEvents(ctx, framework.CreateNamespaceAndWatchEventsInput{
-		Creator:   bootstrapClusterProxy.GetClient(),
-		ClientSet: bootstrapClusterProxy.GetClientSet(),
+		Creator:   clusterProxy.GetClient(),
+		ClientSet: clusterProxy.GetClientSet(),
 		Name:      fmt.Sprintf("%s-%s", specName, util.RandomString(6)),
-		LogFolder: filepath.Join(artifactFolder, "clusters", bootstrapClusterProxy.GetName()),
+		LogFolder: filepath.Join(artifactFolder, "clusters", clusterProxy.GetName()),
 	})
 
 	return namespace, cancelWatches
 }
 
-func dumpSpecResourcesAndCleanup(ctx context.Context, specName string, clusterProxy framework.ClusterProxy, artifactFolder string, namespace *corev1.Namespace, cancelWatches context.CancelFunc, cluster *clusterv1.Cluster, intervalsGetter func(spec, key string) []interface{}, clusterName, clusterctlLogFolder string, skipCleanup bool) {
-	// Remove clusterctl apply log folder
-	Expect(os.RemoveAll(clusterctlLogFolder)).ShouldNot(HaveOccurred())
+func dumpSpecResourcesAndCleanup(ctx context.Context, specName string, clusterProxy framework.ClusterProxy, artifactFolder string, namespace *corev1.Namespace, cancelWatches context.CancelFunc, cluster *clusterv1.Cluster, intervalsGetter func(spec, key string) []interface{}, skipCleanup bool) {
+	Byf("Dumping logs from the %q workload cluster", cluster.Name)
 
-	// Dumps all the resources in the spec namespace, then cleanups the cluster object and the spec namespace itself.
-	By(fmt.Sprintf("Dumping all of the Cluster API resources in the %q namespace", namespace.Name))
+	// Dump all the logs from the workload cluster before deleting them.
+	clusterProxy.CollectWorkloadClusterLogs(ctx, cluster.Namespace, cluster.Name, filepath.Join(artifactFolder, "clusters", cluster.Name, "machines"))
+
+	Byf("Dumping all the Cluster API resources in the %q namespace", namespace.Name)
+
 	// Dump all Cluster API related resources to artifacts before deleting them.
 	framework.DumpAllResources(ctx, framework.DumpAllResourcesInput{
-		Lister:    bootstrapClusterProxy.GetClient(),
+		Lister:    clusterProxy.GetClient(),
 		Namespace: namespace.Name,
-		LogPath:   filepath.Join(artifactFolder, "clusters", bootstrapClusterProxy.GetName(), "resources"),
+		LogPath:   filepath.Join(artifactFolder, "clusters", clusterProxy.GetName(), "resources"),
 	})
 
 	if !skipCleanup {
-		By(fmt.Sprintf("Deleting cluster %s/%s", cluster.Namespace, cluster.Name))
+		Byf("Deleting cluster %s/%s", cluster.Namespace, cluster.Name)
 		// While https://github.com/kubernetes-sigs/cluster-api/issues/2955 is addressed in future iterations, there is a chance
 		// that cluster variable is not set even if the cluster exists, so we are calling DeleteAllClustersAndWait
 		// instead of DeleteClusterAndWait
 		framework.DeleteAllClustersAndWait(ctx, framework.DeleteAllClustersAndWaitInput{
-			Client:    bootstrapClusterProxy.GetClient(),
+			Client:    clusterProxy.GetClient(),
 			Namespace: namespace.Name,
-		}, e2eConfig.GetIntervals(specName, "wait-delete-cluster")...)
+		}, intervalsGetter(specName, "wait-delete-cluster")...)
 
-		By(fmt.Sprintf("Deleting namespace used for hosting the %q test spec", specName))
+		Byf("Deleting namespace used for hosting the %q test spec", specName)
 		framework.DeleteNamespace(ctx, framework.DeleteNamespaceInput{
-			Deleter: bootstrapClusterProxy.GetClient(),
+			Deleter: clusterProxy.GetClient(),
 			Name:    namespace.Name,
 		})
-
-		// Will call the clean resources just to make sure we clean everything
-		By(fmt.Sprintf("Making sure that there are no remaining resources running for %s", cluster.Name))
-		Expect(CleanDOResources(clusterName)).ShouldNot(HaveOccurred())
 	}
-
 	cancelWatches()
-	redactLogs()
 }
 
-func redactLogs() {
+func redactLogs(variableGetter func(string) string) {
 	By("Redacting sensitive information from the logs")
-	Expect(e2eConfig.Variables).To(HaveKey(RedactLogScriptPath))
-	cmd := exec.Command(e2eConfig.GetVariable(RedactLogScriptPath))
+	Expect(variableGetter(RedactLogScriptPath)).To(BeAnExistingFile(), "Missing redact log script")
+	cmd := exec.Command(variableGetter(RedactLogScriptPath))
 	cmd.Run()
 }

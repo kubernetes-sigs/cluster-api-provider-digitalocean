@@ -21,10 +21,8 @@ package e2e
 import (
 	"context"
 	"encoding/base64"
-	"encoding/json"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -44,14 +42,6 @@ import (
 	"sigs.k8s.io/cluster-api/test/framework"
 	"sigs.k8s.io/cluster-api/test/framework/bootstrap"
 	"sigs.k8s.io/cluster-api/test/framework/clusterctl"
-)
-
-const (
-	KubernetesVersion = "KUBERNETES_VERSION"
-	CNIPath           = "CNI"
-	CNIResources      = "CNI_RESOURCES"
-	CCMPath           = "CCM"
-	CCMResources      = "CCM_RESOURCES"
 )
 
 // Test suite flags.
@@ -181,22 +171,7 @@ func loadE2EConfig(configPath string) *clusterctl.E2EConfig {
 	config := clusterctl.LoadE2EConfig(context.TODO(), clusterctl.LoadE2EConfigInput{ConfigPath: configPath})
 	Expect(config).ToNot(BeNil(), "Failed to load E2E config from %s", configPath)
 
-	// Read CCM file and set CCM_RESOURCES environmental variable
-	Expect(config.Variables).To(HaveKey(CCMPath), "Missing %s variable in the config", CCMPath)
-	setCCMEnvVar(config.GetVariable(CCMPath), CCMResources)
-
 	return config
-}
-
-func setCCMEnvVar(ccmManifestPath, ccmEnvVar string) {
-	ccmManifestContent, err := ioutil.ReadFile(ccmManifestPath)
-	Expect(err).ToNot(HaveOccurred(), "Failed to read the e2e test CCM file")
-	Expect(ccmManifestContent).ToNot(BeEmpty(), "CCM file should not be empty")
-	data := map[string]interface{}{}
-	data["resources"] = os.ExpandEnv(string(ccmManifestContent))
-	marshalledData, err := json.Marshal(data)
-	Expect(err).NotTo(HaveOccurred())
-	Expect(os.Setenv(ccmEnvVar, string(marshalledData))).NotTo(HaveOccurred())
 }
 
 func createClusterctlLocalRepository(config *clusterctl.E2EConfig, repositoryFolder string) string {
@@ -210,6 +185,12 @@ func createClusterctlLocalRepository(config *clusterctl.E2EConfig, repositoryFol
 	cniPath := config.GetVariable(capi_e2e.CNIPath)
 	Expect(cniPath).To(BeAnExistingFile(), "The %s variable should resolve to an existing file", capi_e2e.CNIPath)
 	createRepositoryInput.RegisterClusterResourceSetConfigMapTransformation(cniPath, capi_e2e.CNIResources)
+
+	// Ensuring a CCM file is defined in the config and register a FileTransformation to inject the referenced file as in place of the CCM_RESOURCES envSubst variable.
+	Expect(config.Variables).To(HaveKey(CCMPath), "Missing %s variable in the config", CCMPath)
+	ccmPath := config.GetVariable(CCMPath)
+	Expect(ccmPath).To(BeAnExistingFile(), "The %s variable should resolve to an existing file", CCMPath)
+	createRepositoryInput.RegisterClusterResourceSetConfigMapTransformation(ccmPath, CCMResources)
 
 	clusterctlConfig := clusterctl.CreateRepository(context.TODO(), createRepositoryInput)
 	Expect(clusterctlConfig).To(BeAnExistingFile(), "The clusterctl config file does not exists in the local repository %s", repositoryFolder)
