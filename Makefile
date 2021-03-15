@@ -136,7 +136,7 @@ $(ARTIFACTS):
 
 .PHONY: test
 test: generate lint ## Run tests
-	go test -v ./api/... ./controllers/... ./cloud/...
+	source ./scripts/fetch_ext_bins.sh; fetch_tools; setup_envs; go test -v ./api/... ./controllers/... ./cloud/...
 
 .PHONY: test-e2e ## Run e2e tests using clusterctl
 test-e2e: e2e-image $(ENVSUBST) $(GINKGO) $(KIND) $(KUSTOMIZE)  ## Run e2e tests
