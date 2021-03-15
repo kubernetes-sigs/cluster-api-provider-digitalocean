@@ -136,7 +136,7 @@ $(ARTIFACTS):
 
 .PHONY: test
 test: generate lint ## Run tests
-	go test -v ./api/... ./controllers/... ./cloud/...
+	source ./scripts/fetch_ext_bins.sh; fetch_tools; setup_envs; go test -v ./api/... ./controllers/... ./cloud/...
 
 .PHONY: test-e2e ## Run e2e tests using clusterctl
 test-e2e: e2e-image $(ENVSUBST) $(GINKGO) $(KIND) $(KUSTOMIZE)  ## Run e2e tests
@@ -343,7 +343,7 @@ release-binary: $(RELEASE_DIR)
 		-e GOARCH=$(GOARCH) \
 		-v "$$(pwd):/workspace" \
 		-w /workspace \
-		golang:1.13.8 \
+		golang:1.13.15 \
 		go build -a -ldflags '-extldflags "-static"' \
 		-o $(RELEASE_DIR)/$(notdir $(RELEASE_BINARY))-$(GOOS)-$(GOARCH) $(RELEASE_BINARY)
 

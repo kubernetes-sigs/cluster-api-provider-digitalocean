@@ -68,6 +68,11 @@ var _ = Describe("Conformance Tests", func() {
 		clusterctlLogFolder = filepath.Join(os.TempDir(), "clusters", bootstrapClusterProxy.GetName())
 	})
 
+	AfterEach(func() {
+		dumpSpecResourcesAndCleanup(ctx, specName, bootstrapClusterProxy, artifactFolder, namespace, cancelWatches, cluster, e2eConfig.GetIntervals, skipCleanup)
+		redactLogs(e2eConfig.GetVariable)
+	})
+
 	Measure(specName, func(b Benchmarker) {
 		var err error
 
@@ -112,9 +117,4 @@ var _ = Describe("Conformance Tests", func() {
 		})
 		b.RecordValue("conformance suite run time", runtime.Seconds())
 	}, 1)
-
-	AfterEach(func() {
-		dumpSpecResourcesAndCleanup(ctx, specName, bootstrapClusterProxy, artifactFolder, namespace, cancelWatches, cluster, e2eConfig.GetIntervals, clusterName, clusterctlLogFolder, skipCleanup)
-	})
-
 })

@@ -64,7 +64,8 @@ var _ = Describe("Workload cluster creation", func() {
 	})
 
 	AfterEach(func() {
-		dumpSpecResourcesAndCleanup(ctx, specName, bootstrapClusterProxy, artifactFolder, namespace, cancelWatches, cluster, e2eConfig.GetIntervals, clusterName, clusterctlLogFolder, skipCleanup)
+		dumpSpecResourcesAndCleanup(ctx, specName, bootstrapClusterProxy, artifactFolder, namespace, cancelWatches, cluster, e2eConfig.GetIntervals, skipCleanup)
+		redactLogs(e2eConfig.GetVariable)
 	})
 
 	Context("Creating a single control-plane cluster", func() {

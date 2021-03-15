@@ -18,9 +18,9 @@ providers:
   - name: cluster-api
     type: CoreProvider
     versions:
-      - name: v0.3.12
+      - name: v0.3.14
         # Use manifest from source files
-        value: "https://github.com/kubernetes-sigs/cluster-api/releases/download/v0.3.12/core-components.yaml"
+        value: "https://github.com/kubernetes-sigs/cluster-api/releases/download/v0.3.14/core-components.yaml"
         type: "url"
         replacements:
           - old: "imagePullPolicy: Always"
@@ -30,9 +30,9 @@ providers:
   - name: kubeadm
     type: BootstrapProvider
     versions:
-      - name: v0.3.12
+      - name: v0.3.14
         # Use manifest from source files
-        value: "https://github.com/kubernetes-sigs/cluster-api/releases/download/v0.3.12/bootstrap-components.yaml"
+        value: "https://github.com/kubernetes-sigs/cluster-api/releases/download/v0.3.14/bootstrap-components.yaml"
         type: "url"
         replacements:
           - old: "imagePullPolicy: Always"
@@ -42,9 +42,9 @@ providers:
   - name: kubeadm
     type: ControlPlaneProvider
     versions:
-      - name: v0.3.12
+      - name: v0.3.14
         # Use manifest from source files
-        value: "https://github.com/kubernetes-sigs/cluster-api/releases/download/v0.3.12/control-plane-components.yaml"
+        value: "https://github.com/kubernetes-sigs/cluster-api/releases/download/v0.3.14/control-plane-components.yaml"
         type: "url"
         replacements:
           - old: "imagePullPolicy: Always"
@@ -54,7 +54,7 @@ providers:
   - name: digitalocean
     type: InfrastructureProvider
     versions:
-      - name: v0.4.0
+      - name: v0.4.1
         # Use manifest from source files
         value: "${PWD}/config"
         replacements:
@@ -69,7 +69,7 @@ providers:
 
 variables:
   REDACT_LOG_SCRIPT: "${PWD}/hack/log/redact.sh"
-  KUBERNETES_VERSION: "v1.18.10"
+  KUBERNETES_VERSION: "v1.18.16"
   EXP_CLUSTER_RESOURCE_SET: "true"
   # Cluster Addons
   CNI: "${PWD}/test/e2e/data/cni/calico/calico.yaml"
@@ -77,10 +77,10 @@ variables:
   # Following CAPDO variables should be set before testing
   DO_REGION: "nyc1"
   DO_CONTROL_PLANE_MACHINE_TYPE: "s-2vcpu-2gb"
-  DO_CONTROL_PLANE_MACHINE_IMAGE: "63624555"
+  DO_CONTROL_PLANE_MACHINE_IMAGE: "80071030"
   DO_NODE_MACHINE_TYPE: "s-2vcpu-2gb"
-  DO_NODE_MACHINE_IMAGE: "63624555"
-  CONFORMANCE_CI_ARTIFACTS_KUBERNETES_VERSION: "v1.18.10"
+  DO_NODE_MACHINE_IMAGE: "80071030"
+  CONFORMANCE_CI_ARTIFACTS_KUBERNETES_VERSION: "v1.18.16"
   CONFORMANCE_WORKER_MACHINE_COUNT: "5"
   CONFORMANCE_CONTROL_PLANE_MACHINE_COUNT: "1"
 
