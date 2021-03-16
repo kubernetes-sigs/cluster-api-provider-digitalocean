@@ -66,7 +66,7 @@ func (s *Service) CreateDroplet(scope *scope.MachineScope) (*godo.Droplet, error
 	clusterName := infrav1.DOSafeName(s.scope.Name())
 	instanceName := infrav1.DOSafeName(scope.Name())
 
-	image, err := s.GetImage(scope.DOMachine.Spec.Image)
+	imageID, err := s.GetImageID(scope.DOMachine.Spec.Image)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed getting image")
 	}
@@ -102,7 +102,7 @@ func (s *Service) CreateDroplet(scope *scope.MachineScope) (*godo.Droplet, error
 		Size:    scope.DOMachine.Spec.Size,
 		SSHKeys: sshkeys,
 		Image: godo.DropletCreateImage{
-			ID: image.ID,
+			ID: imageID,
 		},
 		UserData:          bootstrapData,
 		PrivateNetworking: true,
