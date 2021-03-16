@@ -146,10 +146,6 @@ func (r *DOClusterReconciler) reconcile(ctx context.Context, clusterScope *scope
 
 	var controlPlaneEndpoint = loadbalancer.IP
 	if docluster.Spec.ControlPlaneDNS != nil {
-		if err := checkDNSNameAllowed(docluster.Spec.ControlPlaneDNS.Name); err != nil {
-			return reconcile.Result{}, errors.Wrapf(err, "failed to manage DNS Name %q is not allowed as Name", docluster.Spec.ControlPlaneDNS.Name)
-		}
-
 		clusterScope.Info("Verifying LB DNS Record")
 		// ensure DNS record is created and use it as control plane endpoint
 		recordSpec := docluster.Spec.ControlPlaneDNS
@@ -214,16 +210,6 @@ func (r *DOClusterReconciler) reconcile(ctx context.Context, clusterScope *scope
 	clusterScope.SetReady()
 	r.Recorder.Eventf(docluster, corev1.EventTypeNormal, "DOClusterReady", "DOCluster %s - has ready status", clusterScope.Name())
 	return reconcile.Result{}, nil
-}
-
-func checkDNSNameAllowed(name string) error {
-	switch name {
-	case "@":
-		return errors.New("@ is not allowed")
-	case "*":
-		return errors.New("* is not allowed")
-	}
-	return nil
 }
 
 func (r *DOClusterReconciler) reconcileDelete(ctx context.Context, clusterScope *scope.ClusterScope) (reconcile.Result, error) {
