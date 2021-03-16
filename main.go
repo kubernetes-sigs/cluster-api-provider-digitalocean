@@ -23,8 +23,6 @@ import (
 	"os"
 	"time"
 
-	"sigs.k8s.io/cluster-api-provider-digitalocean/cloud/services/networking"
-
 	// +kubebuilder:scaffold:imports
 
 	"github.com/spf13/pflag"
@@ -33,6 +31,8 @@ import (
 	infrav1alpha2 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha2"
 	infrav1alpha3 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha3"
 	"sigs.k8s.io/cluster-api-provider-digitalocean/controllers"
+	dnsutil "sigs.k8s.io/cluster-api-provider-digitalocean/util/dns"
+	dnsresolver "sigs.k8s.io/cluster-api-provider-digitalocean/util/dns/resolver"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
@@ -118,18 +118,19 @@ func main() {
 	// Initialize event recorder.
 	record.InitFromRecorder(mgr.GetEventRecorderFor("digitalocean-controller"))
 
-	dns, err := networking.NewDNSResolver()
+	dnsresolver, err := dnsresolver.NewDNSResolver()
 	if err != nil {
 		setupLog.Error(err, "unable to create dns resolver")
 		os.Exit(1)
 	}
+
+	dnsutil.InitFromDNSResolver(dnsresolver)
 
 	if webhookPort == 0 {
 		if err = (&controllers.DOClusterReconciler{
 			Client:   mgr.GetClient(),
 			Log:      ctrl.Log.WithName("controllers").WithName("DOCluster"),
 			Recorder: mgr.GetEventRecorderFor("docluster-controller"),
-			DNS:      dns,
 		}).SetupWithManager(mgr); err != nil {
 			setupLog.Error(err, "unable to create controller", "controller", "DOCluster")
 			os.Exit(1)

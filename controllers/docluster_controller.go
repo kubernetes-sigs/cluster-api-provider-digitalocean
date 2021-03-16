@@ -19,16 +19,15 @@ package controllers
 import (
 	"context"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/go-logr/logr"
-	"github.com/miekg/dns"
 	"github.com/pkg/errors"
 
 	infrav1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha3"
 	"sigs.k8s.io/cluster-api-provider-digitalocean/cloud/scope"
 	"sigs.k8s.io/cluster-api-provider-digitalocean/cloud/services/networking"
+	dnsutil "sigs.k8s.io/cluster-api-provider-digitalocean/util/dns"
 
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -47,7 +46,6 @@ type DOClusterReconciler struct {
 	client.Client
 	Log      logr.Logger
 	Recorder record.EventRecorder
-	DNS      networking.DNSQuerier
 }
 
 func (r *DOClusterReconciler) SetupWithManager(mgr ctrl.Manager) error {
@@ -146,24 +144,27 @@ func (r *DOClusterReconciler) reconcile(ctx context.Context, clusterScope *scope
 
 	r.Recorder.Eventf(docluster, corev1.EventTypeNormal, "LoadBalancerReady", "LoadBalancer got an IP Address - %s", loadbalancer.IP)
 
-	var cpEndpointHost = loadbalancer.IP
+	var controlPlaneEndpoint = loadbalancer.IP
 	if docluster.Spec.ControlPlaneDNS != nil {
 		if err := checkDNSNameAllowed(docluster.Spec.ControlPlaneDNS.Name); err != nil {
 			return reconcile.Result{}, errors.Wrapf(err, "failed to manage DNS Name %q is not allowed as Name", docluster.Spec.ControlPlaneDNS.Name)
 		}
+
 		clusterScope.Info("Verifying LB DNS Record")
 		// ensure DNS record is created and use it as control plane endpoint
 		recordSpec := docluster.Spec.ControlPlaneDNS
-		cpEndpointHost = fmt.Sprintf("%s.%s", recordSpec.Name, recordSpec.Domain)
+		controlPlaneEndpoint = fmt.Sprintf("%s.%s", recordSpec.Name, recordSpec.Domain)
 		dRecord, err := networkingsvc.GetDomainRecord(
 			recordSpec.Domain,
 			recordSpec.Name,
 			"A",
 		)
+
 		if err != nil {
 			return reconcile.Result{}, errors.Wrapf(err, "failed verify DNS record for LB Name %s.%s",
 				recordSpec.Name, recordSpec.Domain)
 		}
+
 		if dRecord == nil || dRecord.Data != loadbalancer.IP {
 			clusterScope.Info("Ensuring LB DNS Record is in place")
 			clusterScope.SetControlPlaneDNSRecordReady(false)
@@ -176,6 +177,7 @@ func (r *DOClusterReconciler) reconcile(ctx context.Context, clusterScope *scope
 				return reconcile.Result{}, errors.Wrap(err, "failed to reconcile LB DNS record")
 			}
 		}
+
 		// If the record has never been ready we need to check whether it has
 		// been propagated or not. Updating the record in the DNS API does not
 		// mean it is already advertised at the DNS server. If the DNS is slower
@@ -185,23 +187,26 @@ func (r *DOClusterReconciler) reconcile(ctx context.Context, clusterScope *scope
 		// propagation check works around the DNS cache problem by directly
 		// making DNS queries and not going through system resolvers.
 		if !clusterScope.DOCluster.Status.ControlPlaneDNSRecordReady {
-			propagated, err := r.dnsIsPropagated(recordSpec.Name, recordSpec.Domain, loadbalancer.IP)
+			propagated, err := dnsutil.CheckDNSPropagated(dnsutil.ToFQDN(recordSpec.Name, recordSpec.Domain), loadbalancer.IP)
 			if err != nil {
 				return reconcile.Result{}, errors.Wrap(err, "failed to check DNS propagation")
 			}
+
 			if !propagated {
 				clusterScope.Info("Waiting for DNS record to be propagated")
 				return reconcile.Result{RequeueAfter: 10 * time.Second}, nil
 			}
+
 			clusterScope.Info("DNS record is propagated - set DOCluster ControlPlaneDNSRecordReady status to ready")
 			clusterScope.SetControlPlaneDNSRecordReady(true)
 		}
+
 		clusterScope.Info("LB DNS Record is already ready")
 		r.Recorder.Eventf(docluster, corev1.EventTypeNormal, "DomainRecordReady", "DNS Record '%s.%s' with IP '%s'", recordSpec.Name, recordSpec.Domain, loadbalancer.IP)
 	}
 
 	clusterScope.SetControlPlaneEndpoint(clusterv1.APIEndpoint{
-		Host: cpEndpointHost,
+		Host: controlPlaneEndpoint,
 		Port: int32(apiServerLoadbalancer.Port),
 	})
 
@@ -219,60 +224,6 @@ func checkDNSNameAllowed(name string) error {
 		return errors.New("* is not allowed")
 	}
 	return nil
-}
-
-func (r *DOClusterReconciler) dnsIsPropagated(name, domain, ip string) (bool, error) {
-	fqdn := fmt.Sprintf("%s.%s", name, domain)
-	if !strings.HasSuffix(fqdn, ".") {
-		fqdn = fqdn + "."
-	}
-	authNS, err := r.getAuthoritativeServer(fqdn)
-	if err != nil {
-		return false, err
-	}
-	m := new(dns.Msg)
-	m.SetQuestion(fqdn, dns.TypeA)
-	resp, err := r.DNS.Query([]string{authNS}, m)
-	if err != nil {
-		return false, err
-	}
-	for _, ans := range resp.Answer {
-		switch a := ans.(type) {
-		case *dns.A:
-			if a.A.String() == ip {
-				return true, nil
-			}
-		default:
-			continue
-		}
-	}
-	return false, nil
-}
-
-func (r *DOClusterReconciler) getAuthoritativeServer(fqdn string) (string, error) {
-	m := new(dns.Msg)
-	m.SetQuestion(fqdn, dns.TypeSOA)
-	m.MsgHdr.RecursionDesired = true
-	resp, err := r.DNS.LocalQuery(m)
-	if err != nil {
-		return "", err
-	}
-	if len(resp.Ns) < 1 {
-		return "", fmt.Errorf("didn't get DNS authority section")
-	}
-	var authNS string
-	for _, rr := range resp.Ns {
-		soa, ok := rr.(*dns.SOA)
-		if !ok {
-			continue
-		}
-		authNS = soa.Ns
-		break
-	}
-	if authNS == "" {
-		return "", fmt.Errorf("didn't find authority NS")
-	}
-	return authNS, nil
 }
 
 func (r *DOClusterReconciler) reconcileDelete(ctx context.Context, clusterScope *scope.ClusterScope) (reconcile.Result, error) {
