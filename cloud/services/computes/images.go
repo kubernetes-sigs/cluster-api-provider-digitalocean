@@ -17,27 +17,30 @@ limitations under the License.
 package computes
 
 import (
+	"fmt"
+
 	"github.com/digitalocean/godo"
 	"github.com/pkg/errors"
 
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
-func (s *Service) GetImage(imageSpec intstr.IntOrString) (*godo.Image, error) {
+func (s *Service) GetImageID(imageSpec intstr.IntOrString) (int, error) {
 	var image *godo.Image
-	var reterr error
 
 	if imageSpec.IntValue() != 0 { // nolint
-		image, _, reterr = s.scope.Images.GetByID(s.ctx, imageSpec.IntValue())
-	} else if imageSpec.String() != "" && imageSpec.String() != "0" {
-		image, _, reterr = s.scope.Images.GetBySlug(s.ctx, imageSpec.String())
-	} else {
-		reterr = errors.New("Unable to get image")
+		return imageSpec.IntValue(), nil
 	}
 
-	if reterr != nil {
-		return nil, errors.Wrap(reterr, "Unable to get image")
+	imageSpecStr := imageSpec.String()
+	if imageSpecStr == "" || imageSpecStr == "0" {
+		return 0, fmt.Errorf("invalid image spec string %q", imageSpecStr)
 	}
 
-	return image, nil
+	image, _, err := s.scope.Images.GetBySlug(s.ctx, imageSpecStr)
+	if err != nil {
+		return 0, errors.Wrap(err, "Unable to get image")
+	}
+
+	return image.ID, nil
 }
