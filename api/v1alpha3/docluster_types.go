@@ -62,10 +62,13 @@ type DOClusterStatus struct {
 }
 
 type DOControlPlaneDNS struct {
-	// Domain is the DO domain that this record should live in.
-	// It must be pre-existing in your DO account.
+	// Domain is the DO domain that this record should live in. It must be pre-existing in your DO account.
+	// The format must be a string that conforms to the definition of a subdomain in DNS (RFC 1123)
+	// +kubebuilder:validation:Pattern:=^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$
 	Domain string `json:"domain"`
 	// Name is the DNS short name of the record (non-FQDN)
+	// The format must consist of alphanumeric characters, '-' or '.', and must start and end with an alphanumeric character
+	// +kubebuilder:validation:Pattern:=^[a-z0-9]([-a-z0-9.]*[a-z0-9])?$
 	Name string `json:"name"`
 }
 
