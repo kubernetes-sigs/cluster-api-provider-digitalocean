@@ -26,8 +26,8 @@ import (
 	// +kubebuilder:scaffold:imports
 
 	"github.com/spf13/pflag"
-	"k8s.io/klog"
-	"k8s.io/klog/klogr"
+	"k8s.io/klog/v2"
+	"k8s.io/klog/v2/klogr"
 	infrav1alpha2 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha2"
 	infrav1alpha3 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha3"
 	"sigs.k8s.io/cluster-api-provider-digitalocean/controllers"
