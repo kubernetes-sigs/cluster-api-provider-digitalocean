@@ -42,6 +42,11 @@ E2E_DATA_DIR ?= $(ROOT_DIR)/$(TEST_E2E_DIR)/data
 KUBETEST_CONF_PATH ?= $(abspath $(E2E_DATA_DIR)/kubetest/conformance.yaml)
 GO_INSTALL = ./scripts/go_install.sh
 
+# Set --output-base for conversion-gen if we are not within GOPATH
+ifneq ($(abspath $(REPO_ROOT)),$(shell go env GOPATH)/src/sigs.k8s.io/cluster-api-provider-digitalocean)
+	GEN_OUTPUT_BASE := --output-base=$(REPO_ROOT)
+endif
+
 # Files
 E2E_CONF_FILE ?= $(REPO_ROOT)/test/e2e/config/digitalocean-dev.yaml
 E2E_CONF_FILE_ENVSUBST := $(ROOT_DIR)/test/e2e/config/digitalocean-dev-envsubst.yaml
@@ -238,7 +243,7 @@ generate-go: $(CONTROLLER_GEN) $(MOCKGEN) $(CONVERSION_GEN) ## Runs Go related g
 
 	$(CONVERSION_GEN) \
 		--input-dirs=./api/v1alpha2 \
-		--output-file-base=zz_generated.conversion \
+		--output-file-base=zz_generated.conversion $(GEN_OUTPUT_BASE) \
 		--go-header-file=./hack/boilerplate/boilerplate.generatego.txt
 
 .PHONY: generate-manifests
