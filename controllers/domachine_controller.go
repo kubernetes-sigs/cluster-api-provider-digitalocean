@@ -36,6 +36,7 @@ import (
 	clusterv1 "sigs.k8s.io/cluster-api/api/v1alpha3"
 	capierrors "sigs.k8s.io/cluster-api/errors"
 	"sigs.k8s.io/cluster-api/util"
+	"sigs.k8s.io/cluster-api/util/predicates"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -52,8 +53,10 @@ type DOMachineReconciler struct {
 }
 
 func (r *DOMachineReconciler) SetupWithManager(mgr ctrl.Manager) error {
-	return ctrl.NewControllerManagedBy(mgr).
+	log := r.Log.WithValues("controller", "DOMachine")
+	c, err := ctrl.NewControllerManagedBy(mgr).
 		For(&infrav1.DOMachine{}).
+		WithEventFilter(predicates.ResourceNotPaused(log)). // don't queue reconcile if resource is paused
 		Watches(
 			&source.Kind{Type: &clusterv1.Machine{}},
 			&handler.EnqueueRequestsFromMapFunc{
@@ -62,9 +65,32 @@ func (r *DOMachineReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		).
 		Watches(
 			&source.Kind{Type: &infrav1.DOCluster{}},
-			&handler.EnqueueRequestsFromMapFunc{ToRequests: handler.ToRequestsFunc(r.DOClusterToDOMachines)},
+			&handler.EnqueueRequestsFromMapFunc{
+				ToRequests: handler.ToRequestsFunc(r.DOClusterToDOMachines),
+			},
 		).
-		Complete(r)
+		Build(r)
+	if err != nil {
+		return errors.Wrapf(err, "error creating controller")
+	}
+
+	clusterToObjectFunc, err := util.ClusterToObjectsMapper(r.Client, &infrav1.DOMachineList{}, mgr.GetScheme())
+	if err != nil {
+		return errors.Wrapf(err, "failed to create mapper for Cluster to DOMachines")
+	}
+
+	// Add a watch on clusterv1.Cluster object for unpause & ready notifications.
+	if err := c.Watch(
+		&source.Kind{Type: &clusterv1.Cluster{}},
+		&handler.EnqueueRequestsFromMapFunc{
+			ToRequests: clusterToObjectFunc,
+		},
+		predicates.ClusterUnpausedAndInfrastructureReady(log),
+	); err != nil {
+		return errors.Wrapf(err, "failed adding a watch for ready clusters")
+	}
+
+	return nil
 }
 
 func (r *DOMachineReconciler) DOClusterToDOMachines(o handler.MapObject) []ctrl.Request {
