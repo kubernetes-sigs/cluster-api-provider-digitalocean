@@ -22,9 +22,10 @@ package mock_computes
 
 import (
 	context "context"
+	reflect "reflect"
+
 	godo "github.com/digitalocean/godo"
 	gomock "github.com/golang/mock/gomock"
-	reflect "reflect"
 )
 
 // MockImagesService is a mock of ImagesService interface.

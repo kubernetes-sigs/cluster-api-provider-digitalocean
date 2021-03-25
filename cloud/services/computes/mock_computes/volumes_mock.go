@@ -22,9 +22,10 @@ package mock_computes
 
 import (
 	context "context"
+	reflect "reflect"
+
 	godo "github.com/digitalocean/godo"
 	gomock "github.com/golang/mock/gomock"
-	reflect "reflect"
 )
 
 // MockStorageService is a mock of StorageService interface.
