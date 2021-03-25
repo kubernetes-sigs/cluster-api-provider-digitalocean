@@ -19,6 +19,7 @@ package computes
 import (
 	"context"
 	"net/http"
+	"os"
 	"reflect"
 	"testing"
 
@@ -26,21 +27,36 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/pkg/errors"
 
-	infrav1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha3"
+	infrav1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha4"
 	"sigs.k8s.io/cluster-api-provider-digitalocean/cloud/scope"
 	"sigs.k8s.io/cluster-api-provider-digitalocean/cloud/services/computes/mock_computes"
 
-	clusterv1 "sigs.k8s.io/cluster-api/api/v1alpha3"
+	clusterv1 "sigs.k8s.io/cluster-api/api/v1alpha4"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/intstr"
+	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
+	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/utils/pointer"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
+var (
+	scheme = runtime.NewScheme()
+)
+
+func init() {
+	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
+	utilruntime.Must(infrav1.AddToScheme(scheme))
+	utilruntime.Must(clusterv1.AddToScheme(scheme))
+}
+
 func TestService_GetDroplet(t *testing.T) {
+	os.Setenv("DIGITALOCEAN_ACCESS_TOKEN", "super-secret-token")
+	defer os.Unsetenv("DIGITALOCEAN_ACCESS_TOKEN")
+
 	mctrl := gomock.NewController(t)
 	defer mctrl.Finish()
 
@@ -135,6 +151,7 @@ func TestService_GetDroplet(t *testing.T) {
 			ctx := context.TODO()
 			mdroplet := mock_computes.NewMockDropletsService(mctrl)
 			cscope, err := scope.NewClusterScope(scope.ClusterScopeParams{
+				Client:    fake.NewFakeClientWithScheme(scheme),
 				Cluster:   &clusterv1.Cluster{},
 				DOCluster: &infrav1.DOCluster{},
 				DOClients: scope.DOClients{
@@ -160,6 +177,9 @@ func TestService_GetDroplet(t *testing.T) {
 }
 
 func TestService_CreateDroplet(t *testing.T) {
+	os.Setenv("DIGITALOCEAN_ACCESS_TOKEN", "super-secret-token")
+	defer os.Unsetenv("DIGITALOCEAN_ACCESS_TOKEN")
+
 	mctrl := gomock.NewController(t)
 	defer mctrl.Finish()
 
@@ -218,7 +238,6 @@ func TestService_CreateDroplet(t *testing.T) {
 				},
 			},
 			expect: func(md *mock_computes.MockDropletsServiceMockRecorder, mk *mock_computes.MockKeysServiceMockRecorder, mi *mock_computes.MockImagesServiceMockRecorder, ms *mock_computes.MockStorageServiceMockRecorder) {
-				mi.GetByID(gomock.Any(), 63624555).Return(&godo.Image{ID: 63624555}, nil, nil)
 				md.Create(gomock.Any(), &godo.DropletCreateRequest{
 					Name:    "capdo-test-control-plane-nkkxn",
 					Region:  "nyc1",
@@ -282,7 +301,6 @@ func TestService_CreateDroplet(t *testing.T) {
 				},
 			},
 			expect: func(md *mock_computes.MockDropletsServiceMockRecorder, mk *mock_computes.MockKeysServiceMockRecorder, mi *mock_computes.MockImagesServiceMockRecorder, ms *mock_computes.MockStorageServiceMockRecorder) {
-				mi.GetByID(gomock.Any(), 63624555).Return(&godo.Image{ID: 63624555}, nil, nil)
 				md.Create(gomock.Any(), &godo.DropletCreateRequest{
 					Name:    "capdo-test-control-plane-nkkxn",
 					Region:  "nyc1",
@@ -394,7 +412,6 @@ func TestService_CreateDroplet(t *testing.T) {
 				},
 			},
 			expect: func(md *mock_computes.MockDropletsServiceMockRecorder, mk *mock_computes.MockKeysServiceMockRecorder, mi *mock_computes.MockImagesServiceMockRecorder, ms *mock_computes.MockStorageServiceMockRecorder) {
-				mi.GetByID(gomock.Any(), 63624555).Return(&godo.Image{ID: 63624555}, nil, nil)
 				mk.GetByFingerprint(gomock.Any(), "12:f8:7e:78:61:b4:bf:e2:de:24:15:96:4e:d4:72:53").Return(&godo.Key{ID: 12345, Fingerprint: "12:f8:7e:78:61:b4:bf:e2:de:24:15:96:4e:d4:72:53"}, nil, nil)
 				md.Create(gomock.Any(), &godo.DropletCreateRequest{
 					Name:   "capdo-test-control-plane-nkkxn",
@@ -421,6 +438,116 @@ func TestService_CreateDroplet(t *testing.T) {
 				}).Return(&godo.Droplet{ID: 123456}, nil, nil)
 			},
 			want: &godo.Droplet{ID: 123456},
+		},
+		{
+			name: "with image slug (should getting image id by slug)",
+			args: args{
+				cluster: &clusterv1.Cluster{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "capdo-test",
+						Namespace: "default",
+					},
+				},
+				docluster: &infrav1.DOCluster{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "capdo-test",
+						Namespace: "default",
+					},
+					Spec: infrav1.DOClusterSpec{
+						Region: "nyc1",
+					},
+				},
+				machine: &clusterv1.Machine{
+					ObjectMeta: metav1.ObjectMeta{
+						Name: "capdo-test-control-plane-h8f6l",
+						Labels: map[string]string{
+							"cluster.x-k8s.io/control-plane": "",
+						},
+					},
+					Spec: clusterv1.MachineSpec{
+						Bootstrap: clusterv1.Bootstrap{
+							DataSecretName: pointer.StringPtr("bootstrap-data"),
+						},
+					},
+				},
+				domachine: &infrav1.DOMachine{
+					ObjectMeta: metav1.ObjectMeta{
+						Name: "capdo-test-control-plane-nkkxn",
+					},
+					Spec: infrav1.DOMachineSpec{
+						Image: intstr.FromString("capi-image"),
+						Size:  "s-2vcpu-2gb",
+					},
+				},
+			},
+			expect: func(md *mock_computes.MockDropletsServiceMockRecorder, mk *mock_computes.MockKeysServiceMockRecorder, mi *mock_computes.MockImagesServiceMockRecorder, ms *mock_computes.MockStorageServiceMockRecorder) {
+				mi.GetBySlug(gomock.Any(), "capi-image").Return(&godo.Image{ID: 63624555}, nil, nil)
+				md.Create(gomock.Any(), &godo.DropletCreateRequest{
+					Name:    "capdo-test-control-plane-nkkxn",
+					Region:  "nyc1",
+					Size:    "s-2vcpu-2gb",
+					SSHKeys: []godo.DropletCreateSSHKey{},
+					Image: godo.DropletCreateImage{
+						ID: 63624555,
+					},
+					UserData:          "data",
+					PrivateNetworking: true,
+					Volumes:           []godo.DropletCreateVolume{},
+					VPCUUID:           "",
+					Tags: infrav1.BuildTags(infrav1.BuildTagParams{
+						ClusterName: "capdo-test",
+						Name:        "capdo-test-control-plane-nkkxn",
+						Role:        "apiserver",
+					}),
+				}).Return(&godo.Droplet{ID: 123456}, nil, nil)
+			},
+			want: &godo.Droplet{ID: 123456},
+		},
+		{
+			name: "failed getting image (should return an error)",
+			args: args{
+				cluster: &clusterv1.Cluster{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "capdo-test",
+						Namespace: "default",
+					},
+				},
+				docluster: &infrav1.DOCluster{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "capdo-test",
+						Namespace: "default",
+					},
+					Spec: infrav1.DOClusterSpec{
+						Region: "nyc1",
+					},
+				},
+				machine: &clusterv1.Machine{
+					ObjectMeta: metav1.ObjectMeta{
+						Name: "capdo-test-control-plane-h8f6l",
+						Labels: map[string]string{
+							"cluster.x-k8s.io/control-plane": "",
+						},
+					},
+					Spec: clusterv1.MachineSpec{
+						Bootstrap: clusterv1.Bootstrap{
+							DataSecretName: pointer.StringPtr("bootstrap-data"),
+						},
+					},
+				},
+				domachine: &infrav1.DOMachine{
+					ObjectMeta: metav1.ObjectMeta{
+						Name: "capdo-test-control-plane-nkkxn",
+					},
+					Spec: infrav1.DOMachineSpec{
+						Image: intstr.FromString("capi-image"),
+						Size:  "s-2vcpu-2gb",
+					},
+				},
+			},
+			expect: func(md *mock_computes.MockDropletsServiceMockRecorder, mk *mock_computes.MockKeysServiceMockRecorder, mi *mock_computes.MockImagesServiceMockRecorder, ms *mock_computes.MockStorageServiceMockRecorder) {
+				mi.GetBySlug(gomock.Any(), "capi-image").Return(nil, nil, errors.New("error getting image"))
+			},
+			wantErr: true,
 		},
 		{
 			name: "with provided ssh key fingerprint but failed getting keys (should return an error)",
@@ -467,7 +594,6 @@ func TestService_CreateDroplet(t *testing.T) {
 				},
 			},
 			expect: func(md *mock_computes.MockDropletsServiceMockRecorder, mk *mock_computes.MockKeysServiceMockRecorder, mi *mock_computes.MockImagesServiceMockRecorder, ms *mock_computes.MockStorageServiceMockRecorder) {
-				mi.GetByID(gomock.Any(), 63624555).Return(&godo.Image{ID: 63624555}, nil, nil)
 				mk.GetByFingerprint(gomock.Any(), "12:f8:7e:78:61:b4:bf:e2:de:24:15:96:4e:d4:72:53").Return(&godo.Key{}, nil, errors.New("error getting keys"))
 			},
 			wantErr: true,
@@ -522,7 +648,6 @@ func TestService_CreateDroplet(t *testing.T) {
 				},
 			},
 			expect: func(md *mock_computes.MockDropletsServiceMockRecorder, mk *mock_computes.MockKeysServiceMockRecorder, mi *mock_computes.MockImagesServiceMockRecorder, ms *mock_computes.MockStorageServiceMockRecorder) {
-				mi.GetByID(gomock.Any(), 63624555).Return(&godo.Image{ID: 63624555}, nil, nil)
 				ms.ListVolumes(gomock.Any(), &godo.ListVolumeParams{Name: "capdo-test-control-plane-nkkxn-etcd", Region: "nyc1"}).Return([]godo.Volume{{ID: "1234"}}, nil, nil)
 				md.Create(gomock.Any(), &godo.DropletCreateRequest{
 					Name:    "capdo-test-control-plane-nkkxn",
@@ -599,7 +724,6 @@ func TestService_CreateDroplet(t *testing.T) {
 				},
 			},
 			expect: func(md *mock_computes.MockDropletsServiceMockRecorder, mk *mock_computes.MockKeysServiceMockRecorder, mi *mock_computes.MockImagesServiceMockRecorder, ms *mock_computes.MockStorageServiceMockRecorder) {
-				mi.GetByID(gomock.Any(), 63624555).Return(&godo.Image{ID: 63624555}, nil, nil)
 				ms.ListVolumes(gomock.Any(), &godo.ListVolumeParams{Name: "capdo-test-control-plane-nkkxn-etcd", Region: "nyc1"}).Return([]godo.Volume{}, nil, nil)
 			},
 			wantErr: true,
@@ -654,54 +778,7 @@ func TestService_CreateDroplet(t *testing.T) {
 				},
 			},
 			expect: func(md *mock_computes.MockDropletsServiceMockRecorder, mk *mock_computes.MockKeysServiceMockRecorder, mi *mock_computes.MockImagesServiceMockRecorder, ms *mock_computes.MockStorageServiceMockRecorder) {
-				mi.GetByID(gomock.Any(), 63624555).Return(&godo.Image{ID: 63624555}, nil, nil)
 				ms.ListVolumes(gomock.Any(), &godo.ListVolumeParams{Name: "capdo-test-control-plane-nkkxn-etcd", Region: "nyc1"}).Return([]godo.Volume{}, nil, errors.New("error getting volume"))
-			},
-			wantErr: true,
-		},
-		{
-			name: "failed getting image (should return an error)",
-			args: args{
-				cluster: &clusterv1.Cluster{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "capdo-test",
-						Namespace: "default",
-					},
-				},
-				docluster: &infrav1.DOCluster{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "capdo-test",
-						Namespace: "default",
-					},
-					Spec: infrav1.DOClusterSpec{
-						Region: "nyc1",
-					},
-				},
-				machine: &clusterv1.Machine{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "capdo-test-control-plane-h8f6l",
-						Labels: map[string]string{
-							"cluster.x-k8s.io/control-plane": "",
-						},
-					},
-					Spec: clusterv1.MachineSpec{
-						Bootstrap: clusterv1.Bootstrap{
-							DataSecretName: pointer.StringPtr("bootstrap-data"),
-						},
-					},
-				},
-				domachine: &infrav1.DOMachine{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "capdo-test-control-plane-nkkxn",
-					},
-					Spec: infrav1.DOMachineSpec{
-						Image: intstr.FromInt(63624555),
-						Size:  "s-2vcpu-2gb",
-					},
-				},
-			},
-			expect: func(md *mock_computes.MockDropletsServiceMockRecorder, mk *mock_computes.MockKeysServiceMockRecorder, mi *mock_computes.MockImagesServiceMockRecorder, ms *mock_computes.MockStorageServiceMockRecorder) {
-				mi.GetByID(gomock.Any(), 63624555).Return(nil, nil, errors.New("error getting image"))
 			},
 			wantErr: true,
 		},
@@ -709,11 +786,6 @@ func TestService_CreateDroplet(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ctx := context.TODO()
-			scheme := runtime.NewScheme()
-			if err := corev1.AddToScheme(scheme); err != nil {
-				t.Fatalf("did not expect err: %v", err)
-			}
-
 			secret := &corev1.Secret{
 				ObjectMeta: metav1.ObjectMeta{
 					Name: "bootstrap-data",
@@ -740,6 +812,7 @@ func TestService_CreateDroplet(t *testing.T) {
 			mimage := mock_computes.NewMockImagesService(mctrl)
 			mstorage := mock_computes.NewMockStorageService(mctrl)
 			cscope, err := scope.NewClusterScope(scope.ClusterScopeParams{
+				Client:    fclient,
 				Cluster:   tt.args.cluster,
 				DOCluster: tt.args.docluster,
 				DOClients: scope.DOClients{
@@ -768,6 +841,9 @@ func TestService_CreateDroplet(t *testing.T) {
 }
 
 func TestService_DeleteDroplet(t *testing.T) {
+	os.Setenv("DIGITALOCEAN_ACCESS_TOKEN", "super-secret-token")
+	defer os.Unsetenv("DIGITALOCEAN_ACCESS_TOKEN")
+
 	mctrl := gomock.NewController(t)
 	defer mctrl.Finish()
 
@@ -822,6 +898,7 @@ func TestService_DeleteDroplet(t *testing.T) {
 			ctx := context.TODO()
 			mdroplet := mock_computes.NewMockDropletsService(mctrl)
 			cscope, err := scope.NewClusterScope(scope.ClusterScopeParams{
+				Client:    fake.NewFakeClientWithScheme(scheme),
 				Cluster:   &clusterv1.Cluster{},
 				DOCluster: &infrav1.DOCluster{},
 				DOClients: scope.DOClients{
@@ -842,6 +919,9 @@ func TestService_DeleteDroplet(t *testing.T) {
 }
 
 func TestService_GetDropletAddress(t *testing.T) {
+	os.Setenv("DIGITALOCEAN_ACCESS_TOKEN", "super-secret-token")
+	defer os.Unsetenv("DIGITALOCEAN_ACCESS_TOKEN")
+
 	type args struct {
 		droplet *godo.Droplet
 	}
@@ -887,6 +967,7 @@ func TestService_GetDropletAddress(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			ctx := context.TODO()
 			cscope, err := scope.NewClusterScope(scope.ClusterScopeParams{
+				Client:    fake.NewFakeClientWithScheme(scheme),
 				Cluster:   &clusterv1.Cluster{},
 				DOCluster: &infrav1.DOCluster{},
 			})

@@ -20,20 +20,39 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"os"
 	"reflect"
 	"testing"
 
 	"github.com/digitalocean/godo"
 	"github.com/golang/mock/gomock"
 
-	infrav1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha3"
+	infrav1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha4"
 	"sigs.k8s.io/cluster-api-provider-digitalocean/cloud/scope"
 	"sigs.k8s.io/cluster-api-provider-digitalocean/cloud/services/networking/mock_networking"
+	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
-	clusterv1 "sigs.k8s.io/cluster-api/api/v1alpha3"
+	clusterv1 "sigs.k8s.io/cluster-api/api/v1alpha4"
+
+	"k8s.io/apimachinery/pkg/runtime"
+	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
+	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 )
 
+var (
+	scheme = runtime.NewScheme()
+)
+
+func init() {
+	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
+	utilruntime.Must(infrav1.AddToScheme(scheme))
+	utilruntime.Must(clusterv1.AddToScheme(scheme))
+}
+
 func TestService_GetLoadBalancer(t *testing.T) {
+	os.Setenv("DIGITALOCEAN_ACCESS_TOKEN", "super-secret-token")
+	defer os.Unsetenv("DIGITALOCEAN_ACCESS_TOKEN")
+
 	mctrl := gomock.NewController(t)
 	defer mctrl.Finish()
 
@@ -105,6 +124,7 @@ func TestService_GetLoadBalancer(t *testing.T) {
 			ctx := context.TODO()
 			mlbalancer := mock_networking.NewMockLoadBalancersService(mctrl)
 			cscope, err := scope.NewClusterScope(scope.ClusterScopeParams{
+				Client:    fake.NewFakeClientWithScheme(scheme),
 				Cluster:   &clusterv1.Cluster{},
 				DOCluster: &infrav1.DOCluster{},
 				DOClients: scope.DOClients{

@@ -22,9 +22,10 @@ package mock_networking
 
 import (
 	context "context"
+	reflect "reflect"
+
 	godo "github.com/digitalocean/godo"
 	gomock "github.com/golang/mock/gomock"
-	reflect "reflect"
 )
 
 // MockLoadBalancersService is a mock of LoadBalancersService interface.

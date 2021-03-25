@@ -22,9 +22,10 @@ package mock_computes
 
 import (
 	context "context"
+	reflect "reflect"
+
 	godo "github.com/digitalocean/godo"
 	gomock "github.com/golang/mock/gomock"
-	reflect "reflect"
 )
 
 // MockDropletsService is a mock of DropletsService interface.
