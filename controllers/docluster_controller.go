@@ -35,10 +35,13 @@ import (
 
 	clusterv1 "sigs.k8s.io/cluster-api/api/v1alpha3"
 	"sigs.k8s.io/cluster-api/util"
+	"sigs.k8s.io/cluster-api/util/predicates"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+	"sigs.k8s.io/controller-runtime/pkg/source"
 )
 
 // DOClusterReconciler reconciles a DOCluster object.
@@ -49,9 +52,27 @@ type DOClusterReconciler struct {
 }
 
 func (r *DOClusterReconciler) SetupWithManager(mgr ctrl.Manager) error {
-	return ctrl.NewControllerManagedBy(mgr).
+	log := r.Log.WithValues("controller", "DOCluster")
+	c, err := ctrl.NewControllerManagedBy(mgr).
 		For(&infrav1.DOCluster{}).
-		Complete(r)
+		WithEventFilter(predicates.ResourceNotPaused(log)). // don't queue reconcile if resource is paused
+		Build(r)
+	if err != nil {
+		return errors.Wrapf(err, "error creating controller")
+	}
+
+	// Add a watch on clusterv1.Cluster object for unpause notifications.
+	if err = c.Watch(
+		&source.Kind{Type: &clusterv1.Cluster{}},
+		&handler.EnqueueRequestsFromMapFunc{
+			ToRequests: util.ClusterToInfrastructureMapFunc(infrav1.GroupVersion.WithKind("DOCluster")),
+		},
+		predicates.ClusterUnpaused(log),
+	); err != nil {
+		return errors.Wrapf(err, "failed adding a watch for ready clusters")
+	}
+
+	return nil
 }
 
 // +kubebuilder:rbac:groups=infrastructure.cluster.x-k8s.io,resources=doclusters,verbs=get;list;watch;create;update;patch;delete
