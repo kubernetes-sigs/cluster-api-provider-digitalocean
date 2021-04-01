@@ -33,7 +33,7 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/client-go/tools/record"
 
-	clusterv1 "sigs.k8s.io/cluster-api/api/v1alpha3"
+	clusterv1 "sigs.k8s.io/cluster-api/api/v1alpha4"
 	capierrors "sigs.k8s.io/cluster-api/errors"
 	"sigs.k8s.io/cluster-api/util"
 	"sigs.k8s.io/cluster-api/util/predicates"
@@ -59,15 +59,11 @@ func (r *DOMachineReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		WithEventFilter(predicates.ResourceNotPaused(log)). // don't queue reconcile if resource is paused
 		Watches(
 			&source.Kind{Type: &clusterv1.Machine{}},
-			&handler.EnqueueRequestsFromMapFunc{
-				ToRequests: util.MachineToInfrastructureMapFunc(infrav1.GroupVersion.WithKind("DOMachine")),
-			},
+			handler.EnqueueRequestsFromMapFunc(util.MachineToInfrastructureMapFunc(infrav1.GroupVersion.WithKind("DOMachine"))),
 		).
 		Watches(
 			&source.Kind{Type: &infrav1.DOCluster{}},
-			&handler.EnqueueRequestsFromMapFunc{
-				ToRequests: handler.ToRequestsFunc(r.DOClusterToDOMachines),
-			},
+			handler.EnqueueRequestsFromMapFunc(r.DOClusterToDOMachines),
 		).
 		Build(r)
 	if err != nil {
@@ -82,9 +78,7 @@ func (r *DOMachineReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	// Add a watch on clusterv1.Cluster object for unpause & ready notifications.
 	if err := c.Watch(
 		&source.Kind{Type: &clusterv1.Cluster{}},
-		&handler.EnqueueRequestsFromMapFunc{
-			ToRequests: clusterToObjectFunc,
-		},
+		handler.EnqueueRequestsFromMapFunc(clusterToObjectFunc),
 		predicates.ClusterUnpausedAndInfrastructureReady(log),
 	); err != nil {
 		return errors.Wrapf(err, "failed adding a watch for ready clusters")
@@ -93,12 +87,12 @@ func (r *DOMachineReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return nil
 }
 
-func (r *DOMachineReconciler) DOClusterToDOMachines(o handler.MapObject) []ctrl.Request {
+func (r *DOMachineReconciler) DOClusterToDOMachines(o client.Object) []ctrl.Request {
 	result := []ctrl.Request{}
 
-	c, ok := o.Object.(*infrav1.DOCluster)
+	c, ok := o.(*infrav1.DOCluster)
 	if !ok {
-		r.Log.Error(errors.Errorf("expected a DOCluster but got a %T", o.Object), "failed to get DOMachine for DOCluster")
+		r.Log.Error(errors.Errorf("expected a DOCluster but got a %T", o), "failed to get DOMachine for DOCluster")
 		return nil
 	}
 	log := r.Log.WithValues("DOCluster", c.Name, "Namespace", c.Namespace)
@@ -135,8 +129,7 @@ func (r *DOMachineReconciler) DOClusterToDOMachines(o handler.MapObject) []ctrl.
 // +kubebuilder:rbac:groups="",resources=events,verbs=get;list;watch;create;update;patch
 // +kubebuilder:rbac:groups="",resources=secrets;,verbs=get;list;watch
 
-func (r *DOMachineReconciler) Reconcile(req ctrl.Request) (_ ctrl.Result, reterr error) {
-	ctx := context.Background()
+func (r *DOMachineReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctrl.Result, reterr error) {
 	logger := r.Log.WithValues("doCluster", req.NamespacedName.Name, "namespace", req.NamespacedName.Namespace)
 
 	domachine := &infrav1.DOMachine{}

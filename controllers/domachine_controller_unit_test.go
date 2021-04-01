@@ -29,10 +29,9 @@ import (
 	"k8s.io/client-go/tools/record"
 	"k8s.io/klog/v2/klogr"
 
-	clusterv1 "sigs.k8s.io/cluster-api/api/v1alpha3"
+	clusterv1 "sigs.k8s.io/cluster-api/api/v1alpha4"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
-	"sigs.k8s.io/controller-runtime/pkg/handler"
 )
 
 var (
@@ -103,7 +102,7 @@ func TestDOMachineReconciler_DOClusterToDOMachines(t *testing.T) {
 		Recorder record.EventRecorder
 	}
 	type args struct {
-		o handler.MapObject
+		o client.Object
 	}
 	tests := []struct {
 		name     string
@@ -118,17 +117,15 @@ func TestDOMachineReconciler_DOClusterToDOMachines(t *testing.T) {
 				Log:    klogr.New(),
 			},
 			args: args{
-				o: handler.MapObject{
-					Object: &infrav1.DOCluster{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      clusterName,
-							Namespace: namespace,
-							OwnerReferences: []metav1.OwnerReference{
-								{
-									Name:       clusterName,
-									Kind:       "Cluster",
-									APIVersion: clusterv1.GroupVersion.String(),
-								},
+				o: &infrav1.DOCluster{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      clusterName,
+						Namespace: namespace,
+						OwnerReferences: []metav1.OwnerReference{
+							{
+								Name:       clusterName,
+								Kind:       "Cluster",
+								APIVersion: clusterv1.GroupVersion.String(),
 							},
 						},
 					},
