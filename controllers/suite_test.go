@@ -24,7 +24,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	// +kubebuilder:scaffold:imports
-	infrav1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha3"
+	infrav1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha4"
 
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"

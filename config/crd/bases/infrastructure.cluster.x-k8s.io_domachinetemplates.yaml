@@ -195,6 +195,111 @@ spec:
             type: object
         type: object
     served: true
+    storage: false
+  - name: v1alpha4
+    schema:
+      openAPIV3Schema:
+        description: DOMachineTemplate is the Schema for the domachinetemplates API.
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: DOMachineTemplateSpec defines the desired state of DOMachineTemplate.
+            properties:
+              template:
+                description: DOMachineTemplateResource describes the data needed to
+                  create am DOMachine from a template.
+                properties:
+                  spec:
+                    description: Spec is the specification of the desired behavior
+                      of the machine.
+                    properties:
+                      additionalTags:
+                        description: AdditionalTags is an optional set of tags to
+                          add to DigitalOcean resources managed by the DigitalOcean
+                          provider.
+                        items:
+                          type: string
+                        type: array
+                      dataDisks:
+                        description: DataDisks specifies the parameters that are used
+                          to add one or more data disks to the machine
+                        items:
+                          description: DataDisk specifies the parameters that are
+                            used to add a data disk to the machine.
+                          properties:
+                            diskSizeGB:
+                              description: DiskSizeGB is the size in GB to assign
+                                to the data disk.
+                              format: int64
+                              type: integer
+                            filesystemLabel:
+                              description: 'FilesystemLabel is the label that is applied
+                                to the created filesystem. Character limits apply:
+                                16 for ext4; 12 for xfs. May only be used in conjunction
+                                with filesystemType.'
+                              type: string
+                            filesystemType:
+                              description: FilesystemType to be used on the volume.
+                                When provided the volume will be automatically formatted.
+                              type: string
+                            nameSuffix:
+                              description: NameSuffix is the suffix to be appended
+                                to the machine name to generate the disk name. Each
+                                disk name will be in format <dropletName>-<nameSuffix>.
+                              type: string
+                          required:
+                          - diskSizeGB
+                          - nameSuffix
+                          type: object
+                        type: array
+                      image:
+                        anyOf:
+                        - type: integer
+                        - type: string
+                        description: Droplet image can be image id or slug. See https://developers.digitalocean.com/documentation/v2/#list-all-images
+                        x-kubernetes-int-or-string: true
+                      providerID:
+                        description: ProviderID is the unique identifier as specified
+                          by the cloud provider.
+                        type: string
+                      size:
+                        description: Droplet size. It must be known DigitalOcean droplet
+                          size. See https://developers.digitalocean.com/documentation/v2/#list-all-sizes
+                        type: string
+                      sshKeys:
+                        description: SSHKeys is the ssh key id or fingerprint to attach
+                          in DigitalOcean droplet. It must be available on DigitalOcean
+                          account. See https://developers.digitalocean.com/documentation/v2/#list-all-keys
+                        items:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          x-kubernetes-int-or-string: true
+                        type: array
+                    required:
+                    - image
+                    - size
+                    - sshKeys
+                    type: object
+                required:
+                - spec
+                type: object
+            required:
+            - template
+            type: object
+        type: object
+    served: true
     storage: true
 status:
   acceptedNames:

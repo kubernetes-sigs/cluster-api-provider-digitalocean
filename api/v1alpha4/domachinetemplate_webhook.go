@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package v1alpha3
+package v1alpha4
 
 import (
 	"reflect"
@@ -31,7 +31,7 @@ import (
 // log is for logging in this package.
 var _ = logf.Log.WithName("domachinetemplate-resource")
 
-// +kubebuilder:webhook:verbs=create;update,path=/validate-infrastructure-cluster-x-k8s-io-v1alpha3-domachinetemplate,mutating=false,failurePolicy=fail,matchPolicy=Equivalent,groups=infrastructure.cluster.x-k8s.io,resources=domachinetemplates,versions=v1alpha3,name=validation.domachinetemplate.infrastructure.x-k8s.io,sideEffects=None
+// +kubebuilder:webhook:verbs=create;update,path=/validate-infrastructure-cluster-x-k8s-io-v1alpha4-domachinetemplate,mutating=false,failurePolicy=fail,matchPolicy=Equivalent,groups=infrastructure.cluster.x-k8s.io,resources=domachinetemplates,versions=v1alpha4,name=validation.domachinetemplate.infrastructure.x-k8s.io,sideEffects=None
 
 var (
 	_ webhook.Validator = &DOMachineTemplate{}

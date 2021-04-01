@@ -21,7 +21,7 @@ import (
 
 	"github.com/go-logr/logr"
 
-	infrav1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha3"
+	infrav1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha4"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

@@ -24,7 +24,7 @@ import (
 	"github.com/digitalocean/godo"
 	"github.com/pkg/errors"
 
-	infrav1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha3"
+	infrav1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha4"
 	"sigs.k8s.io/cluster-api-provider-digitalocean/cloud/scope"
 
 	corev1 "k8s.io/api/core/v1"

@@ -22,7 +22,7 @@ import (
 	"github.com/digitalocean/godo"
 	"github.com/pkg/errors"
 
-	infrav1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha3"
+	infrav1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha4"
 )
 
 // GetVolumeByName takes a volume name and returns a Volume if found.

@@ -1,5 +1,5 @@
 /*
-Copyright 2020 The Kubernetes Authors.
+Copyright 2021 The Kubernetes Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package v1alpha3
+package v1alpha4
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -61,19 +61,9 @@ type DOClusterStatus struct {
 	Network DONetworkResource `json:"network,omitempty"`
 }
 
-type DOControlPlaneDNS struct {
-	// Domain is the DO domain that this record should live in. It must be pre-existing in your DO account.
-	// The format must be a string that conforms to the definition of a subdomain in DNS (RFC 1123)
-	// +kubebuilder:validation:Pattern:=^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$
-	Domain string `json:"domain"`
-	// Name is the DNS short name of the record (non-FQDN)
-	// The format must consist of alphanumeric characters, '-' or '.', and must start and end with an alphanumeric character
-	// +kubebuilder:validation:Pattern:=^[a-z0-9]([-a-z0-9.]*[a-z0-9])?$
-	Name string `json:"name"`
-}
-
 // +kubebuilder:object:root=true
 // +kubebuilder:resource:path=doclusters,scope=Namespaced,categories=cluster-api
+// +kubebuilder:storageversion
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="Cluster",type="string",JSONPath=".metadata.labels.cluster\\.x-k8s\\.io/cluster-name",description="Cluster to which this DOCluster belongs"
 // +kubebuilder:printcolumn:name="Ready",type="string",JSONPath=".status.ready",description="Cluster infrastructure is ready for DigitalOcean droplet instances"

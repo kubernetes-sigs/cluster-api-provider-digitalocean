@@ -11,7 +11,7 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /mutate-infrastructure-cluster-x-k8s-io-v1alpha3-docluster
+      path: /mutate-infrastructure-cluster-x-k8s-io-v1alpha4-docluster
   failurePolicy: Fail
   matchPolicy: Equivalent
   name: default.docluster.infrastructure.cluster.x-k8s.io
@@ -19,7 +19,7 @@ webhooks:
   - apiGroups:
     - infrastructure.cluster.x-k8s.io
     apiVersions:
-    - v1alpha3
+    - v1alpha4
     operations:
     - CREATE
     - UPDATE
@@ -31,7 +31,7 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /mutate-infrastructure-cluster-x-k8s-io-v1alpha3-domachine
+      path: /mutate-infrastructure-cluster-x-k8s-io-v1alpha4-domachine
   failurePolicy: Fail
   matchPolicy: Equivalent
   name: default.domachine.infrastructure.cluster.x-k8s.io
@@ -39,7 +39,7 @@ webhooks:
   - apiGroups:
     - infrastructure.cluster.x-k8s.io
     apiVersions:
-    - v1alpha3
+    - v1alpha4
     operations:
     - CREATE
     - UPDATE
@@ -59,7 +59,7 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /validate-infrastructure-cluster-x-k8s-io-v1alpha3-docluster
+      path: /validate-infrastructure-cluster-x-k8s-io-v1alpha4-docluster
   failurePolicy: Fail
   matchPolicy: Equivalent
   name: validation.docluster.infrastructure.cluster.x-k8s.io
@@ -67,7 +67,7 @@ webhooks:
   - apiGroups:
     - infrastructure.cluster.x-k8s.io
     apiVersions:
-    - v1alpha3
+    - v1alpha4
     operations:
     - CREATE
     - UPDATE
@@ -79,7 +79,7 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /validate-infrastructure-cluster-x-k8s-io-v1alpha3-domachine
+      path: /validate-infrastructure-cluster-x-k8s-io-v1alpha4-domachine
   failurePolicy: Fail
   matchPolicy: Equivalent
   name: validation.domachine.infrastructure.cluster.x-k8s.io
@@ -87,7 +87,7 @@ webhooks:
   - apiGroups:
     - infrastructure.cluster.x-k8s.io
     apiVersions:
-    - v1alpha3
+    - v1alpha4
     operations:
     - CREATE
     - UPDATE
@@ -99,7 +99,7 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /validate-infrastructure-cluster-x-k8s-io-v1alpha3-domachinetemplate
+      path: /validate-infrastructure-cluster-x-k8s-io-v1alpha4-domachinetemplate
   failurePolicy: Fail
   matchPolicy: Equivalent
   name: validation.domachinetemplate.infrastructure.x-k8s.io
@@ -107,7 +107,7 @@ webhooks:
   - apiGroups:
     - infrastructure.cluster.x-k8s.io
     apiVersions:
-    - v1alpha3
+    - v1alpha4
     operations:
     - CREATE
     - UPDATE

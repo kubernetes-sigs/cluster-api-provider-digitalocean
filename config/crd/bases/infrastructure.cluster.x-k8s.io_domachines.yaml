@@ -305,6 +305,177 @@ spec:
             type: object
         type: object
     served: true
+    storage: false
+    subresources:
+      status: {}
+  - additionalPrinterColumns:
+    - description: Cluster to which this DOMachine belongs
+      jsonPath: .metadata.labels.cluster\.x-k8s\.io/cluster-name
+      name: Cluster
+      type: string
+    - description: DigitalOcean droplet instance state
+      jsonPath: .status.instanceStatus
+      name: State
+      type: string
+    - description: Machine ready status
+      jsonPath: .status.ready
+      name: Ready
+      type: string
+    - description: DigitalOcean droplet instance ID
+      jsonPath: .spec.providerID
+      name: InstanceID
+      type: string
+    - description: Machine object which owns with this DOMachine
+      jsonPath: .metadata.ownerReferences[?(@.kind=="Machine")].name
+      name: Machine
+      type: string
+    name: v1alpha4
+    schema:
+      openAPIV3Schema:
+        description: DOMachine is the Schema for the domachines API.
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: DOMachineSpec defines the desired state of DOMachine.
+            properties:
+              additionalTags:
+                description: AdditionalTags is an optional set of tags to add to DigitalOcean
+                  resources managed by the DigitalOcean provider.
+                items:
+                  type: string
+                type: array
+              dataDisks:
+                description: DataDisks specifies the parameters that are used to add
+                  one or more data disks to the machine
+                items:
+                  description: DataDisk specifies the parameters that are used to
+                    add a data disk to the machine.
+                  properties:
+                    diskSizeGB:
+                      description: DiskSizeGB is the size in GB to assign to the data
+                        disk.
+                      format: int64
+                      type: integer
+                    filesystemLabel:
+                      description: 'FilesystemLabel is the label that is applied to
+                        the created filesystem. Character limits apply: 16 for ext4;
+                        12 for xfs. May only be used in conjunction with filesystemType.'
+                      type: string
+                    filesystemType:
+                      description: FilesystemType to be used on the volume. When provided
+                        the volume will be automatically formatted.
+                      type: string
+                    nameSuffix:
+                      description: NameSuffix is the suffix to be appended to the
+                        machine name to generate the disk name. Each disk name will
+                        be in format <dropletName>-<nameSuffix>.
+                      type: string
+                  required:
+                  - diskSizeGB
+                  - nameSuffix
+                  type: object
+                type: array
+              image:
+                anyOf:
+                - type: integer
+                - type: string
+                description: Droplet image can be image id or slug. See https://developers.digitalocean.com/documentation/v2/#list-all-images
+                x-kubernetes-int-or-string: true
+              providerID:
+                description: ProviderID is the unique identifier as specified by the
+                  cloud provider.
+                type: string
+              size:
+                description: Droplet size. It must be known DigitalOcean droplet size.
+                  See https://developers.digitalocean.com/documentation/v2/#list-all-sizes
+                type: string
+              sshKeys:
+                description: SSHKeys is the ssh key id or fingerprint to attach in
+                  DigitalOcean droplet. It must be available on DigitalOcean account.
+                  See https://developers.digitalocean.com/documentation/v2/#list-all-keys
+                items:
+                  anyOf:
+                  - type: integer
+                  - type: string
+                  x-kubernetes-int-or-string: true
+                type: array
+            required:
+            - image
+            - size
+            - sshKeys
+            type: object
+          status:
+            description: DOMachineStatus defines the observed state of DOMachine.
+            properties:
+              addresses:
+                description: Addresses contains the DigitalOcean droplet associated
+                  addresses.
+                items:
+                  description: NodeAddress contains information for the node's address.
+                  properties:
+                    address:
+                      description: The node address.
+                      type: string
+                    type:
+                      description: Node address type, one of Hostname, ExternalIP
+                        or InternalIP.
+                      type: string
+                  required:
+                  - address
+                  - type
+                  type: object
+                type: array
+              failureMessage:
+                description: "FailureMessage will be set in the event that there is
+                  a terminal problem reconciling the Machine and will contain a more
+                  verbose string suitable for logging and human consumption. \n This
+                  field should not be set for transitive errors that a controller
+                  faces that are expected to be fixed automatically over time (like
+                  service outages), but instead indicate that something is fundamentally
+                  wrong with the Machine's spec or the configuration of the controller,
+                  and that manual intervention is required. Examples of terminal errors
+                  would be invalid combinations of settings in the spec, values that
+                  are unsupported by the controller, or the responsible controller
+                  itself being critically misconfigured. \n Any transient errors that
+                  occur during the reconciliation of Machines can be added as events
+                  to the Machine object and/or logged in the controller's output."
+                type: string
+              failureReason:
+                description: "FailureReason will be set in the event that there is
+                  a terminal problem reconciling the Machine and will contain a succinct
+                  value suitable for machine interpretation. \n This field should
+                  not be set for transitive errors that a controller faces that are
+                  expected to be fixed automatically over time (like service outages),
+                  but instead indicate that something is fundamentally wrong with
+                  the Machine's spec or the configuration of the controller, and that
+                  manual intervention is required. Examples of terminal errors would
+                  be invalid combinations of settings in the spec, values that are
+                  unsupported by the controller, or the responsible controller itself
+                  being critically misconfigured. \n Any transient errors that occur
+                  during the reconciliation of Machines can be added as events to
+                  the Machine object and/or logged in the controller's output."
+                type: string
+              instanceStatus:
+                description: InstanceStatus is the status of the DigitalOcean droplet
+                  instance for this machine.
+                type: string
+              ready:
+                description: Ready is true when the provider resource is ready.
+                type: boolean
+            type: object
+        type: object
+    served: true
     storage: true
     subresources:
       status: {}

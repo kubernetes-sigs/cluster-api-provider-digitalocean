@@ -28,8 +28,10 @@ import (
 	"github.com/spf13/pflag"
 	"k8s.io/klog/v2"
 	"k8s.io/klog/v2/klogr"
+
 	infrav1alpha2 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha2"
 	infrav1alpha3 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha3"
+	infrav1alpha4 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha4"
 	"sigs.k8s.io/cluster-api-provider-digitalocean/controllers"
 	dnsutil "sigs.k8s.io/cluster-api-provider-digitalocean/util/dns"
 	dnsresolver "sigs.k8s.io/cluster-api-provider-digitalocean/util/dns/resolver"
@@ -55,6 +57,7 @@ func init() {
 	_ = clientgoscheme.AddToScheme(scheme)
 	_ = infrav1alpha2.AddToScheme(scheme)
 	_ = infrav1alpha3.AddToScheme(scheme)
+	_ = infrav1alpha4.AddToScheme(scheme)
 	_ = clusterv1.AddToScheme(scheme)
 	// +kubebuilder:scaffold:scheme
 }
@@ -144,15 +147,15 @@ func main() {
 			os.Exit(1)
 		}
 	} else {
-		if err := (&infrav1alpha3.DOCluster{}).SetupWebhookWithManager(mgr); err != nil {
+		if err := (&infrav1alpha4.DOCluster{}).SetupWebhookWithManager(mgr); err != nil {
 			setupLog.Error(err, "unable to create webhook", "webhook", "DOCluster")
 			os.Exit(1)
 		}
-		if err := (&infrav1alpha3.DOMachine{}).SetupWebhookWithManager(mgr); err != nil {
+		if err := (&infrav1alpha4.DOMachine{}).SetupWebhookWithManager(mgr); err != nil {
 			setupLog.Error(err, "unable to create webhook", "webhook", "DOMachine")
 			os.Exit(1)
 		}
-		if err := (&infrav1alpha3.DOMachineTemplate{}).SetupWebhookWithManager(mgr); err != nil {
+		if err := (&infrav1alpha4.DOMachineTemplate{}).SetupWebhookWithManager(mgr); err != nil {
 			setupLog.Error(err, "unable to create webhook", "webhook", "DOMachineTemplate")
 			os.Exit(1)
 		}
