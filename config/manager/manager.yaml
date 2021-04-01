@@ -16,6 +16,7 @@ spec:
       labels:
         control-plane: capdo-controller-manager
     spec:
+      serviceAccountName: manager
       containers:
       - args:
         - --enable-leader-election
