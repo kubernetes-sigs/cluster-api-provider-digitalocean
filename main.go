@@ -29,7 +29,6 @@ import (
 	"k8s.io/klog/v2"
 	"k8s.io/klog/v2/klogr"
 
-	infrav1alpha2 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha2"
 	infrav1alpha3 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha3"
 	infrav1alpha4 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha4"
 	"sigs.k8s.io/cluster-api-provider-digitalocean/controllers"
@@ -55,7 +54,6 @@ func init() {
 	klog.InitFlags(nil)
 
 	_ = clientgoscheme.AddToScheme(scheme)
-	_ = infrav1alpha2.AddToScheme(scheme)
 	_ = infrav1alpha3.AddToScheme(scheme)
 	_ = infrav1alpha4.AddToScheme(scheme)
 	_ = clusterv1.AddToScheme(scheme)
