@@ -42,6 +42,7 @@ import (
 	clusterv1 "sigs.k8s.io/cluster-api/api/v1alpha4"
 	"sigs.k8s.io/cluster-api/util/record"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 )
 
@@ -99,6 +100,7 @@ func main() {
 	}
 
 	ctrl.SetLogger(klogr.New())
+	ctx := ctrl.SetupSignalHandler()
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:                  scheme,
@@ -129,17 +131,15 @@ func main() {
 
 	if err = (&controllers.DOClusterReconciler{
 		Client:   mgr.GetClient(),
-		Log:      ctrl.Log.WithName("controllers").WithName("DOCluster"),
 		Recorder: mgr.GetEventRecorderFor("docluster-controller"),
-	}).SetupWithManager(mgr); err != nil {
+	}).SetupWithManager(ctx, mgr, controller.Options{}); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "DOCluster")
 		os.Exit(1)
 	}
 	if err = (&controllers.DOMachineReconciler{
 		Client:   mgr.GetClient(),
-		Log:      ctrl.Log.WithName("controllers").WithName("DOMachine"),
 		Recorder: mgr.GetEventRecorderFor("domachine-controller"),
-	}).SetupWithManager(mgr); err != nil {
+	}).SetupWithManager(ctx, mgr, controller.Options{}); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "DOMachine")
 		os.Exit(1)
 	}
@@ -170,7 +170,7 @@ func main() {
 	}
 
 	setupLog.Info("starting manager")
-	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
+	if err := mgr.Start(ctx); err != nil {
 		setupLog.Error(err, "problem running manager")
 		os.Exit(1)
 	}

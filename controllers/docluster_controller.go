@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 
 	infrav1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha4"
@@ -38,6 +37,7 @@ import (
 	"sigs.k8s.io/cluster-api/util/predicates"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -47,15 +47,13 @@ import (
 // DOClusterReconciler reconciles a DOCluster object.
 type DOClusterReconciler struct {
 	client.Client
-	Log      logr.Logger
 	Recorder record.EventRecorder
 }
 
-func (r *DOClusterReconciler) SetupWithManager(mgr ctrl.Manager) error {
-	log := r.Log.WithValues("controller", "DOCluster")
+func (r *DOClusterReconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager, options controller.Options) error {
 	c, err := ctrl.NewControllerManagedBy(mgr).
 		For(&infrav1.DOCluster{}).
-		WithEventFilter(predicates.ResourceNotPaused(log)). // don't queue reconcile if resource is paused
+		WithEventFilter(predicates.ResourceNotPaused(ctrl.LoggerFrom(ctx))). // don't queue reconcile if resource is paused
 		Build(r)
 	if err != nil {
 		return errors.Wrapf(err, "error creating controller")
@@ -65,7 +63,7 @@ func (r *DOClusterReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	if err = c.Watch(
 		&source.Kind{Type: &clusterv1.Cluster{}},
 		handler.EnqueueRequestsFromMapFunc(util.ClusterToInfrastructureMapFunc(infrav1.GroupVersion.WithKind("DOCluster"))),
-		predicates.ClusterUnpaused(log),
+		predicates.ClusterUnpaused(ctrl.LoggerFrom(ctx)),
 	); err != nil {
 		return errors.Wrapf(err, "failed adding a watch for ready clusters")
 	}
@@ -78,7 +76,7 @@ func (r *DOClusterReconciler) SetupWithManager(mgr ctrl.Manager) error {
 // +kubebuilder:rbac:groups=cluster.x-k8s.io,resources=clusters;clusters/status,verbs=get;list;watch
 
 func (r *DOClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctrl.Result, reterr error) {
-	log := r.Log.WithValues("doCluster", req.NamespacedName.Name, "namespace", req.NamespacedName.Namespace)
+	log := ctrl.LoggerFrom(ctx)
 
 	docluster := &infrav1.DOCluster{}
 	if err := r.Get(ctx, req.NamespacedName, docluster); err != nil {
@@ -87,8 +85,6 @@ func (r *DOClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		}
 		return reconcile.Result{}, err
 	}
-
-	log = log.WithName(docluster.APIVersion)
 
 	// Fetch the Cluster.
 	cluster, err := util.GetOwnerCluster(ctx, r.Client, docluster.ObjectMeta)
@@ -99,8 +95,6 @@ func (r *DOClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		log.Info("Cluster Controller has not yet set OwnerRef")
 		return reconcile.Result{}, nil
 	}
-
-	log = log.WithValues("cluster", cluster.Name)
 
 	// Create the cluster scope.
 	clusterScope, err := scope.NewClusterScope(scope.ClusterScopeParams{

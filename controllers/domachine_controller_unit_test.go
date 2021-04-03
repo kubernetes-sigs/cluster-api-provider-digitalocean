@@ -19,7 +19,7 @@ package controllers
 import (
 	"testing"
 
-	"github.com/go-logr/logr"
+	. "github.com/onsi/gomega"
 
 	infrav1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha4"
 
@@ -27,11 +27,12 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/record"
-	"k8s.io/klog/v2/klogr"
 
 	clusterv1 "sigs.k8s.io/cluster-api/api/v1alpha4"
+	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
 var (
@@ -82,6 +83,7 @@ func newMachineWithInfrastructureRef(clusterName, machineName string) *clusterv1
 }
 
 func TestDOMachineReconciler_DOClusterToDOMachines(t *testing.T) {
+	g := NewWithT(t)
 	scheme, err := setupScheme()
 	if err != nil {
 		t.Fatal(err)
@@ -98,53 +100,59 @@ func TestDOMachineReconciler_DOClusterToDOMachines(t *testing.T) {
 
 	type fields struct {
 		Client   client.Client
-		Log      logr.Logger
 		Recorder record.EventRecorder
 	}
-	type args struct {
-		o client.Object
-	}
+
 	tests := []struct {
 		name     string
 		fields   fields
-		args     args
-		expected int
+		request  client.Object
+		expected []reconcile.Request
 	}{
 		{
 			name: "two-machine-with-infra-ref",
 			fields: fields{
 				Client: fakec,
-				Log:    klogr.New(),
 			},
-			args: args{
-				o: &infrav1.DOCluster{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      clusterName,
-						Namespace: namespace,
-						OwnerReferences: []metav1.OwnerReference{
-							{
-								Name:       clusterName,
-								Kind:       "Cluster",
-								APIVersion: clusterv1.GroupVersion.String(),
-							},
+			request: &infrav1.DOCluster{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      clusterName,
+					Namespace: namespace,
+					OwnerReferences: []metav1.OwnerReference{
+						{
+							Name:       clusterName,
+							Kind:       "Cluster",
+							APIVersion: clusterv1.GroupVersion.String(),
 						},
 					},
 				},
 			},
-			expected: 2,
+			expected: []reconcile.Request{
+				{
+					NamespacedName: client.ObjectKey{
+						Namespace: "default",
+						Name:      "my-machine-1",
+					},
+				},
+				{
+					NamespacedName: client.ObjectKey{
+						Namespace: "default",
+						Name:      "my-machine-2",
+					},
+				},
+			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			r := &DOMachineReconciler{
 				Client:   tt.fields.Client,
-				Log:      tt.fields.Log,
 				Recorder: tt.fields.Recorder,
 			}
-			requests := r.DOClusterToDOMachines(tt.args.o)
-			if len(requests) != tt.expected {
-				t.Fatalf("Expected 2 but found %d requests", len(initObjects))
-			}
+
+			fn := r.DOClusterToDOMachines(ctrl.SetupSignalHandler())
+			out := fn(tt.request)
+			g.Expect(out).To(Equal(tt.expected))
 		})
 	}
 }
