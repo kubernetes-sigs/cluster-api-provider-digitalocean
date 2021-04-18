@@ -27,7 +27,6 @@ type DOMachineTemplateSpec struct {
 
 // +kubebuilder:object:root=true
 // +kubebuilder:resource:path=domachinetemplates,scope=Namespaced,categories=cluster-api
-// +kubebuilder:storageversion
 
 // DOMachineTemplate is the Schema for the domachinetemplates API.
 type DOMachineTemplate struct {

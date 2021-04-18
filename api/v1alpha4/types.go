@@ -1,5 +1,5 @@
 /*
-Copyright 2020 The Kubernetes Authors.
+Copyright 2021 The Kubernetes Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,23 +14,29 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package v1alpha2
+package v1alpha4
 
-import "strings"
-
-// APIEndpoint represents a reachable Kubernetes API endpoint.
-type APIEndpoint struct {
-	// The hostname on which the API server is serving.
-	Host string `json:"host"`
-	// The port on which the API server is serving.
-	Port int `json:"port"`
-}
+import (
+	"fmt"
+	"strings"
+)
 
 // DOSafeName returns DigitalOcean safe name with replacing '.' and '/' to '-'
 // since DigitalOcean doesn't support naming with those character.
 func DOSafeName(name string) string {
 	r := strings.NewReplacer(".", "-", "/", "-")
 	return r.Replace(name)
+}
+
+type DOControlPlaneDNS struct {
+	// Domain is the DO domain that this record should live in. It must be pre-existing in your DO account.
+	// The format must be a string that conforms to the definition of a subdomain in DNS (RFC 1123)
+	// +kubebuilder:validation:Pattern:=^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$
+	Domain string `json:"domain"`
+	// Name is the DNS short name of the record (non-FQDN)
+	// The format must consist of alphanumeric characters, '-' or '.', and must start and end with an alphanumeric character
+	// +kubebuilder:validation:Pattern:=^[a-z0-9]([-a-z0-9.]*[a-z0-9])?$
+	Name string `json:"name"`
 }
 
 // DOResourceStatus describes the status of a DigitalOcean resource.
@@ -59,7 +65,7 @@ type DOResourceReference struct {
 	ResourceStatus DOResourceStatus `json:"resourceStatus,omitempty"`
 }
 
-// Network encapsulates DigitalOcean networking resources.
+// DONetworkResource encapsulates DigitalOcean networking resources.
 type DONetworkResource struct {
 	// APIServerLoadbalancersRef is the id of apiserver loadbalancers.
 	// +optional
@@ -72,11 +78,36 @@ type DOMachineTemplateResource struct {
 	Spec DOMachineSpec `json:"spec"`
 }
 
+// DataDiskName is the volume name used for a data disk of a droplet.
+// It's in the form of <dropletName>-<dataDiskNameSuffix>.
+func DataDiskName(m *DOMachine, suffix string) string {
+	return DOSafeName(fmt.Sprintf("%s-%s", m.Name, suffix))
+}
+
+// DataDisk specifies the parameters that are used to add a data disk to the machine.
+type DataDisk struct {
+	// NameSuffix is the suffix to be appended to the machine name to generate the disk name.
+	// Each disk name will be in format <dropletName>-<nameSuffix>.
+	NameSuffix string `json:"nameSuffix"`
+	// DiskSizeGB is the size in GB to assign to the data disk.
+	DiskSizeGB int64 `json:"diskSizeGB"`
+	// FilesystemType to be used on the volume. When provided the volume will
+	// be automatically formatted.
+	FilesystemType string `json:"filesystemType,omitempty"`
+	// FilesystemLabel is the label that is applied to the created filesystem.
+	// Character limits apply: 16 for ext4; 12 for xfs.
+	// May only be used in conjunction with filesystemType.
+	FilesystemLabel string `json:"filesystemLabel,omitempty"`
+}
+
 // DONetwork encapsulates DigitalOcean networking configuration.
 type DONetwork struct {
 	// Configures an API Server loadbalancers
 	// +optional
 	APIServerLoadbalancers DOLoadBalancer `json:"apiServerLoadbalancers,omitempty"`
+	// VPC defines the VPC configuration.
+	// +optional
+	VPC DOVPC `json:"vpc,omitempty"`
 }
 
 // DOLoadBalancer define the DigitalOcean loadbalancers configurations.
@@ -94,6 +125,14 @@ type DOLoadBalancer struct {
 	// An object specifying health check settings for the Load Balancer. If omitted, default values will be provided.
 	// +optional
 	HealthCheck DOLoadBalancerHealthCheck `json:"healthCheck,omitempty"`
+}
+
+// DOVPC define the DigitalOcean VPC configuration.
+type DOVPC struct {
+	// VPCUUID defines the VPC UUID to use. An empty value implies using the
+	// default VPC.
+	// +optional
+	VPCUUID string `json:"vpc_uuid,omitempty"`
 }
 
 var (

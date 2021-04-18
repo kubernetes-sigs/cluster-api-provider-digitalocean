@@ -6,7 +6,7 @@ metadata:
     prometheus.io/port: "8443"
     prometheus.io/scheme: "https"
   labels:
-    control-plane: controller-manager
+    control-plane: capdo-controller-manager
   name: controller-manager-metrics-service
   namespace: system
 spec:
@@ -15,4 +15,4 @@ spec:
     port: 8443
     targetPort: https
   selector:
-    control-plane: controller-manager
+    control-plane: capdo-controller-manager

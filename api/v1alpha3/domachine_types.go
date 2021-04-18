@@ -102,7 +102,6 @@ type DOMachineStatus struct {
 
 // +kubebuilder:object:root=true
 // +kubebuilder:resource:path=domachines,scope=Namespaced,categories=cluster-api
-// +kubebuilder:storageversion
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="Cluster",type="string",JSONPath=".metadata.labels.cluster\\.x-k8s\\.io/cluster-name",description="Cluster to which this DOMachine belongs"
 // +kubebuilder:printcolumn:name="State",type="string",JSONPath=".status.instanceStatus",description="DigitalOcean droplet instance state"

@@ -22,10 +22,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 
-	infrav1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha3"
+	infrav1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha4"
 	"sigs.k8s.io/cluster-api-provider-digitalocean/cloud/scope"
 	"sigs.k8s.io/cluster-api-provider-digitalocean/cloud/services/computes"
 
@@ -33,12 +32,13 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/client-go/tools/record"
 
-	clusterv1 "sigs.k8s.io/cluster-api/api/v1alpha3"
+	clusterv1 "sigs.k8s.io/cluster-api/api/v1alpha4"
 	capierrors "sigs.k8s.io/cluster-api/errors"
 	"sigs.k8s.io/cluster-api/util"
 	"sigs.k8s.io/cluster-api/util/predicates"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -48,26 +48,20 @@ import (
 // DOMachineReconciler reconciles a DOMachine object.
 type DOMachineReconciler struct {
 	client.Client
-	Log      logr.Logger
 	Recorder record.EventRecorder
 }
 
-func (r *DOMachineReconciler) SetupWithManager(mgr ctrl.Manager) error {
-	log := r.Log.WithValues("controller", "DOMachine")
+func (r *DOMachineReconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager, options controller.Options) error {
 	c, err := ctrl.NewControllerManagedBy(mgr).
 		For(&infrav1.DOMachine{}).
-		WithEventFilter(predicates.ResourceNotPaused(log)). // don't queue reconcile if resource is paused
+		WithEventFilter(predicates.ResourceNotPaused(ctrl.LoggerFrom(ctx))). // don't queue reconcile if resource is paused
 		Watches(
 			&source.Kind{Type: &clusterv1.Machine{}},
-			&handler.EnqueueRequestsFromMapFunc{
-				ToRequests: util.MachineToInfrastructureMapFunc(infrav1.GroupVersion.WithKind("DOMachine")),
-			},
+			handler.EnqueueRequestsFromMapFunc(util.MachineToInfrastructureMapFunc(infrav1.GroupVersion.WithKind("DOMachine"))),
 		).
 		Watches(
 			&source.Kind{Type: &infrav1.DOCluster{}},
-			&handler.EnqueueRequestsFromMapFunc{
-				ToRequests: handler.ToRequestsFunc(r.DOClusterToDOMachines),
-			},
+			handler.EnqueueRequestsFromMapFunc(r.DOClusterToDOMachines(ctx)),
 		).
 		Build(r)
 	if err != nil {
@@ -82,10 +76,8 @@ func (r *DOMachineReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	// Add a watch on clusterv1.Cluster object for unpause & ready notifications.
 	if err := c.Watch(
 		&source.Kind{Type: &clusterv1.Cluster{}},
-		&handler.EnqueueRequestsFromMapFunc{
-			ToRequests: clusterToObjectFunc,
-		},
-		predicates.ClusterUnpausedAndInfrastructureReady(log),
+		handler.EnqueueRequestsFromMapFunc(clusterToObjectFunc),
+		predicates.ClusterUnpausedAndInfrastructureReady(ctrl.LoggerFrom(ctx)),
 	); err != nil {
 		return errors.Wrapf(err, "failed adding a watch for ready clusters")
 	}
@@ -93,40 +85,42 @@ func (r *DOMachineReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return nil
 }
 
-func (r *DOMachineReconciler) DOClusterToDOMachines(o handler.MapObject) []ctrl.Request {
-	result := []ctrl.Request{}
+func (r *DOMachineReconciler) DOClusterToDOMachines(ctx context.Context) handler.MapFunc {
+	log := ctrl.LoggerFrom(ctx)
+	return func(o client.Object) []ctrl.Request {
+		result := []ctrl.Request{}
 
-	c, ok := o.Object.(*infrav1.DOCluster)
-	if !ok {
-		r.Log.Error(errors.Errorf("expected a DOCluster but got a %T", o.Object), "failed to get DOMachine for DOCluster")
-		return nil
-	}
-	log := r.Log.WithValues("DOCluster", c.Name, "Namespace", c.Namespace)
-
-	cluster, err := util.GetOwnerCluster(context.TODO(), r.Client, c.ObjectMeta)
-	switch {
-	case apierrors.IsNotFound(err) || cluster == nil:
-		return result
-	case err != nil:
-		log.Error(err, "failed to get owning cluster")
-		return result
-	}
-
-	labels := map[string]string{clusterv1.ClusterLabelName: cluster.Name}
-	machineList := &clusterv1.MachineList{}
-	if err := r.List(context.TODO(), machineList, client.InNamespace(c.Namespace), client.MatchingLabels(labels)); err != nil {
-		log.Error(err, "failed to list Machines")
-		return nil
-	}
-	for _, m := range machineList.Items {
-		if m.Spec.InfrastructureRef.Name == "" {
-			continue
+		c, ok := o.(*infrav1.DOCluster)
+		if !ok {
+			log.Error(errors.Errorf("expected a DOCluster but got a %T", o), "failed to get DOMachine for DOCluster")
+			return nil
 		}
-		name := client.ObjectKey{Namespace: m.Namespace, Name: m.Spec.InfrastructureRef.Name}
-		result = append(result, ctrl.Request{NamespacedName: name})
-	}
 
-	return result
+		cluster, err := util.GetOwnerCluster(ctx, r.Client, c.ObjectMeta)
+		switch {
+		case apierrors.IsNotFound(err) || cluster == nil:
+			return result
+		case err != nil:
+			log.Error(err, "failed to get owning cluster")
+			return result
+		}
+
+		labels := map[string]string{clusterv1.ClusterLabelName: cluster.Name}
+		machineList := &clusterv1.MachineList{}
+		if err := r.List(ctx, machineList, client.InNamespace(c.Namespace), client.MatchingLabels(labels)); err != nil {
+			log.Error(err, "failed to list Machines")
+			return nil
+		}
+		for _, m := range machineList.Items {
+			if m.Spec.InfrastructureRef.Name == "" {
+				continue
+			}
+			name := client.ObjectKey{Namespace: m.Namespace, Name: m.Spec.InfrastructureRef.Name}
+			result = append(result, ctrl.Request{NamespacedName: name})
+		}
+
+		return result
+	}
 }
 
 // +kubebuilder:rbac:groups=infrastructure.cluster.x-k8s.io,resources=domachines,verbs=get;list;watch;create;update;patch;delete
@@ -135,9 +129,8 @@ func (r *DOMachineReconciler) DOClusterToDOMachines(o handler.MapObject) []ctrl.
 // +kubebuilder:rbac:groups="",resources=events,verbs=get;list;watch;create;update;patch
 // +kubebuilder:rbac:groups="",resources=secrets;,verbs=get;list;watch
 
-func (r *DOMachineReconciler) Reconcile(req ctrl.Request) (_ ctrl.Result, reterr error) {
-	ctx := context.Background()
-	logger := r.Log.WithValues("doCluster", req.NamespacedName.Name, "namespace", req.NamespacedName.Namespace)
+func (r *DOMachineReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctrl.Result, reterr error) {
+	log := ctrl.LoggerFrom(ctx)
 
 	domachine := &infrav1.DOMachine{}
 	if err := r.Get(ctx, req.NamespacedName, domachine); err != nil {
@@ -147,28 +140,22 @@ func (r *DOMachineReconciler) Reconcile(req ctrl.Request) (_ ctrl.Result, reterr
 		return reconcile.Result{}, err
 	}
 
-	logger = logger.WithName(domachine.APIVersion)
-
 	// Fetch the Machine.
 	machine, err := util.GetOwnerMachine(ctx, r.Client, domachine.ObjectMeta)
 	if err != nil {
 		return reconcile.Result{}, err
 	}
 	if machine == nil {
-		logger.Info("Machine Controller has not yet set OwnerRef")
+		log.Info("Machine Controller has not yet set OwnerRef")
 		return reconcile.Result{}, nil
 	}
-
-	logger = logger.WithValues("machine", machine.Name)
 
 	// Fetch the Cluster.
 	cluster, err := util.GetClusterFromMetadata(ctx, r.Client, machine.ObjectMeta)
 	if err != nil {
-		logger.Info("Machine is missing cluster label or cluster does not exist")
+		log.Info("Machine is missing cluster label or cluster does not exist")
 		return reconcile.Result{}, nil
 	}
-
-	logger = logger.WithValues("cluster", cluster.Name)
 
 	docluster := &infrav1.DOCluster{}
 	doclusterNamespacedName := client.ObjectKey{
@@ -176,16 +163,14 @@ func (r *DOMachineReconciler) Reconcile(req ctrl.Request) (_ ctrl.Result, reterr
 		Name:      cluster.Spec.InfrastructureRef.Name,
 	}
 	if err := r.Get(ctx, doclusterNamespacedName, docluster); err != nil {
-		logger.Info("DOluster is not available yet")
+		log.Info("DOluster is not available yet")
 		return reconcile.Result{}, nil
 	}
-
-	logger = logger.WithValues("docluster", docluster.Name)
 
 	// Create the cluster scope
 	clusterScope, err := scope.NewClusterScope(scope.ClusterScopeParams{
 		Client:    r.Client,
-		Logger:    logger,
+		Logger:    log,
 		Cluster:   cluster,
 		DOCluster: docluster,
 	})
@@ -195,7 +180,7 @@ func (r *DOMachineReconciler) Reconcile(req ctrl.Request) (_ ctrl.Result, reterr
 
 	// Create the machine scope
 	machineScope, err := scope.NewMachineScope(scope.MachineScopeParams{
-		Logger:    logger,
+		Logger:    log,
 		Client:    r.Client,
 		Cluster:   cluster,
 		Machine:   machine,

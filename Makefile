@@ -96,11 +96,11 @@ help:  ## Display this help
 ## --------------------------------------
 
 # Binaries.
-CONTROLLER_GEN_VER := v0.3.0
+CONTROLLER_GEN_VER := v0.5.0
 CONTROLLER_GEN_BIN := controller-gen
 CONTROLLER_GEN := $(TOOLS_BIN_DIR)/$(CONTROLLER_GEN_BIN)-$(CONTROLLER_GEN_VER)
 
-CONVERSION_GEN_VER := v0.18.4
+CONVERSION_GEN_VER := v0.20.4
 CONVERSION_GEN_BIN := conversion-gen
 CONVERSION_GEN := $(TOOLS_BIN_DIR)/$(CONVERSION_GEN_BIN)-$(CONVERSION_GEN_VER)
 
@@ -111,12 +111,11 @@ GOLANGCI_LINT_VER := v1.32.2
 GOLANGCI_LINT_BIN := golangci-lint
 GOLANGCI_LINT := $(TOOLS_BIN_DIR)/$(GOLANGCI_LINT_BIN)-$(GOLANGCI_LINT_VER)
 
-KUSTOMIZE_VER := v3.5.4
+KUSTOMIZE_VER := v3.8.6
 KUSTOMIZE_BIN := kustomize
 KUSTOMIZE := $(TOOLS_BIN_DIR)/$(KUSTOMIZE_BIN)-$(KUSTOMIZE_VER)
 
-# Using unreleased version until https://github.com/golang/mock/pull/405 is part of a release.
-MOCKGEN_VER := 8a3d5958550701de9e6650b84b75a118771e7b49
+MOCKGEN_VER := v1.5.0
 MOCKGEN_BIN := mockgen
 MOCKGEN := $(TOOLS_BIN_DIR)/$(MOCKGEN_BIN)-$(MOCKGEN_VER)
 
@@ -124,11 +123,11 @@ RELEASE_NOTES_VER := v0.3.4
 RELEASE_NOTES_BIN := release-notes
 RELEASE_NOTES := $(TOOLS_BIN_DIR)/$(RELEASE_NOTES_BIN)-$(RELEASE_NOTES_VER)
 
-GINKGO_VER := v1.13.0
+GINKGO_VER := v1.15.2
 GINKGO_BIN := ginkgo
 GINKGO := $(TOOLS_BIN_DIR)/$(GINKGO_BIN)-$(GINKGO_VER)
 
-KUBECTL_VER := v1.16.13
+KUBECTL_VER := v1.20.4
 KUBECTL_BIN := kubectl
 KUBECTL := $(TOOLS_BIN_DIR)/$(KUBECTL_BIN)-$(KUBECTL_VER)
 
@@ -182,7 +181,7 @@ $(CONVERSION_GEN): ## Build conversion-gen.
 
 $(ENVSUBST): ## Build envsubst from tools folder.
 	rm -f $(TOOLS_BIN_DIR)/$(ENVSUBST_BIN)*
-	mkdir -p $(TOOLS_DIR) && cd $(TOOLS_DIR) && go build -tags=tools -o $(ENVSUBST) github.com/drone/envsubst/cmd/envsubst
+	mkdir -p $(TOOLS_DIR) && cd $(TOOLS_DIR) && go build -tags=tools -o $(ENVSUBST) github.com/drone/envsubst/v2/cmd/envsubst
 	ln -sf $(ENVSUBST) $(TOOLS_BIN_DIR)/$(ENVSUBST_BIN)
 
 .PHONY: $(ENVSUBST_BIN)
@@ -242,7 +241,7 @@ generate-go: $(CONTROLLER_GEN) $(MOCKGEN) $(CONVERSION_GEN) ## Runs Go related g
 		object:headerFile=./hack/boilerplate/boilerplate.generatego.txt
 
 	$(CONVERSION_GEN) \
-		--input-dirs=./api/v1alpha2 \
+		--input-dirs=./api/v1alpha3 \
 		--output-file-base=zz_generated.conversion $(GEN_OUTPUT_BASE) \
 		--go-header-file=./hack/boilerplate/boilerplate.generatego.txt
 
@@ -302,12 +301,12 @@ docker-push-manifest: ## Push the fat manifest docker image.
 .PHONY: set-manifest-image
 set-manifest-image:
 	$(info Updating kustomize image patch file for manager resource)
-	sed -i'' -e 's@image: .*@image: '"${MANIFEST_IMG}:$(MANIFEST_TAG)"'@' ./config/manager/manager_image_patch.yaml
+	sed -i'' -e 's@image: .*@image: '"${MANIFEST_IMG}:$(MANIFEST_TAG)"'@' ./config/default/manager_image_patch.yaml
 
 .PHONY: set-manifest-pull-policy
 set-manifest-pull-policy:
 	$(info Updating kustomize pull policy file for manager resource)
-	sed -i'' -e 's@imagePullPolicy: .*@imagePullPolicy: '"$(PULL_POLICY)"'@' ./config/manager/manager_pull_policy.yaml
+	sed -i'' -e 's@imagePullPolicy: .*@imagePullPolicy: '"$(PULL_POLICY)"'@' ./config/default/manager_pull_policy.yaml
 
 ## --------------------------------------
 ##@ Release
@@ -333,7 +332,7 @@ release: clean-release  ## Builds and push container images using the latest git
 .PHONY: release-manifests
 release-manifests: $(KUSTOMIZE) $(RELEASE_DIR) ## Builds the manifests to publish with a release
 	cp metadata.yaml $(RELEASE_DIR)/metadata.yaml
-	kustomize build config > $(RELEASE_DIR)/infrastructure-components.yaml
+	kustomize build config/default > $(RELEASE_DIR)/infrastructure-components.yaml
 
 .PHONY: release-templates
 release-templates: $(RELEASE_DIR)
@@ -348,7 +347,7 @@ release-binary: $(RELEASE_DIR)
 		-e GOARCH=$(GOARCH) \
 		-v "$$(pwd):/workspace" \
 		-w /workspace \
-		golang:1.13.15 \
+		golang:1.16.3 \
 		go build -a -ldflags '-extldflags "-static"' \
 		-o $(RELEASE_DIR)/$(notdir $(RELEASE_BINARY))-$(GOOS)-$(GOARCH) $(RELEASE_BINARY)
 

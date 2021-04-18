@@ -29,7 +29,6 @@ import (
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/utils/pointer"
-	clusterv1 "sigs.k8s.io/cluster-api/api/v1alpha3"
 	capi_e2e "sigs.k8s.io/cluster-api/test/e2e"
 	"sigs.k8s.io/cluster-api/test/framework/clusterctl"
 	"sigs.k8s.io/cluster-api/test/framework/kubetest"
@@ -42,7 +41,7 @@ var _ = Describe("Conformance Tests", func() {
 		specName            = "conformance-tests"
 		namespace           *corev1.Namespace
 		cancelWatches       context.CancelFunc
-		cluster             *clusterv1.Cluster
+		result              *clusterctl.ApplyClusterTemplateAndWaitResult
 		clusterName         string
 		clusterctlLogFolder string
 	)
@@ -64,12 +63,13 @@ var _ = Describe("Conformance Tests", func() {
 		// Setup a Namespace where to host objects for this spec and create a watcher for the namespace events.
 		namespace, cancelWatches = setupSpecNamespace(ctx, specName, bootstrapClusterProxy, artifactFolder)
 
-		// We need to override clusterctl apply log folder to avoid getting our credentials exposed.
-		clusterctlLogFolder = filepath.Join(os.TempDir(), "clusters", bootstrapClusterProxy.GetName())
+		clusterctlLogFolder = filepath.Join(artifactFolder, "clusters", bootstrapClusterProxy.GetName())
+
+		result = new(clusterctl.ApplyClusterTemplateAndWaitResult)
 	})
 
 	AfterEach(func() {
-		dumpSpecResourcesAndCleanup(ctx, specName, bootstrapClusterProxy, artifactFolder, namespace, cancelWatches, cluster, e2eConfig.GetIntervals, skipCleanup)
+		dumpSpecResourcesAndCleanup(ctx, specName, bootstrapClusterProxy, artifactFolder, namespace, cancelWatches, result.Cluster, e2eConfig.GetIntervals, skipCleanup)
 		redactLogs(e2eConfig.GetVariable)
 	})
 
@@ -82,7 +82,7 @@ var _ = Describe("Conformance Tests", func() {
 		Expect(err).NotTo(HaveOccurred())
 
 		runtime := b.Time("cluster creation", func() {
-			result := clusterctl.ApplyClusterTemplateAndWait(ctx, clusterctl.ApplyClusterTemplateAndWaitInput{
+			clusterctl.ApplyClusterTemplateAndWait(ctx, clusterctl.ApplyClusterTemplateAndWaitInput{
 				ClusterProxy: bootstrapClusterProxy,
 				ConfigCluster: clusterctl.ConfigClusterInput{
 					LogFolder:                clusterctlLogFolder,
@@ -99,15 +99,13 @@ var _ = Describe("Conformance Tests", func() {
 				WaitForClusterIntervals:      e2eConfig.GetIntervals(specName, "wait-cluster"),
 				WaitForControlPlaneIntervals: e2eConfig.GetIntervals(specName, "wait-control-plane"),
 				WaitForMachineDeployments:    e2eConfig.GetIntervals(specName, "wait-worker-nodes"),
-			})
-
-			cluster = result.Cluster
+			}, result)
 		})
 
 		b.RecordValue("cluster creation", runtime.Seconds())
 		workloadProxy := bootstrapClusterProxy.GetWorkloadCluster(ctx, namespace.Name, clusterName)
 		runtime = b.Time("conformance suite", func() {
-			kubetest.Run(
+			kubetest.Run(context.Background(),
 				kubetest.RunInput{
 					ClusterProxy:   workloadProxy,
 					NumberOfNodes:  int(workerMachineCount),

@@ -1,5 +1,5 @@
 /*
-Copyright 2020 The Kubernetes Authors.
+Copyright 2021 The Kubernetes Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package v1alpha2
+package v1alpha4
 
 import (
 	"reflect"
@@ -35,11 +35,17 @@ func TestBuildTags(t *testing.T) {
 			args: args{
 				params: BuildTagParams{
 					ClusterName: "foo",
+					ClusterUID:  "155bd6ca-c6a9-45a8-8c9c-05e09b36bc42",
 					Name:        "bar",
 					Role:        APIServerRoleTagValue,
 				},
 			},
-			want: Tags{ClusterNameTag("foo"), ClusterNameRoleTag("foo", APIServerRoleTagValue), "name:" + "bar"},
+			want: Tags{
+				ClusterNameTag("foo"),
+				ClusterNameRoleTag("foo", APIServerRoleTagValue),
+				ClusterNameUIDRoleTag("foo", "155bd6ca-c6a9-45a8-8c9c-05e09b36bc42", APIServerRoleTagValue),
+				NameTagFromName("bar"),
+			},
 		},
 	}
 	for _, tt := range tests {
