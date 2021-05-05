@@ -107,7 +107,7 @@ func main() {
 		LeaderElectionNamespace: leaderElectionNamespace,
 		Namespace:               watchNamespace,
 		SyncPeriod:              &syncPeriod,
-		Port:                    9443,
+		Port:                    webhookPort,
 		HealthProbeBindAddress:  healthAddr,
 	})
 	if err != nil {
