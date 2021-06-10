@@ -78,6 +78,7 @@ variables:
   # DO_NODE_MACHINE_IMAGE: ""
   # Also following variables are required but it is recommended to use env variables to avoid disclosure of sensitive data
   # DO_SSH_KEY_FINGERPRINT: ""
+  IP_FAMILY: "IPv4"
 
 intervals:
   default/wait-controllers: ["3m", "10s"]
