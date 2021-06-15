@@ -85,6 +85,25 @@ func main() {
 		}
 	}
 
+	volumes, err := volumeList(ctx, client)
+	if err != nil {
+		log.Fatalf("failed to list volumes: %+v", err.Error())
+	}
+
+	for _, volume := range volumes {
+		hours := time.Since(volume.CreatedAt).Hours()
+		if hours >= timeToCleanInHours {
+			log.Printf("%s is older than %d hours will terminate\n", volume.Name, timeToCleanInHours)
+			_, err := client.Storage.DeleteVolume(ctx, volume.ID)
+			if err != nil {
+				log.Printf("failed to delete volume %s: %+v\n", volume.Name, err.Error())
+				continue
+			}
+
+			log.Printf("volume %s terminated\n", volume.Name)
+		}
+	}
+
 	log.Println("Completed DO Janitor")
 	os.Exit(0)
 }
@@ -139,6 +158,34 @@ func lbList(ctx context.Context, client *godo.Client) ([]godo.LoadBalancer, erro
 		}
 
 		opt.Page = page + 1
+	}
+
+	return list, nil
+}
+
+func volumeList(ctx context.Context, client *godo.Client) ([]godo.Volume, error) {
+	list := []godo.Volume{}
+
+	// create options. initially, these will be blank
+	opt := &godo.ListVolumeParams{}
+	for {
+		volumes, resp, err := client.Storage.ListVolumes(ctx, opt)
+		if err != nil {
+			return nil, err
+		}
+
+		list = append(list, volumes...)
+
+		if resp.Links == nil || resp.Links.IsLastPage() {
+			break
+		}
+
+		page, err := resp.Links.CurrentPage()
+		if err != nil {
+			return nil, err
+		}
+
+		opt.ListOptions.Page = page + 1
 	}
 
 	return list, nil
