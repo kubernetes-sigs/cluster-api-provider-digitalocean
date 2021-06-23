@@ -1,15 +1,27 @@
-{
-  "name": "digitalocean",
-  "config": {
-    "image": "gcr.io/k8s-staging-cluster-api-do/cluster-api-do-controller",
-    "live_reload_deps": [
-      "main.go",
-      "go.mod",
-      "go.sum",
-      "api",
-      "cloud",
-      "controllers",
-      "pkg"
-    ]
+[
+  {
+    "name": "digitalocean",
+    "config": {
+      "image": "gcr.io/k8s-staging-cluster-api-do/cluster-api-do-controller",
+      "live_reload_deps": [
+        "main.go",
+        "go.mod",
+        "go.sum",
+        "api",
+        "cloud",
+        "controllers",
+        "pkg"
+      ]
+    }
+  },
+  {
+    "name": "doks-controlplane",
+    "config": {
+      "context": "controlplane/doks",
+      "image": "gcr.io/k8s-staging-cluster-api-do/doks-controlplane-controller",
+      "live_reload_deps": [
+        "main.go", "api", "controllers"
+      ]
+    }
   }
-}
+]
