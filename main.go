@@ -23,6 +23,7 @@ import (
 	"os"
 	"time"
 
+	infrastructurev1alpha4 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha4"
 	// +kubebuilder:scaffold:imports
 
 	"github.com/spf13/pflag"
@@ -58,6 +59,7 @@ func init() {
 	_ = infrav1alpha3.AddToScheme(scheme)
 	_ = infrav1alpha4.AddToScheme(scheme)
 	_ = clusterv1.AddToScheme(scheme)
+	utilruntime.Must(infrastructurev1alpha4.AddToScheme(scheme))
 	// +kubebuilder:scaffold:scheme
 }
 
@@ -157,6 +159,13 @@ func main() {
 		os.Exit(1)
 	}
 
+	if err = (&controllers.DOKSClusterReconciler{
+		Client: mgr.GetClient(),
+		Scheme: mgr.GetScheme(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "DOKSCluster")
+		os.Exit(1)
+	}
 	// +kubebuilder:scaffold:builder
 
 	if err := mgr.AddReadyzCheck("ping", healthz.Ping); err != nil {

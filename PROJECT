@@ -1,4 +1,3 @@
-version: "3"
 domain: cluster.x-k8s.io
 repo: sigs.k8s.io/cluster-api-provider-digitalocean
 resources:
@@ -20,3 +19,13 @@ resources:
 - group: infrastructure
   kind: DOMachineTemplate
   version: v1alpha4
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: cluster.x-k8s.io
+  group: infrastructure
+  kind: DOKSCluster
+  path: sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha4
+  version: v1alpha4
+version: "3"

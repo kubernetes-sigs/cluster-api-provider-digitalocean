@@ -23,6 +23,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
+	infrastructurev1alpha4 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha4"
 	// +kubebuilder:scaffold:imports
 	infrav1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha4"
 
@@ -71,6 +72,9 @@ var _ = BeforeSuite(func(done Done) {
 	Expect(infrav1.AddToScheme(scheme.Scheme)).To(Succeed())
 
 	Expect(clusterv1.AddToScheme(scheme.Scheme)).To(Succeed())
+
+	err = infrastructurev1alpha4.AddToScheme(scheme.Scheme)
+	Expect(err).NotTo(HaveOccurred())
 
 	// +kubebuilder:scaffold:scheme
 
