@@ -23,7 +23,6 @@ import (
 	"os"
 	"time"
 
-	infrastructurev1alpha4 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha4"
 	// +kubebuilder:scaffold:imports
 
 	"github.com/spf13/pflag"
@@ -59,7 +58,6 @@ func init() {
 	_ = infrav1alpha3.AddToScheme(scheme)
 	_ = infrav1alpha4.AddToScheme(scheme)
 	_ = clusterv1.AddToScheme(scheme)
-	utilruntime.Must(infrastructurev1alpha4.AddToScheme(scheme))
 	// +kubebuilder:scaffold:scheme
 }
 
