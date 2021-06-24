@@ -23,5 +23,15 @@
         "main.go", "api", "controllers"
       ]
     }
+  },
+  {
+    "name": "doks-bootstrap",
+    "config": {
+      "context": "bootstrap/doks",
+      "image": "gcr.io/k8s-staging-cluster-api-do/doks-bootstrap-controller",
+      "live_reload_deps": [
+        "main.go", "api", "controllers"
+      ]
+    }
   }
 ]

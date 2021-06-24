@@ -36,9 +36,8 @@ spec:
           spec:
             description: DOKSControlPlaneSpec defines the desired state of DOKSControlPlane
             properties:
-              foo:
-                description: Foo is an example field of DOKSControlPlane. Edit dokscontrolplane_types.go
-                  to remove/update
+              clusterName:
+                description: Name of the Cluster resource located in the same namespace.
                 type: string
             type: object
           status:

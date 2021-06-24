@@ -2,56 +2,62 @@
 apiVersion: cluster.x-k8s.io/v1alpha4
 kind: Cluster
 metadata:
-  name: "${CLUSTER_NAME}"
+  name: "poc"
 spec:
   infrastructureRef:
     apiVersion: infrastructure.cluster.x-k8s.io/v1alpha4
     kind: DOKSCluster
-    name: "${CLUSTER_NAME}"
+    name: "poc"
   controlPlaneRef:
     kind: DOKSControlPlane
     apiVersion: controlplane.cluster.x-k8s.io/v1alpha4
-    name: "${CLUSTER_NAME}-control-plane"
+    name: "poc-control-plane"
 ---
 apiVersion: infrastructure.cluster.x-k8s.io/v1alpha4
 kind: DOKSCluster
 metadata:
-  name: "${CLUSTER_NAME}"
+  name: "poc"
 spec:
-  region: ${DO_REGION}
-  version: "${KUBERNETES_VERSION}"
+  region: "fra1"
+  version: "v1.17"
 ---
 kind: DOKSControlPlane
 apiVersion: controlplane.cluster.x-k8s.io/v1alpha4
 metadata:
-  name: "${CLUSTER_NAME}-control-plane"
+  name: "poc-control-plane"
 spec:
-  clusterName: "${CLUSTER_NAME}"
+  clusterName: "poc"
 ---
 apiVersion: cluster.x-k8s.io/v1alpha4
 kind: MachinePool
 metadata:
-  name: "${CLUSTER_NAME}-mp-0"
+  name: "poc-mp-0"
 spec:
-  clusterName: "${CLUSTER_NAME}"
-  replicas: ${WORKER_MACHINE_COUNT}
-  selector:
-    matchLabels:
+  clusterName: "poc"
+  replicas: 
   template:
     spec:
-      clusterName: "${CLUSTER_NAME}"
+      clusterName: "poc"
       bootstrap:
-        data: "" # empty string means ignore?
+        configRef:
+          apiVersion: bootstrap.cluster.x-k8s.io/v1alpha4
+          kind: DOKSBootstrapConfig
+          name: "poc"
       infrastructureRef:
-        name: "${CLUSTER_NAME}-mp-0"
+        name: "poc-mp-0"
         apiVersion: infrastructure.cluster.x-k8s.io/v1alpha4
         kind: DOKSNodePool
 ---
 apiVersion: infrastructure.cluster.x-k8s.io/v1alpha4
 kind: DOKSNodePool
 metadata:
-  name: "${CLUSTER_NAME}-mp-0"
+  name: "poc-mp-0"
 spec:
-  template:
-    spec:
-      size: "${DO_NODE_MACHINE_TYPE}"
+  size: "small-123"
+---
+apiVersion: bootstrap.cluster.x-k8s.io/v1alpha4
+kind: DOKSBootstrapConfig
+metadata:
+  name: "poc"
+spec:
+  foo: "lol"

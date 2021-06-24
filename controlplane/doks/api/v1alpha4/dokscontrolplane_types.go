@@ -28,8 +28,8 @@ type DOKSControlPlaneSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	// Foo is an example field of DOKSControlPlane. Edit dokscontrolplane_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	// Name of the Cluster resource located in the same namespace.
+	ClusterName string `json:"clusterName,omitempty"`
 }
 
 // DOKSControlPlaneStatus defines the observed state of DOKSControlPlane

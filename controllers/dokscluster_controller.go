@@ -50,6 +50,7 @@ func (r *DOKSClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	_ = log.FromContext(ctx)
 
 	// your logic here
+	//l.Info("WHOOP WHOOP", struct{}{})
 
 	return ctrl.Result{}, nil
 }
