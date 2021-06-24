@@ -1,0 +1,6 @@
+domain: cluster.x-k8s.io
+layout:
+- go.kubebuilder.io/v3
+projectName: doks-bootstrap
+repo: sigs.k8s.io/cluster-api-provider-digitalocean
+version: "3"
