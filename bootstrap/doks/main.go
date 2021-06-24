@@ -30,6 +30,8 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+
+	bootstrapv1alpha4 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha4"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -41,6 +43,7 @@ var (
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 
+	utilruntime.Must(bootstrapv1alpha4.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 }
 
