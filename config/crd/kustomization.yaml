@@ -9,7 +9,6 @@ resources:
 - bases/infrastructure.cluster.x-k8s.io_domachines.yaml
 - bases/infrastructure.cluster.x-k8s.io_domachinetemplates.yaml
 - bases/infrastructure.cluster.x-k8s.io_doksclusters.yaml
-- bases/infrastructure.cluster.x-k8s.io_doksmachinetemplates.yaml
 - bases/infrastructure.cluster.x-k8s.io_doksnodepools.yaml
 # +kubebuilder:scaffold:crdkustomizeresource
 

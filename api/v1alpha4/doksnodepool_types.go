@@ -28,8 +28,8 @@ type DOKSNodePoolSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	// Foo is an example field of DOKSNodePool. Edit doksnodepool_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	// The slug identifier for the type of Droplet to be used as workers in the node pool.
+	Size string `json:"size"`
 }
 
 // DOKSNodePoolStatus defines the observed state of DOKSNodePool

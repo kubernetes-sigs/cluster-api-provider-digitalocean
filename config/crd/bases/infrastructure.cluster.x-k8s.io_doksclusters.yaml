@@ -32,9 +32,6 @@ spec:
           spec:
             description: DOKSClusterSpec defines the desired state of DOKSCluster
             properties:
-              defaultMachinePoolName:
-                description: Name of the default Pool to initialize the Cluster with.
-                type: string
               region:
                 description: The slug identifier for the region where the Kubernetes cluster will be created.
                 type: string
@@ -42,7 +39,6 @@ spec:
                 description: The slug identifier for the version of Kubernetes used for the cluster. See the /v2/kubernetes/options endpoint for available versions.
                 type: string
             required:
-            - defaultMachinePoolName
             - region
             - version
             type: object

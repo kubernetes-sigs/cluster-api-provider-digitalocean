@@ -32,9 +32,11 @@ spec:
           spec:
             description: DOKSNodePoolSpec defines the desired state of DOKSNodePool
             properties:
-              foo:
-                description: Foo is an example field of DOKSNodePool. Edit doksnodepool_types.go to remove/update
+              size:
+                description: The slug identifier for the type of Droplet to be used as workers in the node pool.
                 type: string
+            required:
+            - size
             type: object
           status:
             description: DOKSNodePoolStatus defines the observed state of DOKSNodePool
