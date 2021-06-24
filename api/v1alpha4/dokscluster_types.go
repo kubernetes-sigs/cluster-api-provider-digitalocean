@@ -28,8 +28,15 @@ type DOKSClusterSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	// Foo is an example field of DOKSCluster. Edit dokscluster_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	// The slug identifier for the region where the Kubernetes cluster will be created.
+	Region string `json:"region"`
+
+	// The slug identifier for the version of Kubernetes used for the cluster.
+	// See the /v2/kubernetes/options endpoint for available versions.
+	Version string `json:"version"`
+
+	// Name of the default Pool to initialize the Cluster with.
+	DefaultMachinePoolName string `json:"defaultMachinePoolName"`
 }
 
 // DOKSClusterStatus defines the observed state of DOKSCluster
