@@ -32,6 +32,9 @@ spec:
           spec:
             description: DOKSClusterSpec defines the desired state of DOKSCluster
             properties:
+              providerID:
+                description: ProviderID is the unique identifier as specified by the cloud provider.
+                type: string
               region:
                 description: The slug identifier for the region where the Kubernetes cluster will be created.
                 type: string
@@ -44,6 +47,10 @@ spec:
             type: object
           status:
             description: DOKSClusterStatus defines the observed state of DOKSCluster
+            properties:
+              ready:
+                description: Ready denotes that the cluster (infrastructure) is ready.
+                type: boolean
             type: object
         type: object
     served: true

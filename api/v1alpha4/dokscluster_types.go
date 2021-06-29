@@ -23,6 +23,12 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
+const (
+	// DOKSClusterFinalizer allows ReconcileDOKSCluster to clean up DigitalOcean resources associated
+	// with DOKSCluster before removing it from the apiserver.
+	DOKSClusterFinalizer = "dokscluster.infrastructure.cluster.x-k8s.io"
+)
+
 // DOKSClusterSpec defines the desired state of DOKSCluster
 type DOKSClusterSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
@@ -30,16 +36,22 @@ type DOKSClusterSpec struct {
 
 	// The slug identifier for the region where the Kubernetes cluster will be created.
 	Region string `json:"region"`
-
 	// The slug identifier for the version of Kubernetes used for the cluster.
 	// See the /v2/kubernetes/options endpoint for available versions.
 	Version string `json:"version"`
+	// ProviderID is the unique identifier as specified by the cloud provider.
+	// +optional
+	ProviderID *string `json:"providerID,omitempty"`
 }
 
 // DOKSClusterStatus defines the observed state of DOKSCluster
 type DOKSClusterStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
+
+	// Ready denotes that the cluster (infrastructure) is ready.
+	// +optional
+	Ready bool `json:"ready"`
 }
 
 //+kubebuilder:object:root=true

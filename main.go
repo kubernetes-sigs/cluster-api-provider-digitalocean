@@ -160,7 +160,7 @@ func main() {
 	if err = (&controllers.DOKSClusterReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
-	}).SetupWithManager(mgr); err != nil {
+	}).SetupWithManager(ctx, mgr, controller.Options{}); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "DOKSCluster")
 		os.Exit(1)
 	}

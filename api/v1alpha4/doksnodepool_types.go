@@ -30,12 +30,19 @@ type DOKSNodePoolSpec struct {
 
 	// The slug identifier for the type of Droplet to be used as workers in the node pool.
 	Size string `json:"size"`
+	// ProviderID is the unique identifier as specified by the cloud provider.
+	// +optional
+	ProviderID *string `json:"providerID,omitempty"`
 }
 
 // DOKSNodePoolStatus defines the observed state of DOKSNodePool
 type DOKSNodePoolStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
+
+	// Ready denotes that the cluster (infrastructure) is ready.
+	// +optional
+	Ready bool `json:"ready"`
 }
 
 //+kubebuilder:object:root=true

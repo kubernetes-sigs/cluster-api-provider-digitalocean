@@ -34,7 +34,7 @@ metadata:
   name: "poc-mp-0"
 spec:
   clusterName: "poc"
-  replicas: 
+  replicas: 2
   template:
     spec:
       clusterName: "poc"
@@ -61,3 +61,30 @@ metadata:
   name: "poc"
 spec:
   foo: "lol"
+---
+apiVersion: cluster.x-k8s.io/v1alpha4
+kind: MachinePool
+metadata:
+  name: "poclops-mp-0"
+spec:
+  clusterName: "poclops"
+  replicas: 2
+  template:
+    spec:
+      clusterName: "poclops"
+      bootstrap:
+        configRef:
+          apiVersion: bootstrap.cluster.x-k8s.io/v1alpha4
+          kind: DOKSBootstrapConfig
+          name: "poc"
+      infrastructureRef:
+        name: "poclops-mp-0"
+        apiVersion: infrastructure.cluster.x-k8s.io/v1alpha4
+        kind: DOKSNodePool
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1alpha4
+kind: DOKSNodePool
+metadata:
+  name: "poclops-mp-0"
+spec:
+  size: "small-123"

@@ -32,6 +32,9 @@ spec:
           spec:
             description: DOKSNodePoolSpec defines the desired state of DOKSNodePool
             properties:
+              providerID:
+                description: ProviderID is the unique identifier as specified by the cloud provider.
+                type: string
               size:
                 description: The slug identifier for the type of Droplet to be used as workers in the node pool.
                 type: string
@@ -40,6 +43,10 @@ spec:
             type: object
           status:
             description: DOKSNodePoolStatus defines the observed state of DOKSNodePool
+            properties:
+              ready:
+                description: Ready denotes that the cluster (infrastructure) is ready.
+                type: boolean
             type: object
         type: object
     served: true

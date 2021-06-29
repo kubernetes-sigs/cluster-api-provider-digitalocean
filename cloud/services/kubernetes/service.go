@@ -13,19 +13,25 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package scope
+
+package kubernetes
 
 import (
-	"github.com/digitalocean/godo"
+	"context"
+
+	"sigs.k8s.io/cluster-api-provider-digitalocean/cloud/scope"
 )
 
-type DOClients struct {
-	Actions       godo.ActionsService
-	Droplets      godo.DropletsService
-	Storage       godo.StorageService
-	Images        godo.ImagesService
-	Keys          godo.KeysService
-	LoadBalancers godo.LoadBalancersService
-	Domains       godo.DomainsService
-	Kubernetes    godo.KubernetesService
+// Service holds a collection of interfaces.
+type Service struct {
+	scope *scope.DOKSClusterScope
+	ctx   context.Context
+}
+
+// NewService returns a new service given the digitalocean api client.
+func NewService(ctx context.Context, scope *scope.DOKSClusterScope) *Service {
+	return &Service{
+		scope: scope,
+		ctx:   ctx,
+	}
 }
