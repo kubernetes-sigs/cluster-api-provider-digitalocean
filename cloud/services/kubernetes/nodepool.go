@@ -26,15 +26,15 @@ import (
 )
 
 // GetCluster get a cluster instance.
-func (s *Service) GetCluster(id string) (*godo.KubernetesCluster, error) {
-	if id == "" {
-		s.scope.Info("DOKSCluster does not have an instance id")
+func (s *Service) GetNodePool(clusterId string, nodePoolId string) (*godo.KubernetesNodePool, error) {
+	if nodePoolId == "" {
+		s.scope.Info("DOKSNodePool does not have an instance id")
 		return nil, nil
 	}
 
-	s.scope.V(2).Info("Looking for instance by id", "instance-id", id)
+	s.scope.V(2).Info("Looking for instance by id", "instance-id", nodePoolId)
 
-	cluster, res, err := s.scope.Kubernetes.Get(s.ctx, id)
+	nodePool, res, err := s.scope.Kubernetes.GetNodePool(s.ctx, clusterId, nodePoolId)
 	if err != nil {
 		if res != nil && res.StatusCode == http.StatusNotFound {
 			return nil, nil
@@ -42,36 +42,32 @@ func (s *Service) GetCluster(id string) (*godo.KubernetesCluster, error) {
 		return nil, err
 	}
 
-	return cluster, nil
+	return nodePool, nil
 }
 
-// CreateCluster create a cluster instance.
-func (s *Service) CreateCluster(clusterScope *scope.DOKSClusterScope, nodePoolScopes []*scope.DOKSNodePoolScope) (*godo.KubernetesCluster, error) {
+// CreateNodePool create a node pool instance.
+func (s *Service) CreateNodePool(clusterId string, nodePoolScope *scope.DOKSNodePoolScope) (*godo.KubernetesNodePool, error) {
 	s.scope.V(2).Info("Creating an instance for a cluster")
 
-	clusterCreateRequest, err := clusterScope.DOAPICreateRequest(nodePoolScopes)
-	if err != nil {
-		return nil, errors.Errorf("failed to assemble cluster create request: %+v", err)
-	}
+	nodePoolCreateRequest := nodePoolScope.DOAPICreateRequest()
+	nodePool, _, err := s.scope.Kubernetes.CreateNodePool(s.ctx, clusterId, nodePoolCreateRequest)
 
-	cluster, _, err := s.scope.Kubernetes.Create(s.ctx, clusterCreateRequest)
-
-	return cluster, err
+	return nodePool, err
 }
 
-// DeleteCluster delete a cluster instance.
+// DeleteNodePool delete a node pool instance.
 // Returns nil on success, error in all other cases.
-func (s *Service) DeleteCluster(id string) error {
-	s.scope.V(2).Info("Attempting to delete instance", "instance-id", id)
-	if id == "" {
+func (s *Service) DeleteNodePool(clusterId string, nodePoolId string) error {
+	s.scope.V(2).Info("Attempting to delete instance", "instance-id", nodePoolId)
+	if nodePoolId == "" {
 		s.scope.Info("Instance does not have an instance id")
 		return errors.New("cannot delete instance. instance does not have an instance id")
 	}
 
-	if _, err := s.scope.Kubernetes.Delete(s.ctx, id); err != nil {
-		return errors.Wrapf(err, "failed to delete instance with id %q", id)
+	if _, err := s.scope.Kubernetes.DeleteNodePool(s.ctx, clusterId, nodePoolId); err != nil {
+		return errors.Wrapf(err, "failed to delete instance with id %q", nodePoolId)
 	}
 
-	s.scope.V(2).Info("Deleted instance", "instance-id", id)
+	s.scope.V(2).Info("Deleted instance", "instance-id", nodePoolId)
 	return nil
 }

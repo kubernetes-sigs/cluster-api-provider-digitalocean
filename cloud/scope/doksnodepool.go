@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/digitalocean/godo"
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 
@@ -105,6 +106,16 @@ type DOKSNodePoolScope struct {
 	DOKSNodePool *infrav1.DOKSNodePool
 }
 
+func (s *DOKSNodePoolScope) ToDOKSClusterScope() (*DOKSClusterScope, error) {
+	return NewDOKSClusterScope(DOKSClusterScopeParams{
+		DOClients:   s.DOClients,
+		Client:      s.client,
+		Logger:      s.Logger,
+		Cluster:     s.Cluster,
+		DOKSCluster: s.DOKSCluster,
+	})
+}
+
 // Close closes the current scope persisting the cluster configuration and status.
 func (s *DOKSNodePoolScope) Close() error {
 	return s.patchHelper.Patch(context.TODO(), s.DOKSNodePool)
@@ -113,6 +124,16 @@ func (s *DOKSNodePoolScope) Close() error {
 // Name returns the machine pool name.
 func (s *DOKSNodePoolScope) Name() string {
 	return s.MachinePool.GetName()
+}
+
+// Replicas returns the machine pool replicas compatible to godo format.
+func (s *DOKSNodePoolScope) Replicas() *int {
+	replicas := *s.MachinePool.Spec.Replicas
+
+	var conv int
+	conv = int(replicas)
+
+	return &conv
 }
 
 // Namespace returns the cluster namespace.
@@ -134,8 +155,8 @@ func (s *DOKSNodePoolScope) GetProviderID() string {
 }
 
 // SetProviderID sets the DOKSNodePool providerID in spec from cluster id.
-func (s *DOKSNodePoolScope) SetProviderID(clusterID string) {
-	pid := fmt.Sprintf("digitalocean://%s", clusterID)
+func (s *DOKSNodePoolScope) SetProviderID(nodePoolID string) {
+	pid := fmt.Sprintf("digitalocean://%s", nodePoolID)
 	s.DOKSNodePool.Spec.ProviderID = pointer.StringPtr(pid)
 }
 
@@ -146,4 +167,12 @@ func (s *DOKSNodePoolScope) GetInstanceID() string {
 		return ""
 	}
 	return parsed.ID()
+}
+
+func (s *DOKSNodePoolScope) DOAPICreateRequest() *godo.KubernetesNodePoolCreateRequest {
+	return &godo.KubernetesNodePoolCreateRequest{
+		Name:  s.Name(),
+		Size:  s.DOKSNodePool.Spec.Size,
+		Count: int(*s.MachinePool.Spec.Replicas),
+	}
 }

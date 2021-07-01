@@ -19,7 +19,7 @@ metadata:
   name: "poc"
 spec:
   region: "fra1"
-  version: "v1.17"
+  version: "latest"
 ---
 kind: DOKSControlPlane
 apiVersion: controlplane.cluster.x-k8s.io/v1alpha4
@@ -53,7 +53,7 @@ kind: DOKSNodePool
 metadata:
   name: "poc-mp-0"
 spec:
-  size: "small-123"
+  size: "s-1vcpu-2gb"
 ---
 apiVersion: bootstrap.cluster.x-k8s.io/v1alpha4
 kind: DOKSBootstrapConfig

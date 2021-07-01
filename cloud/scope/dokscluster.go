@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/digitalocean/godo"
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 
@@ -30,7 +31,7 @@ import (
 
 	clusterv1 "sigs.k8s.io/cluster-api/api/v1alpha4"
 	"sigs.k8s.io/cluster-api/controllers/noderefutil"
-	expclusterv1 "sigs.k8s.io/cluster-api/exp/api/v1alpha4"
+	capi_errors "sigs.k8s.io/cluster-api/errors"
 	"sigs.k8s.io/cluster-api/util/patch"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -38,12 +39,10 @@ import (
 // DOKSClusterScopeParams defines the input parameters used to create a new Scope.
 type DOKSClusterScopeParams struct {
 	DOClients
-	Client        client.Client
-	Logger        logr.Logger
-	Cluster       *clusterv1.Cluster
-	DOKSCluster   *infrav1.DOKSCluster
-	MachinePools  []*expclusterv1.MachinePool
-	DOKSNodePools []*infrav1.DOKSNodePool
+	Client      client.Client
+	Logger      logr.Logger
+	Cluster     *clusterv1.Cluster
+	DOKSCluster *infrav1.DOKSCluster
 }
 
 // NewDOKSClusterScope creates a new DOKSClusterScope from the supplied parameters.
@@ -74,14 +73,12 @@ func NewDOKSClusterScope(params DOKSClusterScopeParams) (*DOKSClusterScope, erro
 	}
 
 	return &DOKSClusterScope{
-		Logger:        params.Logger,
-		client:        params.Client,
-		DOClients:     params.DOClients,
-		Cluster:       params.Cluster,
-		DOKSCluster:   params.DOKSCluster,
-		MachinePools:  params.MachinePools,
-		DOKSNodePools: params.DOKSNodePools,
-		patchHelper:   helper,
+		Logger:      params.Logger,
+		client:      params.Client,
+		DOClients:   params.DOClients,
+		Cluster:     params.Cluster,
+		DOKSCluster: params.DOKSCluster,
+		patchHelper: helper,
 	}, nil
 }
 
@@ -92,10 +89,8 @@ type DOKSClusterScope struct {
 	patchHelper *patch.Helper
 
 	DOClients
-	Cluster       *clusterv1.Cluster
-	DOKSCluster   *infrav1.DOKSCluster
-	MachinePools  []*expclusterv1.MachinePool
-	DOKSNodePools []*infrav1.DOKSNodePool
+	Cluster     *clusterv1.Cluster
+	DOKSCluster *infrav1.DOKSCluster
 }
 
 // Close closes the current scope persisting the cluster configuration and status.
@@ -144,4 +139,37 @@ func (s *DOKSClusterScope) GetInstanceID() string {
 		return ""
 	}
 	return parsed.ID()
+}
+
+func (s *DOKSClusterScope) DOAPICreateRequest(nodePoolScopes []*DOKSNodePoolScope) (*godo.KubernetesClusterCreateRequest, error) {
+	var nodePoolCreateRequests []*godo.KubernetesNodePoolCreateRequest
+
+	for _, nodePoolScope := range nodePoolScopes {
+		nodePoolCreateRequests = append(nodePoolCreateRequests, nodePoolScope.DOAPICreateRequest())
+	}
+
+	createRequest := &godo.KubernetesClusterCreateRequest{
+		Name:        s.Name(),
+		RegionSlug:  s.DOKSCluster.Spec.Region,
+		VersionSlug: s.DOKSCluster.Spec.Version,
+		NodePools:   nodePoolCreateRequests,
+	}
+	return createRequest, nil
+}
+
+func (s *DOKSClusterScope) SetFailureReason(reason *capi_errors.ClusterStatusError) {
+	s.DOKSCluster.Status.FailureReason = reason
+}
+func (s *DOKSClusterScope) SetFailureMessage(v error) {
+	s.DOKSCluster.Status.FailureMessage = pointer.StringPtr(v.Error())
+}
+func (s *DOKSClusterScope) SetProviderStatus(status *godo.KubernetesClusterStatus) {
+	s.DOKSCluster.Status.ProviderStatus = status
+}
+
+func (s *DOKSClusterScope) SetControlPlaneEndpoint(controlPlaneEndpoint string) {
+	s.DOKSCluster.Spec.ControlPlaneEndpoint = clusterv1.APIEndpoint{
+		Host: controlPlaneEndpoint,
+		Port: 443,
+	}
 }
