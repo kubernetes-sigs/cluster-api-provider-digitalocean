@@ -52,4 +52,4 @@ The cloudbuild will automatically trigger the build and push the images to the [
 
 [staging-registry]: https://gcr.io/k8s-staging-cluster-api-do
 [production registry]: https://us.gcr.io/k8s-artifacts-prod/cluster-api-do
-[image-promoter]: https://github.com/kubernetes/k8s.io/tree/master/k8s.gcr.io#image-promoter
+[image-promoter]: https://github.com/kubernetes/k8s.io/tree/main/k8s.gcr.io#image-promoter
