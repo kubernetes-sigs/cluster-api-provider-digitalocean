@@ -30,7 +30,7 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	bootstrapv1alpha4 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha4"
+	bootstrapv1alpha4 "sigs.k8s.io/cluster-api-provider-digitalocean/bootstrap/doks/api/v1alpha4"
 	//+kubebuilder:scaffold:imports
 )
 

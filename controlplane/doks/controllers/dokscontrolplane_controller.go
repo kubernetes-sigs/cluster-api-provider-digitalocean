@@ -19,12 +19,17 @@ package controllers
 import (
 	"context"
 
+	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"sigs.k8s.io/cluster-api/util/predicates"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/source"
 
-	controlplanev1alpha4 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha4"
+	clusterv1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha4"
+	controlplanev1alpha4 "sigs.k8s.io/cluster-api-provider-digitalocean/controlplane/doks/api/v1alpha4"
 )
 
 // DOKSControlPlaneReconciler reconciles a DOKSControlPlane object
@@ -56,7 +61,21 @@ func (r *DOKSControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Req
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *DOKSControlPlaneReconciler) SetupWithManager(mgr ctrl.Manager) error {
-	return ctrl.NewControllerManagedBy(mgr).
+	c, err := ctrl.NewControllerManagedBy(mgr).
 		For(&controlplanev1alpha4.DOKSControlPlane{}).
-		Complete(r)
+		Build(r)
+	if err != nil {
+		return errors.Wrap(err, "failed setting up with a controller manager")
+	}
+
+	err = c.Watch(
+		&source.Kind{Type: &clusterv1.Cluster{}},
+		handler.EnqueueRequestsFromMapFunc(r.ClusterToKubeadmControlPlane),
+		predicates.ClusterUnpausedAndInfrastructureReady(ctrl.LoggerFrom(ctx)),
+	)
+	if err != nil {
+		return errors.Wrap(err, "failed adding Watch for Clusters to controller manager")
+	}
+
+	return err
 }

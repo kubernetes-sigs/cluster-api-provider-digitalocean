@@ -1,4 +1,4 @@
-module sigs.k8s.io/cluster-api-provider-digitalocean
+module sigs.k8s.io/cluster-api-provider-digitalocean/bootstrap/doks
 
 go 1.16
 

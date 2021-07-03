@@ -30,12 +30,21 @@ type DOKSControlPlaneSpec struct {
 
 	// Name of the Cluster resource located in the same namespace.
 	ClusterName string `json:"clusterName,omitempty"`
+	// ControlPlaneEndpoint represents the endpoint used to communicate with the
+	// control plane. If ControlPlaneDNS is unset, the DO load-balancer IP
+	// of the Kubernetes API Server is used.
+	// +optional
+	ControlPlaneEndpoint clusterv1.APIEndpoint `json:"controlPlaneEndpoint"`
 }
 
 // DOKSControlPlaneStatus defines the observed state of DOKSControlPlane
 type DOKSControlPlaneStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
+
+	// Ready denotes that the control plane (infrastructure) is ready.
+	// +optional
+	Ready bool `json:"ready"`
 }
 
 //+kubebuilder:object:root=true

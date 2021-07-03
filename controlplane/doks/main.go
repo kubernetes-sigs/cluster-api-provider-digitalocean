@@ -31,8 +31,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	controlplanev1alpha4 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha4"
 	"sigs.k8s.io/cluster-api-provider-digitalocean/controllers"
+	controlplanev1alpha4 "sigs.k8s.io/cluster-api-provider-digitalocean/controlplane/doks/api/v1alpha4"
 	//+kubebuilder:scaffold:imports
 )
 
