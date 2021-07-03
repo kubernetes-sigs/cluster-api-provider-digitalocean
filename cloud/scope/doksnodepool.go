@@ -160,6 +160,16 @@ func (s *DOKSNodePoolScope) SetProviderID(nodePoolID string) {
 	s.DOKSNodePool.Spec.ProviderID = pointer.StringPtr(pid)
 }
 
+// SetProviderIDList sets the DOKSNodePool providerIDList in spec from nodes.
+func (s *DOKSNodePoolScope) SetProviderIDList(nodes []*godo.KubernetesNode) {
+	var providerIDList []string
+	for _, node := range nodes {
+		pid := fmt.Sprintf("digitalocean://%s", node.ID)
+		providerIDList = append(providerIDList, pid)
+	}
+	s.DOKSNodePool.Spec.ProviderIDList = providerIDList
+}
+
 // GetInstanceID returns the DOKSNodePool intsance id by parsing Spec.ProviderID.
 func (s *DOKSNodePoolScope) GetInstanceID() string {
 	parsed, err := noderefutil.NewProviderID(s.GetProviderID())

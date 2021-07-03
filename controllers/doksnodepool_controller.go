@@ -202,6 +202,7 @@ func (r *DOKSNodePoolReconciler) reconcile(ctx context.Context, nodePoolScope *s
 	}
 
 	nodePoolScope.SetProviderID(nodePool.ID)
+	nodePoolScope.SetProviderIDList(nodePool.Nodes)
 
 	// Handle existing node pools
 	updateRequest := godo.KubernetesNodePoolUpdateRequest{

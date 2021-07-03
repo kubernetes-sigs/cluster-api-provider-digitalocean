@@ -51,6 +51,10 @@ type DOKSNodePoolSpec struct {
 	// ProviderID is the unique identifier as specified by the cloud provider.
 	// +optional
 	ProviderID *string `json:"providerID,omitempty"`
+
+	// ProviderIDList are the unique node identifiers as specified by the cloud provider.
+	// +optional
+	ProviderIDList []string `json:"providerIDList,omitempty"`
 }
 
 // DOKSNodePoolStatus defines the observed state of DOKSNodePool
