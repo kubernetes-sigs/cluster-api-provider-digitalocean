@@ -204,6 +204,20 @@ func (r *DOKSNodePoolReconciler) reconcile(ctx context.Context, nodePoolScope *s
 	nodePoolScope.SetProviderID(nodePool.ID)
 	nodePoolScope.SetProviderIDList(nodePool.Nodes)
 
+	if !doksnodepool.Status.Ready {
+		// Wait for NodePool to be initialized before declaring it ready
+		var nodePoolReady bool = true
+		for _, node := range nodePool.Nodes {
+			if node.Status.State != "running" {
+				nodePoolReady = false
+				break
+			}
+		}
+		if nodePoolReady {
+			nodePoolScope.SetReady()
+		}
+	}
+
 	// Handle existing node pools
 	updateRequest := godo.KubernetesNodePoolUpdateRequest{
 		Name:      nodePoolScope.Name(),
