@@ -32,6 +32,20 @@ spec:
           spec:
             description: DOKSClusterSpec defines the desired state of DOKSCluster
             properties:
+              controlPlaneEndpoint:
+                description: ControlPlaneEndpoint represents the endpoint used to communicate with the control plane. If ControlPlaneDNS is unset, the DO load-balancer IP of the Kubernetes API Server is used.
+                properties:
+                  host:
+                    description: The hostname on which the API server is serving.
+                    type: string
+                  port:
+                    description: The port on which the API server is serving.
+                    format: int32
+                    type: integer
+                required:
+                - host
+                - port
+                type: object
               providerID:
                 description: ProviderID is the unique identifier as specified by the cloud provider.
                 type: string

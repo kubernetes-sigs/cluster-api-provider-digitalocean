@@ -32,9 +32,23 @@ spec:
           spec:
             description: DOKSNodePoolSpec defines the desired state of DOKSNodePool
             properties:
+              auto_scale:
+                description: A boolean value indicating whether auto-scaling is enabled for this node pool. This requires DOKS versions at least 1.13.10-do.3, 1.14.6-do.3, or 1.15.3-do.3.
+                type: boolean
+              max_nodes:
+                description: The maximum number of nodes that this node pool can be auto-scaled to. This can be 0, but your cluster must contain at least 1 node across all node pools.
+                type: integer
+              min_nodes:
+                description: The minimum number of nodes that this node pool can be auto-scaled to. This will fail validation if the additional nodes will exceed your account droplet limit.
+                type: integer
               providerID:
                 description: ProviderID is the unique identifier as specified by the cloud provider.
                 type: string
+              providerIDList:
+                description: ProviderIDList are the unique node identifiers as specified by the cloud provider.
+                items:
+                  type: string
+                type: array
               size:
                 description: The slug identifier for the type of Droplet to be used as workers in the node pool.
                 type: string
