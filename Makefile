@@ -234,14 +234,14 @@ generate: ## Generate code
 	$(MAKE) generate-manifests
 
 .PHONY: generate-go
-generate-go: $(CONTROLLER_GEN) $(MOCKGEN) $(CONVERSION_GEN) ## Runs Go related generate targets
+generate-go: $(MOCKGEN) ## Runs Go related generate targets
 	go generate ./...
 	$(MAKE) generate-go-core
 	$(MAKE) generate-go-doks-bootstrap
 	$(MAKE) generate-go-doks-controlplane
 
 .PHONY: generate-go-core
-generate-go-core:
+generate-go-core: $(CONTROLLER_GEN) $(CONVERSION_GEN)
 	$(CONTROLLER_GEN) \
 		paths=./api/... \
 		object:headerFile=./hack/boilerplate/boilerplate.generatego.txt
@@ -249,7 +249,7 @@ generate-go-core:
 	$(CONVERSION_GEN) \
 		--input-dirs=./api/v1alpha3 \
 		--output-file-base=zz_generated.conversion $(GEN_OUTPUT_BASE) \
-		--go-header-file=./hack/btoilerplate/boilerplate.generatego.txt
+		--go-header-file=./hack/boilerplate/boilerplate.generatego.txt
 
 .PHONY: generate-go-doks-bootstrap
 generate-go-doks-bootstrap: $(CONTROLLER_GEN)
@@ -264,7 +264,13 @@ generate-go-doks-controlplane: $(CONTROLLER_GEN)
 		object:headerFile=./hack/boilerplate/boilerplate.generatego.txt
 
 .PHONY: generate-manifests
-generate-manifests: $(CONTROLLER_GEN) ## Generate manifests e.g. CRD, RBAC etc.
+generate-manifests: ## Generate manifests e.g. CRD, RBAC etc.
+	$(MAKE) generate-core-manifests
+	$(MAKE) generate-doks-bootstrap-manifests
+	$(MAKE) generate-doks-controlplane-manifests
+
+.PHONY: generate-core-manifests
+generate-core-manifests: $(CONTROLLER_GEN)
 	$(CONTROLLER_GEN) \
 		paths=./api/... \
 		crd:crdVersions=v1 \
@@ -275,9 +281,6 @@ generate-manifests: $(CONTROLLER_GEN) ## Generate manifests e.g. CRD, RBAC etc.
 		paths=./controllers/... \
 		output:rbac:dir=$(RBAC_ROOT) \
 		rbac:roleName=manager-role
-
-	$(MAKE) generate-doks-bootstrap-manifests
-	$(MAKE) generate-doks-controlplane-manifests
 
 .PHONY: generate-doks-bootstrap-manifests
 generate-doks-bootstrap-manifests: $(CONTROLLER_GEN)
