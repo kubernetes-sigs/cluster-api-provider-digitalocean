@@ -236,6 +236,12 @@ generate: ## Generate code
 .PHONY: generate-go
 generate-go: $(CONTROLLER_GEN) $(MOCKGEN) $(CONVERSION_GEN) ## Runs Go related generate targets
 	go generate ./...
+	$(MAKE) generate-go-core
+	$(MAKE) generate-go-doks-bootstrap
+	$(MAKE) generate-go-doks-controlplane
+
+.PHONY: generate-go-core
+generate-go-core:
 	$(CONTROLLER_GEN) \
 		paths=./api/... \
 		object:headerFile=./hack/boilerplate/boilerplate.generatego.txt
@@ -243,7 +249,19 @@ generate-go: $(CONTROLLER_GEN) $(MOCKGEN) $(CONVERSION_GEN) ## Runs Go related g
 	$(CONVERSION_GEN) \
 		--input-dirs=./api/v1alpha3 \
 		--output-file-base=zz_generated.conversion $(GEN_OUTPUT_BASE) \
-		--go-header-file=./hack/boilerplate/boilerplate.generatego.txt
+		--go-header-file=./hack/btoilerplate/boilerplate.generatego.txt
+
+.PHONY: generate-go-doks-bootstrap
+generate-go-doks-bootstrap: $(CONTROLLER_GEN)
+	$(CONTROLLER_GEN) \
+		paths=./bootstrap/doks/api/... \
+		object:headerFile=./hack/boilerplate/boilerplate.generatego.txt
+
+.PHONY: generate-go-doks-controlplane
+generate-go-doks-controlplane: $(CONTROLLER_GEN)
+	$(CONTROLLER_GEN) \
+		paths=./controlplane/doks/api/... \
+		object:headerFile=./hack/boilerplate/boilerplate.generatego.txt
 
 .PHONY: generate-manifests
 generate-manifests: $(CONTROLLER_GEN) ## Generate manifests e.g. CRD, RBAC etc.
@@ -257,6 +275,33 @@ generate-manifests: $(CONTROLLER_GEN) ## Generate manifests e.g. CRD, RBAC etc.
 		paths=./controllers/... \
 		output:rbac:dir=$(RBAC_ROOT) \
 		rbac:roleName=manager-role
+
+	$(MAKE) generate-doks-bootstrap-manifests
+	$(MAKE) generate-doks-controlplane-manifests
+
+.PHONY: generate-doks-bootstrap-manifests
+generate-doks-bootstrap-manifests: $(CONTROLLER_GEN)
+	$(CONTROLLER_GEN) \
+		paths=./bootstrap/doks/api/... \
+		paths=./bootstrap/doks/controllers/... \
+		crd:crdVersions=v1 \
+		rbac:roleName=manager-role \
+		output:crd:dir=./bootstrap/doks/config/crd/bases \
+		output:rbac:dir=./bootstrap/doks/config/rbac \
+		output:webhook:dir=./bootstrap/doks/config/webhook \
+		webhook
+
+.PHONY: generate-doks-controlplane-manifests
+generate-doks-controlplane-manifests: $(CONTROLLER_GEN)
+	$(CONTROLLER_GEN) \
+		paths=./controlplane/doks/api/... \
+		paths=./controlplane/doks/controllers/... \
+		crd:crdVersions=v1 \
+		rbac:roleName=manager-role \
+		output:crd:dir=./controlplane/doks/config/crd/bases \
+		output:rbac:dir=./controlplane/doks/config/rbac \
+		output:webhook:dir=./controlplane/doks/config/webhook \
+		webhook
 
 ## --------------------------------------
 ##@ Docker
