@@ -74,7 +74,7 @@ func NewDOKSClusterScope(params DOKSClusterScopeParams) (*DOKSClusterScope, erro
 
 	return &DOKSClusterScope{
 		Logger:      params.Logger,
-		client:      params.Client,
+		Client:      params.Client,
 		DOClients:   params.DOClients,
 		Cluster:     params.Cluster,
 		DOKSCluster: params.DOKSCluster,
@@ -85,7 +85,7 @@ func NewDOKSClusterScope(params DOKSClusterScopeParams) (*DOKSClusterScope, erro
 // ClusterScope defines the basic context for an actuator to operate upon.
 type DOKSClusterScope struct {
 	logr.Logger
-	client      client.Client
+	Client      client.Client
 	patchHelper *patch.Helper
 
 	DOClients

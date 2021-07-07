@@ -18,11 +18,16 @@ package v1alpha4
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	clusterv1 "sigs.k8s.io/cluster-api/api/v1alpha4"
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
+
+const (
+	// DOKSControlPlaneFinalizer allows ReconcileDOKSControlPlane to clean up DigitalOcean resources associated
+	// with DOKSControlPlane before removing it from the apiserver.
+	DOKSControlPlaneFinalizer = "dokscontrolplane.infrastructure.cluster.x-k8s.io"
+)
 
 // DOKSControlPlaneSpec defines the desired state of DOKSControlPlane
 type DOKSControlPlaneSpec struct {
@@ -31,11 +36,6 @@ type DOKSControlPlaneSpec struct {
 
 	// Name of the Cluster resource located in the same namespace.
 	ClusterName string `json:"clusterName,omitempty"`
-	// ControlPlaneEndpoint represents the endpoint used to communicate with the
-	// control plane. If ControlPlaneDNS is unset, the DO load-balancer IP
-	// of the Kubernetes API Server is used.
-	// +optional
-	ControlPlaneEndpoint clusterv1.APIEndpoint `json:"controlPlaneEndpoint"`
 }
 
 // DOKSControlPlaneStatus defines the observed state of DOKSControlPlane
@@ -43,6 +43,13 @@ type DOKSControlPlaneStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
+	// ExternalManagedControlPlane indicates to cluster-api that the control plane
+	// is managed by an external service such as AKS, EKS, GKE, etc.
+	// +kubebuilder:default=true
+	ExternalManagedControlPlane *bool `json:"externalManagedControlPlane,omitempty"`
+	// Initialized denotes that the control plane kubeconfig secret is available.
+	// +optional
+	Initialized bool `json:"initialized"`
 	// Ready denotes that the control plane (infrastructure) is ready.
 	// +optional
 	Ready bool `json:"ready"`
