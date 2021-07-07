@@ -31,8 +31,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	controlplanev1alpha4 "sigs.k8s.io/cluster-api-provider-digitalocean/controlplane/doks/api/v1alpha4"
+	infrav1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha4"
+	controlplanev1 "sigs.k8s.io/cluster-api-provider-digitalocean/controlplane/doks/api/v1alpha4"
 	"sigs.k8s.io/cluster-api-provider-digitalocean/controlplane/doks/controllers"
+	clusterv1 "sigs.k8s.io/cluster-api/api/v1alpha4"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -44,7 +46,9 @@ var (
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 
-	utilruntime.Must(controlplanev1alpha4.AddToScheme(scheme))
+	utilruntime.Must(controlplanev1.AddToScheme(scheme))
+	utilruntime.Must(infrav1.AddToScheme(scheme))
+	utilruntime.Must(clusterv1.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 }
 
@@ -99,7 +103,7 @@ func main() {
 	}
 
 	setupLog.Info("starting manager")
-	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
+	if err := mgr.Start(ctx); err != nil {
 		setupLog.Error(err, "problem running manager")
 		os.Exit(1)
 	}

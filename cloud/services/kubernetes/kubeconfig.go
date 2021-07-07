@@ -31,7 +31,7 @@ import (
 
 // GetCluster get a cluster instance.
 func (s *Service) ReconcileKubeconfig(ctx context.Context, controlplane *controlplanev1.DOKSControlPlane) error {
-	s.scope.V(2).Info("Reconciling DOKS kubeconfig for cluster", "cluster-name", s.scope.Name())
+	s.scope.Info("Reconciling DOKS kubeconfig for cluster", "cluster-name", s.scope.Name())
 
 	clusterRef := types.NamespacedName{
 		Name:      s.scope.Cluster.Name,
@@ -45,16 +45,17 @@ func (s *Service) ReconcileKubeconfig(ctx context.Context, controlplane *control
 		}
 
 		if createErr := s.createCAPIKubeconfigSecret(ctx, controlplane, &clusterRef); createErr != nil {
-			return errors.Errorf("creating kubeconfig secret: %w", err)
+			return errors.Wrap(createErr, "creating kubeconfig secret")
 		}
 	} else if updateErr := s.updateCAPIKubeconfigSecret(ctx, controlplane, &clusterRef); updateErr != nil {
-		return errors.Errorf("updating kubeconfig secret: %w", err)
+		return errors.Wrap(updateErr, "updating kubeconfig secret")
 	}
 
 	return nil
 }
 
 func (s *Service) createCAPIKubeconfigSecret(ctx context.Context, controlplane *controlplanev1.DOKSControlPlane, clusterRef *types.NamespacedName) error {
+	s.scope.Info("Creating kubeconfig for cluster", "cluster-name", s.scope.Name())
 	controllerOwnerRef := *metav1.NewControllerRef(controlplane, controlplanev1.GroupVersion.WithKind("DOKSControlPlane"))
 
 	clusterKubeconfig, _, err := s.scope.Kubernetes.GetKubeConfig(ctx, s.scope.GetInstanceID())
@@ -62,17 +63,19 @@ func (s *Service) createCAPIKubeconfigSecret(ctx context.Context, controlplane *
 		return errors.Wrap(err, "failed to aquire kubeconfig from DigitalOcean")
 	}
 
-	// kubeconfig secret name + namespace MUST be identical to the CAPI Cluster resource
 	kubeconfigSecret := kubeconfig.GenerateSecretWithOwner(*clusterRef, clusterKubeconfig.KubeconfigYAML, controllerOwnerRef)
 	if err := s.scope.Client.Create(ctx, kubeconfigSecret); err != nil {
+		s.scope.Error(err, "Failed to create kubeconfig for cluster", "cluster-name", s.scope.Name())
 		return errors.Wrap(err, "failed to create kubeconfig secret")
 	}
+	s.scope.Info("Created kubeconfig for cluster", "cluster-name", s.scope.Name())
 
 	record.Eventf(controlplane, "SucessfulCreateKubeconfig", "Created kubeconfig for cluster %q", s.scope.Name())
 	return nil
 }
 
 func (s *Service) updateCAPIKubeconfigSecret(ctx context.Context, controlplane *controlplanev1.DOKSControlPlane, clusterRef *types.NamespacedName) error {
+	s.scope.Info("Updating kubeconfig for cluster", "cluster-name", s.scope.Name())
 	controllerOwnerRef := *metav1.NewControllerRef(controlplane, controlplanev1.GroupVersion.WithKind("DOKSControlPlane"))
 
 	clusterKubeconfig, _, err := s.scope.Kubernetes.GetKubeConfig(ctx, s.scope.GetInstanceID())
@@ -80,9 +83,9 @@ func (s *Service) updateCAPIKubeconfigSecret(ctx context.Context, controlplane *
 		return errors.Wrap(err, "failed to aquire kubeconfig from DigitalOcean")
 	}
 
-	// kubeconfig secret name + namespace MUST be identical to the CAPI Cluster resource
 	kubeconfigSecret := kubeconfig.GenerateSecretWithOwner(*clusterRef, clusterKubeconfig.KubeconfigYAML, controllerOwnerRef)
 	if err := s.scope.Client.Update(ctx, kubeconfigSecret); err != nil {
+		s.scope.Error(err, "Failed to update kubeconfig for cluster", "cluster-name", s.scope.Name())
 		return errors.Wrap(err, "failed to update kubeconfig secret")
 	}
 

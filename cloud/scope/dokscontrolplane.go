@@ -67,7 +67,7 @@ func NewDOKSControlPlaneScope(params DOKSControlPlaneScopeParams) (*DOKSControlP
 		params.DOClients.Kubernetes = session.Kubernetes
 	}
 
-	helper, err := patch.NewHelper(params.DOKSCluster, params.Client)
+	helper, err := patch.NewHelper(params.DOKSControlPlane, params.Client)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to init patch helper")
 	}

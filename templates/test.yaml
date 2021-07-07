@@ -11,7 +11,7 @@ spec:
   controlPlaneRef:
     kind: DOKSControlPlane
     apiVersion: controlplane.cluster.x-k8s.io/v1alpha4
-    name: "poc-control-plane"
+    name: "poc"
 ---
 apiVersion: infrastructure.cluster.x-k8s.io/v1alpha4
 kind: DOKSCluster
@@ -24,9 +24,16 @@ spec:
 kind: DOKSControlPlane
 apiVersion: controlplane.cluster.x-k8s.io/v1alpha4
 metadata:
-  name: "poc-control-plane"
+  name: "poc"
 spec:
   clusterName: "poc"
+---
+apiVersion: bootstrap.cluster.x-k8s.io/v1alpha4
+kind: DOKSBootstrapConfig
+metadata:
+  name: "poc"
+spec:
+  foo: "lol"
 ---
 apiVersion: cluster.x-k8s.io/v1alpha4
 kind: MachinePool
@@ -54,37 +61,3 @@ metadata:
   name: "poc-mp-0"
 spec:
   size: "s-1vcpu-2gb"
----
-apiVersion: bootstrap.cluster.x-k8s.io/v1alpha4
-kind: DOKSBootstrapConfig
-metadata:
-  name: "poc"
-spec:
-  foo: "lol"
----
-apiVersion: cluster.x-k8s.io/v1alpha4
-kind: MachinePool
-metadata:
-  name: "poclops-mp-0"
-spec:
-  clusterName: "poclops"
-  replicas: 2
-  template:
-    spec:
-      clusterName: "poclops"
-      bootstrap:
-        configRef:
-          apiVersion: bootstrap.cluster.x-k8s.io/v1alpha4
-          kind: DOKSBootstrapConfig
-          name: "poc"
-      infrastructureRef:
-        name: "poclops-mp-0"
-        apiVersion: infrastructure.cluster.x-k8s.io/v1alpha4
-        kind: DOKSNodePool
----
-apiVersion: infrastructure.cluster.x-k8s.io/v1alpha4
-kind: DOKSNodePool
-metadata:
-  name: "poclops-mp-0"
-spec:
-  size: "small-123"

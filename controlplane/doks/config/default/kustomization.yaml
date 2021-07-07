@@ -12,6 +12,9 @@ namePrefix: doks-controlplane-
 #commonLabels:
 #  someName: someValue
 
+resources:
+- credentials.yaml
+
 bases:
 - ../crd
 - ../rbac
@@ -30,6 +33,8 @@ patchesStrategicMerge:
 # endpoint w/o any authn/z, please comment the following line.
 - manager_auth_proxy_patch.yaml
 - manager_image_patch.yaml
+- manager_credentials_patch.yaml
+- manager_credentials_patch.yaml
 
 # Mount the controller config file for loading manager configurations
 # through a ComponentConfig type
