@@ -22,7 +22,7 @@ import (
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
-	_ "k8s.io/client-go/plugin/pkg/client/auth"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
@@ -31,8 +31,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	"sigs.k8s.io/cluster-api-provider-digitalocean/controllers"
 	controlplanev1alpha4 "sigs.k8s.io/cluster-api-provider-digitalocean/controlplane/doks/api/v1alpha4"
+	"sigs.k8s.io/cluster-api-provider-digitalocean/controlplane/doks/controllers"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -78,10 +78,12 @@ func main() {
 		os.Exit(1)
 	}
 
+	ctx := ctrl.SetupSignalHandler()
+
 	if err = (&controllers.DOKSControlPlaneReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
-	}).SetupWithManager(mgr); err != nil {
+	}).SetupWithManager(ctx, mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "DOKSControlPlane")
 		os.Exit(1)
 	}

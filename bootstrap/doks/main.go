@@ -22,7 +22,7 @@ import (
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
-	_ "k8s.io/client-go/plugin/pkg/client/auth"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
@@ -32,7 +32,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	bootstrapv1alpha4 "sigs.k8s.io/cluster-api-provider-digitalocean/bootstrap/doks/api/v1alpha4"
-	"sigs.k8s.io/cluster-api-provider-digitalocean/controllers"
+	"sigs.k8s.io/cluster-api-provider-digitalocean/bootstrap/doks/controllers"
 	//+kubebuilder:scaffold:imports
 )
 
