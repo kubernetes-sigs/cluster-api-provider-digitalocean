@@ -168,6 +168,8 @@ binaries: manager ## Builds and installs all binaries
 .PHONY: manager
 manager: ## Build manager binary.
 	go build -o $(BIN_DIR)/manager .
+	go build -o $(BIN_DIR)/manager-controlplane ./controlplane/doks
+	go build -o $(BIN_DIR)/manager-bootstrap ./bootstrap/doks
 
 ## --------------------------------------
 ## Tooling Binaries
