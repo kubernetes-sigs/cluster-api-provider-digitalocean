@@ -60,7 +60,7 @@ func (s *Service) createCAPIKubeconfigSecret(ctx context.Context, controlplane *
 
 	clusterKubeconfig, _, err := s.scope.Kubernetes.GetKubeConfig(ctx, s.scope.GetInstanceID())
 	if err != nil {
-		return errors.Wrap(err, "failed to aquire kubeconfig from DigitalOcean")
+		return errors.Wrap(err, "failed to acquire kubeconfig from DigitalOcean")
 	}
 
 	kubeconfigSecret := kubeconfig.GenerateSecretWithOwner(*clusterRef, clusterKubeconfig.KubeconfigYAML, controllerOwnerRef)
@@ -80,7 +80,7 @@ func (s *Service) updateCAPIKubeconfigSecret(ctx context.Context, controlplane *
 
 	clusterKubeconfig, _, err := s.scope.Kubernetes.GetKubeConfig(ctx, s.scope.GetInstanceID())
 	if err != nil {
-		return errors.Wrap(err, "failed to aquire kubeconfig from DigitalOcean")
+		return errors.Wrap(err, "failed to acquire kubeconfig from DigitalOcean")
 	}
 
 	kubeconfigSecret := kubeconfig.GenerateSecretWithOwner(*clusterRef, clusterKubeconfig.KubeconfigYAML, controllerOwnerRef)

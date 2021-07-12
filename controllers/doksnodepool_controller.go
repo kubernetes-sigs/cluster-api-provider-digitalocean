@@ -185,14 +185,14 @@ func (r *DOKSNodePoolReconciler) reconcile(ctx context.Context, nodePoolScope *s
 	}
 
 	// Handle new node pools
-	doClusterId := clusterScope.GetInstanceID()
+	doClusterID := clusterScope.GetInstanceID()
 	kubernetessvc := kubernetes.NewService(ctx, clusterScope)
-	nodePool, err := kubernetessvc.GetNodePool(doClusterId, nodePoolScope.GetInstanceID())
+	nodePool, err := kubernetessvc.GetNodePool(doClusterID, nodePoolScope.GetInstanceID())
 	if err != nil {
 		return reconcile.Result{}, err
 	}
 	if nodePool == nil {
-		nodePool, err = kubernetessvc.CreateNodePool(doClusterId, nodePoolScope)
+		nodePool, err = kubernetessvc.CreateNodePool(doClusterID, nodePoolScope)
 		if err != nil {
 			err = errors.Errorf("Failed to create node pool %s/%s: %v", doksnodepool.Namespace, doksnodepool.Name, err)
 			r.Recorder.Event(doksnodepool, corev1.EventTypeWarning, "InstanceCreatingError", err.Error())
@@ -251,21 +251,21 @@ func (r *DOKSNodePoolReconciler) reconcileDelete(ctx context.Context, nodePoolSc
 	}
 
 	if !nodePoolScope.Cluster.DeletionTimestamp.IsZero() {
-		nodePoolScope.Info("The Cluster of this NodePool is beeing deleted. Skipping NodePool deletion.")
+		nodePoolScope.Info("The Cluster of this NodePool is being deleted. Skipping NodePool deletion.")
 		controllerutil.RemoveFinalizer(doksnodepool, infrav1.DOKSNodePoolFinalizer)
 		return reconcile.Result{}, nil
 	}
 
-	clusterId := clusterScope.GetInstanceID()
-	nodePoolId := nodePoolScope.GetInstanceID()
+	clusterID := clusterScope.GetInstanceID()
+	nodePoolID := nodePoolScope.GetInstanceID()
 	kubernetessvc := kubernetes.NewService(ctx, clusterScope)
-	nodePool, err := kubernetessvc.GetNodePool(clusterId, nodePoolId)
+	nodePool, err := kubernetessvc.GetNodePool(clusterID, nodePoolID)
 	if err != nil {
 		return reconcile.Result{}, err
 	}
 
 	if nodePool != nil {
-		if err := kubernetessvc.DeleteNodePool(clusterId, nodePoolId); err != nil {
+		if err := kubernetessvc.DeleteNodePool(clusterID, nodePoolID); err != nil {
 			return reconcile.Result{}, err
 		}
 	} else {

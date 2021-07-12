@@ -38,6 +38,10 @@ spec:
             type: object
           status:
             description: DOKSBootstrapConfigStatus defines the observed state of DOKSBootstrapConfig
+            properties:
+              ready:
+                description: Ready denotes that the bootstrap config is ready.
+                type: boolean
             type: object
         type: object
     served: true

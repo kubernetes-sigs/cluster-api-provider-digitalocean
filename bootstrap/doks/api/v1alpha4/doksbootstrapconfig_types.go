@@ -36,6 +36,10 @@ type DOKSBootstrapConfigSpec struct {
 type DOKSBootstrapConfigStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
+
+	// Ready denotes that the bootstrap config is ready.
+	// +optional
+	Ready bool `json:"ready"`
 }
 
 //+kubebuilder:object:root=true

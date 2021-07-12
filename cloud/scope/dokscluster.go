@@ -142,7 +142,7 @@ func (s *DOKSClusterScope) GetInstanceID() string {
 }
 
 func (s *DOKSClusterScope) DOAPICreateRequest(nodePoolScopes []*DOKSNodePoolScope) (*godo.KubernetesClusterCreateRequest, error) {
-	var nodePoolCreateRequests []*godo.KubernetesNodePoolCreateRequest
+	nodePoolCreateRequests := make([]*godo.KubernetesNodePoolCreateRequest, 0, len(nodePoolScopes))
 
 	for _, nodePoolScope := range nodePoolScopes {
 		nodePoolCreateRequests = append(nodePoolCreateRequests, nodePoolScope.DOAPICreateRequest())

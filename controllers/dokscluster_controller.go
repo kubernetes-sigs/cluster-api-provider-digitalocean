@@ -126,15 +126,15 @@ func (r *DOKSClusterReconciler) reconcileDelete(ctx context.Context, clusterScop
 	dokscluster := clusterScope.DOKSCluster
 
 	// Handle cluster deletion
-	clusterId := clusterScope.GetInstanceID()
+	clusterID := clusterScope.GetInstanceID()
 	kubernetessvc := kubernetes.NewService(ctx, clusterScope)
-	docluster, err := kubernetessvc.GetCluster(clusterId)
+	docluster, err := kubernetessvc.GetCluster(clusterID)
 	if err != nil {
 		return reconcile.Result{}, err
 	}
 
 	if docluster != nil {
-		if err := kubernetessvc.DeleteCluster(clusterId); err != nil {
+		if err := kubernetessvc.DeleteCluster(clusterID); err != nil {
 			return reconcile.Result{}, err
 		}
 	} else {
@@ -179,7 +179,7 @@ func (r *DOKSClusterReconciler) reconcile(ctx context.Context, clusterScope *sco
 		clusterScope.Info(fmt.Sprintf("Found %d MachinePools", len(nodePoolList.Items)))
 
 		var nodePoolScopes []*scope.DOKSNodePoolScope
-		for _, nodePool := range nodePoolList.Items {
+		for i, nodePool := range nodePoolList.Items {
 			machinePool, err := exp_util.GetOwnerMachinePool(ctx, r.Client, nodePool.ObjectMeta)
 			if err != nil {
 				return reconcile.Result{}, errors.Errorf("failed to locate owning MachinePool: %+v", err)
@@ -191,7 +191,7 @@ func (r *DOKSClusterReconciler) reconcile(ctx context.Context, clusterScope *sco
 				Cluster:      clusterScope.Cluster,
 				DOKSCluster:  clusterScope.DOKSCluster,
 				MachinePool:  machinePool,
-				DOKSNodePool: &nodePool,
+				DOKSNodePool: &nodePoolList.Items[i],
 			})
 			if err != nil {
 				return reconcile.Result{}, errors.Errorf("failed to create NodePool Scope: %+v", err)
