@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package dns implement the dns operations.
 package dns
 
 import (
@@ -34,21 +35,24 @@ func init() {
 	defaultResolver = resolver.NewFakeDNSResolver([]*dns.Msg{})
 }
 
+// InitFromDNSResolver ...
 func InitFromDNSResolver(resolver resolver.DNSResolver) {
 	syncOnce.Do(func() {
 		defaultResolver = resolver
 	})
 }
 
+// ToFQDN ...
 func ToFQDN(name, domain string) string {
 	fqdn := fmt.Sprintf("%s.%s", name, domain)
 	if !strings.HasSuffix(fqdn, ".") {
-		fqdn = fqdn + "."
+		fqdn += "."
 	}
 
 	return fqdn
 }
 
+// CheckDNSPropagated checks if the DNS is propagated.
 func CheckDNSPropagated(fqdn, ip string) (bool, error) {
 	m := new(dns.Msg)
 	m.SetQuestion(fqdn, dns.TypeA)
@@ -77,6 +81,7 @@ func CheckDNSPropagated(fqdn, ip string) (bool, error) {
 	return false, nil
 }
 
+// LookupAuthoritativeServer ...
 func LookupAuthoritativeServer(fqdn string) (string, error) {
 	m := new(dns.Msg)
 	m.SetQuestion(fqdn, dns.TypeSOA)

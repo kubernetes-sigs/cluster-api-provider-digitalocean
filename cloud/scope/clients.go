@@ -13,12 +13,15 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+
+// Package scope implements scope types.
 package scope
 
 import (
 	"github.com/digitalocean/godo"
 )
 
+// DOClients hold all necessary clients to work with the DO API.
 type DOClients struct {
 	Actions       godo.ActionsService
 	Droplets      godo.DropletsService

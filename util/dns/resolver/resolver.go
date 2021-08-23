@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package resolver implement the dns resolver and apis.
 package resolver
 
 import (
@@ -21,6 +22,7 @@ import (
 	"github.com/pkg/errors"
 )
 
+// DNSResolver have the interfaces to be implemented.
 type DNSResolver interface {
 	Query(servers []string, msg *dns.Msg) (*dns.Msg, error)
 	LocalQuery(msg *dns.Msg) (*dns.Msg, error)
@@ -31,6 +33,7 @@ type resolver struct {
 	client *dns.Client
 }
 
+// NewDNSResolver creates a new client resolver.
 func NewDNSResolver() (DNSResolver, error) {
 	dnsConfig, err := dns.ClientConfigFromFile("/etc/resolv.conf")
 	if err != nil {

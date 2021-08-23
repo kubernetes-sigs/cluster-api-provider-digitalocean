@@ -23,6 +23,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
+// GetSSHKey return the public ssh key stored in DO.
 func (s *Service) GetSSHKey(sshkey intstr.IntOrString) (*godo.Key, error) {
 	var keys *godo.Key
 	var reterr error

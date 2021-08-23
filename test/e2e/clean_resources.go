@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package e2e define and implement the e2e tests.
 package e2e
 
 import (

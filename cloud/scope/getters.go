@@ -17,26 +17,34 @@ limitations under the License.
 package scope
 
 var (
+	// DefaultClusterScopeGetter ...
 	DefaultClusterScopeGetter ClusterScopeGetter = ClusterScopeGetterFunc(NewClusterScope)
+	// DefaultMachineScopeGetter ...
 	DefaultMachineScopeGetter MachineScopeGetter = MachineScopeGetterFunc(NewMachineScope)
 )
 
+// ClusterScopeGetter ...
 type ClusterScopeGetter interface {
 	ClusterScope(params ClusterScopeParams) (*ClusterScope, error)
 }
 
+// ClusterScopeGetterFunc ...
 type ClusterScopeGetterFunc func(params ClusterScopeParams) (*ClusterScope, error)
 
+// ClusterScope ...
 func (f ClusterScopeGetterFunc) ClusterScope(params ClusterScopeParams) (*ClusterScope, error) {
 	return f(params)
 }
 
+// MachineScopeGetter ...
 type MachineScopeGetter interface {
 	MachineScope(params MachineScopeParams) (*MachineScope, error)
 }
 
+// MachineScopeGetterFunc ...
 type MachineScopeGetterFunc func(params MachineScopeParams) (*MachineScope, error)
 
+// MachineScope ...
 func (f MachineScopeGetterFunc) MachineScope(params MachineScopeParams) (*MachineScope, error) {
 	return f(params)
 }

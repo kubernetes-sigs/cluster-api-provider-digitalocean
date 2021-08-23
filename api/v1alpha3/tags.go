@@ -25,11 +25,11 @@ type Tags []string
 
 const (
 	// NameDigitalOceanProviderPrefix is the tag prefix for
-	// cluster-api-provider-digitalocean owned components
+	// cluster-api-provider-digitalocean owned components.
 	NameDigitalOceanProviderPrefix = "sigs-k8s-io:capdo"
-	// APIServerRoleTagValue describes the value for the apiserver role
+	// APIServerRoleTagValue describes the value for the apiserver role.
 	APIServerRoleTagValue = "apiserver"
-	// NodeRoleTagValue describes the value for the node role
+	// NodeRoleTagValue describes the value for the node role.
 	NodeRoleTagValue = "node"
 )
 

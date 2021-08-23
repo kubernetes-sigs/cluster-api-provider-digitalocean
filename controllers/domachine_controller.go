@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package controllers implements controller types.
 package controllers
 
 import (
@@ -85,6 +86,7 @@ func (r *DOMachineReconciler) SetupWithManager(ctx context.Context, mgr ctrl.Man
 	return nil
 }
 
+// DOClusterToDOMachines convert the cluster to machines spec.
 func (r *DOMachineReconciler) DOClusterToDOMachines(ctx context.Context) handler.MapFunc {
 	log := ctrl.LoggerFrom(ctx)
 	return func(o client.Object) []ctrl.Request {

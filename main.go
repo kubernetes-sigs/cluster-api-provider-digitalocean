@@ -19,9 +19,10 @@ package main
 import (
 	"flag"
 	"net/http"
-	_ "net/http/pprof" //nolint
 	"os"
 	"time"
+
+	_ "net/http/pprof"
 
 	// +kubebuilder:scaffold:imports
 
@@ -72,7 +73,7 @@ var (
 	webhookPort             int
 )
 
-func InitFlags(fs *pflag.FlagSet) {
+func initFlags(fs *pflag.FlagSet) {
 	fs.StringVar(&metricsAddr, "metrics-addr", ":8080", "The address the metric endpoint binds to.")
 	fs.BoolVar(&enableLeaderElection, "enable-leader-election", false, "Enable leader election for controller manager. Enabling this will ensure there is only one active controller manager.")
 	fs.StringVar(&leaderElectionNamespace, "leader-election-namespace", "", "Namespace that the controller performs leader election in. If unspecified, the controller will discover which namespace it is running in.")
@@ -84,7 +85,7 @@ func InitFlags(fs *pflag.FlagSet) {
 }
 
 func main() {
-	InitFlags(pflag.CommandLine)
+	initFlags(pflag.CommandLine)
 	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
 	pflag.Parse()
 

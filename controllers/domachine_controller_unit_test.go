@@ -89,14 +89,17 @@ func TestDOMachineReconciler_DOClusterToDOMachines(t *testing.T) {
 		t.Fatal(err)
 	}
 	clusterName := "test-cluster"
-	initObjects := []runtime.Object{
+	initObjects := []client.Object{
 		newCluster(clusterName),
 		newMachine(clusterName, "my-machine-0"),
 		newMachineWithInfrastructureRef(clusterName, "my-machine-1"),
 		newMachineWithInfrastructureRef(clusterName, "my-machine-2"),
 	}
 
-	fakec := fake.NewFakeClientWithScheme(scheme, initObjects...)
+	fakec := fake.NewClientBuilder().
+		WithScheme(scheme).
+		WithObjects(initObjects...).
+		Build()
 
 	type fields struct {
 		Client   client.Client
