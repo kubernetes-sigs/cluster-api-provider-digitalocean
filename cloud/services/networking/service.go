@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package networking have all services and interface to work with the DO network API.
 package networking
 
 import (

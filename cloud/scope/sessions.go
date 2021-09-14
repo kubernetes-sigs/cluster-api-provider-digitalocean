@@ -25,10 +25,12 @@ import (
 	"golang.org/x/oauth2"
 )
 
+// TokenSource ...
 type TokenSource struct {
 	AccessToken string
 }
 
+// Token return the oauth token.
 func (t *TokenSource) Token() (*oauth2.Token, error) {
 	token := &oauth2.Token{
 		AccessToken: t.AccessToken,
@@ -36,6 +38,7 @@ func (t *TokenSource) Token() (*oauth2.Token, error) {
 	return token, nil
 }
 
+// Session return the DO session.
 func (c *DOClients) Session() (*godo.Client, error) {
 	accessToken := os.Getenv("DIGITALOCEAN_ACCESS_TOKEN")
 	if accessToken == "" {

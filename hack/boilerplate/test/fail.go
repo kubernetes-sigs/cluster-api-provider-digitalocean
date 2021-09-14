@@ -16,4 +16,5 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package test implement the actions/apif for testing capdo.
 package test

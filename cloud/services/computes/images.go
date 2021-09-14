@@ -25,10 +25,11 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
+// GetImageID gets the image ID for to yuse to bootstrap the cluster.
 func (s *Service) GetImageID(imageSpec intstr.IntOrString) (int, error) {
 	var image *godo.Image
 
-	if imageSpec.IntValue() != 0 { // nolint
+	if imageSpec.IntValue() != 0 {
 		return imageSpec.IntValue(), nil
 	}
 

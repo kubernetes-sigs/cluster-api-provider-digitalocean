@@ -127,6 +127,7 @@ func (s *ClusterScope) Namespace() string {
 	return s.Cluster.GetNamespace()
 }
 
+// UID returns the cluster UID.
 func (s *ClusterScope) UID() string {
 	return string(s.Cluster.UID)
 }

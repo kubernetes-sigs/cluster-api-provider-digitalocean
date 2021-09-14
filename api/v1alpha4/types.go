@@ -28,6 +28,7 @@ func DOSafeName(name string) string {
 	return r.Replace(name)
 }
 
+// DOControlPlaneDNS ...
 type DOControlPlaneDNS struct {
 	// Domain is the DO domain that this record should live in. It must be pre-existing in your DO account.
 	// The format must be a string that conforms to the definition of a subdomain in DNS (RFC 1123)
@@ -136,12 +137,18 @@ type DOVPC struct {
 }
 
 var (
-	DefaultLBPort                          = 6443
-	DefaultLBAlgorithm                     = "round_robin"
-	DefaultLBHealthCheckInterval           = 10
-	DefaultLBHealthCheckTimeout            = 5
+	// DefaultLBPort default LoadBalancer port.
+	DefaultLBPort = 6443
+	// DefaultLBAlgorithm default LoadBalancer algorithm.
+	DefaultLBAlgorithm = "round_robin"
+	// DefaultLBHealthCheckInterval default LoadBalancer health check interval.
+	DefaultLBHealthCheckInterval = 10
+	// DefaultLBHealthCheckTimeout default LoadBalancer health check timeout.
+	DefaultLBHealthCheckTimeout = 5
+	// DefaultLBHealthCheckUnhealthyThreshold default LoadBalancer unhealthy threshold.
 	DefaultLBHealthCheckUnhealthyThreshold = 3
-	DefaultLBHealthCheckHealthyThreshold   = 5
+	// DefaultLBHealthCheckHealthyThreshold default LoadBalancer healthy threshold.
+	DefaultLBHealthCheckHealthyThreshold = 5
 )
 
 // ApplyDefault give APIServerLoadbalancers default values.

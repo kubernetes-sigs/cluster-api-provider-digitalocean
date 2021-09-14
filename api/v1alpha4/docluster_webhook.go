@@ -47,7 +47,7 @@ func (r *DOCluster) SetupWebhookWithManager(mgr ctrl.Manager) error {
 		Complete()
 }
 
-// Default implements webhook.Defaulter so a webhook will be registered for the type
+// Default implements webhook.Defaulter so a webhook will be registered for the type.
 func (r *DOCluster) Default() {}
 
 // ValidateCreate implements webhook.Validator so a webhook will be registered for the type.
@@ -55,7 +55,7 @@ func (r *DOCluster) ValidateCreate() error {
 	return nil
 }
 
-// ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
+// ValidateUpdate implements webhook.Validator so a webhook will be registered for the type.
 func (r *DOCluster) ValidateUpdate(old runtime.Object) error {
 	var allErrs field.ErrorList
 
@@ -79,7 +79,7 @@ func (r *DOCluster) ValidateUpdate(old runtime.Object) error {
 	return apierrors.NewInvalid(r.GroupVersionKind().GroupKind(), r.Name, allErrs)
 }
 
-// ValidateDelete implements webhook.Validator so a webhook will be registered for the type
+// ValidateDelete implements webhook.Validator so a webhook will be registered for the type.
 func (r *DOCluster) ValidateDelete() error {
 	return nil
 }

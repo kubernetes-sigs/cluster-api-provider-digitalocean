@@ -61,6 +61,7 @@ type DOClusterStatus struct {
 	Network DONetworkResource `json:"network,omitempty"`
 }
 
+// DOControlPlaneDNS ...
 type DOControlPlaneDNS struct {
 	// Domain is the DO domain that this record should live in. It must be pre-existing in your DO account.
 	// The format must be a string that conforms to the definition of a subdomain in DNS (RFC 1123)

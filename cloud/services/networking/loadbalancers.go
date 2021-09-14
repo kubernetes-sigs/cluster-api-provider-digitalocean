@@ -24,6 +24,7 @@ import (
 	infrav1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha4"
 )
 
+// GetLoadBalancer get a LB by LB ID.
 func (s *Service) GetLoadBalancer(id string) (*godo.LoadBalancer, error) {
 	if id == "" {
 		return nil, nil
@@ -40,6 +41,7 @@ func (s *Service) GetLoadBalancer(id string) (*godo.LoadBalancer, error) {
 	return lb, nil
 }
 
+// CreateLoadBalancer creates a LB.
 func (s *Service) CreateLoadBalancer(spec *infrav1.DOLoadBalancer) (*godo.LoadBalancer, error) {
 	clusterName := infrav1.DOSafeName(s.scope.Name())
 	name := clusterName + "-" + infrav1.APIServerRoleTagValue + "-" + s.scope.UID()
@@ -75,6 +77,7 @@ func (s *Service) CreateLoadBalancer(spec *infrav1.DOLoadBalancer) (*godo.LoadBa
 	return lb, nil
 }
 
+// DeleteLoadBalancer delete a LB by ID.
 func (s *Service) DeleteLoadBalancer(id string) error {
 	if _, err := s.scope.LoadBalancers.Delete(s.ctx, id); err != nil {
 		return err
