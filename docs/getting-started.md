@@ -9,9 +9,9 @@
 - [Packer][Packer] and [Ansible][Ansible] to build images
 - Make to use `Makefile` targets
 - A management cluster. You can use either a VM, container or existing Kubernetes cluster as management cluster.
-   - If you want to use VM, install [Minikube][Minikube], version 0.30.0 or greater. Also install a [driver][Minikube Driver]. For Linux, we recommend `kvm2`. For MacOS, we recommend `VirtualBox`.
-   - If you want to use a container, install [Kind][kind].
-   - If you want to use an existing Kubernetes cluster, prepare a kubeconfig which for this cluster.
+   - If you want to use a VM, install [Minikube][Minikube] version 0.30.0 or greater. You'll also need to install the [Minikube driver][Minikube Driver]. For Linux, we recommend `kvm2`. For MacOS, we recommend `VirtualBox`.
+   - If you want to use a container you'll need to install [Kind][kind].
+   - If you want to use an existing Kubernetes cluster you'll need to prepare a kubeconfig for the cluster you intend to use.
 - Install [doctl][doctl] (optional)
 
 ## Setup Environment
@@ -65,7 +65,7 @@ Installing Provider="infrastructure-digitalocean" Version="v0.4.0" TargetNamespa
 
 Your management cluster has been initialized successfully!
 
-You can now create your first workload cluster by running the following:
+You can now create your first workload cluster by using:
 
   clusterctl config cluster [name] --kubernetes-version [version] | kubectl apply -f -
 
@@ -73,7 +73,7 @@ You can now create your first workload cluster by running the following:
 
 ## Creating a workload cluster
 
-Setting up environment variable
+Setting up environment variables:
 
 ```bash
 $ export DO_REGION=<region>
@@ -83,7 +83,8 @@ $ export DO_CONTROL_PLANE_MACHINE_IMAGE=<image-id> # created in the step above.
 $ export DO_NODE_MACHINE_TYPE=<droplet-size>
 $ export DO_NODE_MACHINE_IMAGE=<image-id> # created in the step above.
 ```
-Generate templates for creating workload clusters.
+
+Generate templates for creating workload clusters:
 
 ```bash
 $ clusterctl config cluster capdo-quickstart \
@@ -95,13 +96,13 @@ $ clusterctl config cluster capdo-quickstart \
 
 *You may need to inspect and make some changes to the generated template.*
 
-Create the workload cluster on the management cluster.
+Create the workload cluster on the management cluster:
 
 ```bash
 $ kubectl apply -f capdo-quickstart-cluster.yaml
 ```
 
-You can see the workload cluster resources using
+You can see the workload cluster resources by using:
 
 ```bash
 $ kubectl get cluster-api
@@ -109,7 +110,7 @@ $ kubectl get cluster-api
 
 > Note: The control planes won’t be ready until you install the CNI and DigitalOcean Cloud Controller Manager.
 
-To verify the first control plane is up:
+To verify that the first control plane is up, use:
 
 ```bash
 $ kubectl get kubeadmcontrolplane
@@ -118,13 +119,13 @@ NAME                                                                            
 kubeadmcontrolplane.controlplane.cluster.x-k8s.io/capdo-quickstart-control-plane   true                                 v1.17.11   1                  1         1
 ```
 
-After the first control plane node has initialized status, you can retrieve the workload cluster Kubeconfig:
+After the first control plane node has the `initialized` status, you can retrieve the workload cluster's Kubeconfig:
 
 ```bash
 $ clusterctl get kubeconfig capdo-quickstart > capdo-quickstart.kubeconfig
 ```
 
-You can verify the kubernetes node in the workload cluster
+You can verify what kubernetes nodes exist in the workload cluster by using:
 
 ```bash
 $ KUBECONFIG=capdo-quickstart.kubeconfig kubectl get node
@@ -157,7 +158,7 @@ $ KUBECONFIG=capdo-quickstart.kubeconfig kubectl apply -f https://raw.githubuser
 $ KUBECONFIG=capdo-quickstart.kubeconfig kubectl apply -f https://raw.githubusercontent.com/digitalocean/csi-digitalocean/master/deploy/kubernetes/releases/csi-digitalocean-v1.3.0.yaml
 ```
 
-After CNI and CCM deployed, your workload cluster nodes should be in the ready state. You can verify using:
+After the [CNI](https://github.com/containernetworking/cni) and the [CCM](https://github.com/digitalocean/digitalocean-cloud-controller-manager) have deployed your workload cluster nodes should be in the `ready` state. You can verify this by using:
 
 ```bash
 $ KUBECONFIG=capdo-quickstart.kubeconfig kubectl get node
@@ -188,3 +189,5 @@ $ kubectl delete cluster capdo-quickstart
 [Ansible]: https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html
 [DigitalOcean]: https://cloud.digitalocean.com/
 [clusterctl]: https://github.com/kubernetes-sigs/cluster-api/releases
+[CNI]: https://github.com/containernetworking/cni
+[CCM]: https://github.com/digitalocean/digitalocean-cloud-controller-manager
