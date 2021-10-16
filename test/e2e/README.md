@@ -1,14 +1,14 @@
 # E2E Test
 
-This document is to help developers understand how for run e2e test CAPDO.
+This document is to help developers understand how to run e2e tests for CAPDO.
 
 ## Requirements
 
 In order to run the e2e tests the following requirements must be met:
 
-* Ginkgo
-* Docker
-* Kind v0.7.0+
+* [Ginkgo](https://github.com/onsi/ginkgo)
+* [Docker](https://www.docker.com/)
+* [Kind](https://github.com/kubernetes-sigs/kind) v0.7.0+
 
 ### Environment variables
 
