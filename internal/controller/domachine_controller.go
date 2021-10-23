@@ -55,13 +55,14 @@ type DOMachineReconciler struct {
 	ReconcileTimeout time.Duration
 }
 
-func (r *DOMachineReconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager, _ controller.Options) error {
+func (r *DOMachineReconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager, options controller.Options) error {
 	clusterToObjectFunc, err := util.ClusterToTypedObjectsMapper(r.Client, &infrav1.DOMachineList{}, mgr.GetScheme())
 	if err != nil {
 		return errors.Wrapf(err, "failed to create mapper for Cluster to DOMachines")
 	}
 
 	return ctrl.NewControllerManagedBy(mgr).
+		WithOptions(options).
 		For(&infrav1.DOMachine{}).
 		WithEventFilter(predicates.ResourceNotPaused(mgr.GetScheme(), ctrl.LoggerFrom(ctx))). // don't queue reconcile if resource is paused
 		Watches(
