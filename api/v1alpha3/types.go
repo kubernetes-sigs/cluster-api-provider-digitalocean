@@ -21,14 +21,6 @@ import (
 	"strings"
 )
 
-// APIEndpoint represents a reachable Kubernetes API endpoint.
-type APIEndpoint struct {
-	// The hostname on which the API server is serving.
-	Host string `json:"host"`
-	// The port on which the API server is serving.
-	Port int `json:"port"`
-}
-
 // DOSafeName returns DigitalOcean safe name with replacing '.' and '/' to '-'
 // since DigitalOcean doesn't support naming with those character.
 func DOSafeName(name string) string {

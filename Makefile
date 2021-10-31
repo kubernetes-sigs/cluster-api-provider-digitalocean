@@ -20,7 +20,9 @@ SHELL:=/usr/bin/env bash
 
 .DEFAULT_GOAL:=help
 
-# Use GOPROXY environment variable if set
+GOPATH  := $(shell go env GOPATH)
+GOARCH  := $(shell go env GOARCH)
+GOOS    := $(shell go env GOOS)
 GOPROXY := $(shell go env GOPROXY)
 ifeq ($(GOPROXY),)
 GOPROXY := https://proxy.golang.org
@@ -42,17 +44,16 @@ E2E_DATA_DIR ?= $(ROOT_DIR)/$(TEST_E2E_DIR)/data
 KUBETEST_CONF_PATH ?= $(abspath $(E2E_DATA_DIR)/kubetest/conformance.yaml)
 GO_INSTALL = ./scripts/go_install.sh
 
-# Set --output-base for conversion-gen if we are not within GOPATH
-ifneq ($(abspath $(REPO_ROOT)),$(shell go env GOPATH)/src/sigs.k8s.io/cluster-api-provider-digitalocean)
-	GEN_OUTPUT_BASE := --output-base=$(REPO_ROOT)
-endif
+# curl retries
+CURL_RETRIES=3
 
 # Files
 E2E_CONF_FILE ?= $(REPO_ROOT)/test/e2e/config/digitalocean-dev.yaml
 E2E_CONF_FILE_ENVSUBST := $(ROOT_DIR)/test/e2e/config/digitalocean-dev-envsubst.yaml
 
 # Define Docker related variables. Releases should modify and double check these vars.
-REGISTRY ?= gcr.io/$(shell gcloud config get-value project)
+export GCP_PROJECT ?= $(shell gcloud config get-value project)
+REGISTRY ?= gcr.io/$(GCP_PROJECT)
 STAGING_REGISTRY := gcr.io/k8s-staging-cluster-api-do
 PROD_REGISTRY := us.gcr.io/k8s-artifacts-prod/cluster-api-do
 IMAGE_NAME ?= cluster-api-do-controller
@@ -67,7 +68,6 @@ CRD_ROOT ?= $(MANIFEST_ROOT)/crd/bases
 WEBHOOK_ROOT ?= $(MANIFEST_ROOT)/webhook
 RBAC_ROOT ?= $(MANIFEST_ROOT)/rbac
 
-
 # Allow overriding the e2e configurations
 GINKGO_FOCUS ?= Workload cluster creation
 GINKGO_NODES ?= 3
@@ -81,7 +81,22 @@ PULL_POLICY ?= Always
 DOCKER_BUILDKIT ?= 0
 export DOCKER_BUILDKIT
 
+# Hosts running SELinux need :z added to volume mounts
+SELINUX_ENABLED := $(shell cat /sys/fs/selinux/enforce 2> /dev/null || echo 0)
+
+ifeq ($(SELINUX_ENABLED),1)
+  DOCKER_VOL_OPTS?=:z
+endif
+
 KIND_CLUSTER_NAME ?= capdo
+
+# set --output-base used for conversion-gen which needs to be different for in GOPATH and outside GOPATH dev
+ifneq ($(abspath $(ROOT_DIR)),$(GOPATH)/src/sigs.k8s.io/cluster-api-provider-digitalocean)
+  OUTPUT_BASE := --output-base=$(ROOT_DIR)
+endif
+
+# CI
+CAPDO_WORKER_CLUSTER_KUBECONFIG ?= "/tmp/kubeconfig"
 
 ## --------------------------------------
 ##@ Help
@@ -90,24 +105,23 @@ KIND_CLUSTER_NAME ?= capdo
 help:  ## Display this help
 	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z0-9_-]+:.*?##/ { printf "  \033[36m%-25s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
 
-
 ## --------------------------------------
 ##@ Binaries
 ## --------------------------------------
 
 # Binaries.
-CONTROLLER_GEN_VER := v0.5.0
+CONTROLLER_GEN_VER := v0.7.0
 CONTROLLER_GEN_BIN := controller-gen
 CONTROLLER_GEN := $(TOOLS_BIN_DIR)/$(CONTROLLER_GEN_BIN)-$(CONTROLLER_GEN_VER)
 
-CONVERSION_GEN_VER := v0.20.4
+CONVERSION_GEN_VER := v0.22.2
 CONVERSION_GEN_BIN := conversion-gen
 CONVERSION_GEN := $(TOOLS_BIN_DIR)/$(CONVERSION_GEN_BIN)-$(CONVERSION_GEN_VER)
 
 ENVSUBST_BIN := envsubst
 ENVSUBST := $(TOOLS_BIN_DIR)/$(ENVSUBST_BIN)-drone
 
-GOLANGCI_LINT_VER := v1.42.0
+GOLANGCI_LINT_VER := v1.42.1
 GOLANGCI_LINT_BIN := golangci-lint
 GOLANGCI_LINT := $(TOOLS_BIN_DIR)/$(GOLANGCI_LINT_BIN)-$(GOLANGCI_LINT_VER)
 
@@ -119,7 +133,7 @@ MOCKGEN_VER := v1.5.0
 MOCKGEN_BIN := mockgen
 MOCKGEN := $(TOOLS_BIN_DIR)/$(MOCKGEN_BIN)-$(MOCKGEN_VER)
 
-RELEASE_NOTES_VER := v0.3.4
+RELEASE_NOTES_VER := v0.11.0
 RELEASE_NOTES_BIN := release-notes
 RELEASE_NOTES := $(TOOLS_BIN_DIR)/$(RELEASE_NOTES_BIN)-$(RELEASE_NOTES_VER)
 
@@ -127,9 +141,11 @@ GINKGO_VER := v1.16.4
 GINKGO_BIN := ginkgo
 GINKGO := $(TOOLS_BIN_DIR)/$(GINKGO_BIN)-$(GINKGO_VER)
 
-KUBECTL_VER := v1.21.3
-KUBECTL_BIN := kubectl
-KUBECTL := $(TOOLS_BIN_DIR)/$(KUBECTL_BIN)-$(KUBECTL_VER)
+KUBECTL_VER := v1.22.3
+KUBECTL_BIN := $(TOOLS_BIN_DIR)/kubectl
+KUBECTL := $(KUBECTL_BIN)-$(KUBECTL_VER)
+
+TIMEOUT := $(shell command -v timeout || command -v gtimeout)
 
 ## --------------------------------------
 ##@ Testing
@@ -159,7 +175,7 @@ test-conformance: e2e-image $(ENVSUBST) $(GINKGO) $(KIND) $(KUSTOMIZE) ## Run co
 
 .PHONY: e2e-image
 e2e-image:
-	docker build --build-arg ldflags="$(LDFLAGS)" --tag="gcr.io/k8s-staging-cluster-api/capdo-manager:e2e" .
+	docker build --build-arg ldflags="$(LDFLAGS)" --tag="gcr.io/k8s-staging-cluster-api-do/cluster-api-do-controller:e2e" .
 
 
 .PHONY: binaries
@@ -205,9 +221,12 @@ $(GINKGO): ## Build ginkgo.
 $(KUBECTL): ## Build kubectl
 	mkdir -p $(TOOLS_BIN_DIR)
 	rm -f "$(KUBECTL)*"
-	curl -fsL https://storage.googleapis.com/kubernetes-release/release/$(KUBECTL_VER)/bin/$(GOOS)/$(GOARCH)/kubectl -o $(KUBECTL)
-	ln -sf "$(KUBECTL)" "$(TOOLS_BIN_DIR)/$(KUBECTL_BIN)"
-	chmod +x "$(TOOLS_BIN_DIR)/$(KUBECTL_BIN)" "$(KUBECTL)"
+	curl --retry $(CURL_RETRIES) -fsL https://storage.googleapis.com/kubernetes-release/release/$(KUBECTL_VER)/bin/$(GOOS)/$(GOARCH)/kubectl -o $(KUBECTL)
+	ln -sf "$(KUBECTL)" "$(KUBECTL_BIN)"
+	chmod +x "$(KUBECTL_BIN)" "$(KUBECTL)"
+
+.PHONY: $(KUBECTL_BIN)
+$(KUBECTL_BIN): $(KUBECTL) ## Building kubectl from the tools folder
 
 ## --------------------------------------
 ##@ Linting
@@ -234,22 +253,30 @@ generate: ## Generate code
 	$(MAKE) generate-manifests
 
 .PHONY: generate-go
-generate-go: $(CONTROLLER_GEN) $(MOCKGEN) $(CONVERSION_GEN) ## Runs Go related generate targets
-	go generate ./...
+generate-go: $(CONTROLLER_GEN) $(CONVERSION_GEN) $(MOCKGEN) ## Runs Go related generate targets
 	$(CONTROLLER_GEN) \
 		paths=./api/... \
 		object:headerFile=./hack/boilerplate/boilerplate.generatego.txt
-
 	$(CONVERSION_GEN) \
 		--input-dirs=./api/v1alpha3 \
-		--output-file-base=zz_generated.conversion $(GEN_OUTPUT_BASE) \
-		--go-header-file=./hack/boilerplate/boilerplate.generatego.txt
+		--build-tag=ignore_autogenerated_core_v1alpha3 \
+		--extra-peer-dirs=sigs.k8s.io/cluster-api/api/v1alpha3 \
+		--output-file-base=zz_generated.conversion \
+		--go-header-file=./hack/boilerplate/boilerplate.generatego.txt $(OUTPUT_BASE)
+	$(CONVERSION_GEN) \
+		--input-dirs=./api/v1alpha4 \
+		--build-tag=ignore_autogenerated_core_v1alpha4 \
+		--extra-peer-dirs=sigs.k8s.io/cluster-api/api/v1alpha4 \
+		--output-file-base=zz_generated.conversion \
+		--go-header-file=./hack/boilerplate/boilerplate.generatego.txt $(OUTPUT_BASE)
+	go generate ./...
 
 .PHONY: generate-manifests
 generate-manifests: $(CONTROLLER_GEN) ## Generate manifests e.g. CRD, RBAC etc.
 	$(CONTROLLER_GEN) \
 		paths=./api/... \
 		crd:crdVersions=v1 \
+		rbac:roleName=manager-role \
 		output:crd:dir=$(CRD_ROOT) \
 		output:webhook:dir=$(WEBHOOK_ROOT) \
 		webhook
@@ -259,21 +286,27 @@ generate-manifests: $(CONTROLLER_GEN) ## Generate manifests e.g. CRD, RBAC etc.
 		rbac:roleName=manager-role
 
 ## --------------------------------------
-##@ Docker
+## Docker
 ## --------------------------------------
 
+.PHONY: docker-pull-prerequisites
+docker-pull-prerequisites:
+	docker pull docker/dockerfile:1.1-experimental
+	docker pull docker.io/library/golang:1.16
+	docker pull gcr.io/distroless/static:latest
+
 .PHONY: docker-build
-docker-build: ## Build the docker image for controller-manager
-	docker build --pull --build-arg ARCH=$(ARCH) . -t $(CONTROLLER_IMG)-$(ARCH):$(TAG)
-	MANIFEST_IMG=$(CONTROLLER_IMG)-$(ARCH) MANIFEST_TAG=$(TAG) $(MAKE) set-manifest-image
-	$(MAKE) set-manifest-pull-policy
+docker-build: docker-pull-prerequisites ## Build the docker image for controller-manager
+	DOCKER_BUILDKIT=1 docker build --build-arg goproxy=$(GOPROXY) --build-arg ARCH=$(ARCH) --build-arg ldflags="$(LDFLAGS)" . -t $(CONTROLLER_IMG)-$(ARCH):$(TAG)
+	$(MAKE) set-manifest-image MANIFEST_IMG=$(CONTROLLER_IMG)-$(ARCH) MANIFEST_TAG=$(TAG) TARGET_RESOURCE="./config/default/manager_image_patch.yaml"
+	$(MAKE) set-manifest-pull-policy TARGET_RESOURCE="./config/default/manager_pull_policy.yaml"
 
 .PHONY: docker-push
 docker-push: ## Push the docker image
 	docker push $(CONTROLLER_IMG)-$(ARCH):$(TAG)
 
 ## --------------------------------------
-##@ Docker — All ARCH
+## Docker — All ARCH
 ## --------------------------------------
 
 .PHONY: docker-build-all ## Build all the architecture docker images
@@ -300,12 +333,12 @@ docker-push-manifest: ## Push the fat manifest docker image.
 
 .PHONY: set-manifest-image
 set-manifest-image:
-	$(info Updating kustomize image patch file for manager resource)
+	$(info Updating kustomize image patch file for default resource)
 	sed -i'' -e 's@image: .*@image: '"${MANIFEST_IMG}:$(MANIFEST_TAG)"'@' ./config/default/manager_image_patch.yaml
 
 .PHONY: set-manifest-pull-policy
 set-manifest-pull-policy:
-	$(info Updating kustomize pull policy file for manager resource)
+	$(info Updating kustomize pull policy file for default resource)
 	sed -i'' -e 's@imagePullPolicy: .*@imagePullPolicy: '"$(PULL_POLICY)"'@' ./config/default/manager_pull_policy.yaml
 
 ## --------------------------------------
@@ -384,47 +417,48 @@ create-cluster: $(CLUSTERCTL) ## Create a development Kubernetes cluster on Digi
 # e2e-conformance.sh script, which is why we need it as a variable here.
 CLUSTER_NAME ?= test1
 
-.PHONY: create-cluster-management
-create-cluster-management: $(CLUSTERCTL) ## Create a development Kubernetes cluster on DigitalOcean in a KIND management cluster.
+.PHONY: create-management-cluster
+create-management-cluster: $(KUSTOMIZE) $(ENVSUBST)
 	## Create kind management cluster.
 	$(MAKE) kind-create
 
-	@if [ ! -z "${LOAD_IMAGE}" ]; then \
-		echo "loading ${LOAD_IMAGE} into kind cluster ..." && \
-		kind --name="clusterapi" load docker-image "${LOAD_IMAGE}"; \
-	fi
-	# Apply core-components.
-	kubectl \
-		--kubeconfig=$$(kind get kubeconfig-path --name="clusterapi") \
-		create -f examples/_out/core-components.yaml
-	# Apply provider-components.
-	kubectl \
-		--kubeconfig=$$(kind get kubeconfig-path --name="clusterapi") \
-		create -f examples/_out/provider-components.yaml
-	# Create Cluster.
-	kubectl \
-		--kubeconfig=$$(kind get kubeconfig-path --name="clusterapi") \
-		create -f examples/_out/cluster.yaml
-	# Create control plane machine.
-	kubectl \
-		--kubeconfig=$$(kind get kubeconfig-path --name="clusterapi") \
-		create -f examples/_out/controlplane.yaml
-	# Get KubeConfig using clusterctl.
-	$(CLUSTERCTL) \
-		alpha phases get-kubeconfig -v=3 \
-		--kubeconfig=$$(kind get kubeconfig-path --name="clusterapi") \
-		--namespace=default \
-		--cluster-name=$(CLUSTER_NAME)
-	# Apply addons on the target cluster, waiting for the control-plane to become available.
-	$(CLUSTERCTL) \
-		alpha phases apply-addons -v=3 \
-		--kubeconfig=./kubeconfig \
-		-a examples/addons.yaml
-	# Create a worker node with MachineDeployment.
-	kubectl \
-		--kubeconfig=$$(kind get kubeconfig-path --name="clusterapi") \
-		create -f examples/_out/machinedeployment.yaml
+	# Install cert manager and wait for availability
+	./hack/install-cert-manager.sh
 
+	# Deploy CAPI
+	curl --retry $(CURL_RETRIES) -sSL https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.0.0/cluster-api-components.yaml | $(ENVSUBST) | kubectl apply -f -
+
+	# Deploy CAPG
+	kind load docker-image $(CONTROLLER_IMG)-$(ARCH):$(TAG) --name=capdo
+	$(KUSTOMIZE) build config/default | $(ENVSUBST) | kubectl apply -f -
+
+	# Wait for CAPI pods
+	kubectl wait --for=condition=Available --timeout=5m -n capi-system deployment -l cluster.x-k8s.io/provider=cluster-api
+	kubectl wait --for=condition=Available --timeout=5m -n capi-kubeadm-bootstrap-system deployment -l cluster.x-k8s.io/provider=bootstrap-kubeadm
+	kubectl wait --for=condition=Available --timeout=5m -n capi-kubeadm-control-plane-system deployment -l cluster.x-k8s.io/provider=control-plane-kubeadm
+
+	# Wait for CAPDO pods
+	kubectl wait --for=condition=Ready --timeout=5m -n capdo-system pod -l cluster.x-k8s.io/provider=infrastructure-digitalocean
+
+	# required sleep for when creating management and workload cluster simultaneously
+	sleep 10
+	@echo 'Set kubectl context to the kind management cluster by running "kubectl config set-context kind-clusterapi"'
+
+.PHONY: create-workload-cluster
+create-workload-cluster: $(KUSTOMIZE) $(ENVSUBST)
+	# Create workload Cluster.
+	$(KUSTOMIZE) build templates | $(ENVSUBST) | kubectl apply -f -
+
+	# Wait for the kubeconfig to become available.
+	${TIMEOUT} 5m bash -c "while ! kubectl get secrets | grep $(CLUSTER_NAME)-kubeconfig; do sleep 1; done"
+	# Get kubeconfig and store it locally.
+	kubectl get secrets $(CLUSTER_NAME)-kubeconfig -o json | jq -r .data.value | base64 --decode > $(CAPDO_WORKER_CLUSTER_KUBECONFIG)
+	${TIMEOUT} 15m bash -c "while ! kubectl --kubeconfig=$(CAPDO_WORKER_CLUSTER_KUBECONFIG) get nodes | grep master; do sleep 1; done"
+
+	# Deploy calico
+	kubectl --kubeconfig=$(CAPDO_WORKER_CLUSTER_KUBECONFIG) apply -f https://docs.projectcalico.org/manifests/calico.yaml
+
+	@echo 'run "kubectl --kubeconfig=$(CAPDO_WORKER_CLUSTER_KUBECONFIG) ..." to work with the new target cluster'
 
 .PHONY: delete-workload-cluster
 delete-workload-cluster: $(CLUSTERCTL) ## Deletes the development Kubernetes Cluster "$CLUSTER_NAME"
@@ -437,17 +471,25 @@ delete-workload-cluster: $(CLUSTERCTL) ## Deletes the development Kubernetes Clu
 	--kubeconfig ./kubeconfig \
 	-p ./examples/_out/provider-components.yaml \
 
+## --------------------------------------
+## Tilt / Kind
+## --------------------------------------
+
 .PHONY: kind-create
-kind-create: ## create capdo kind cluster if needed
+kind-create: $(KUBECTL) ## create capg kind cluster if needed
 	./scripts/kind-with-registry.sh
+
+.PHONY: kind-delete
+kind-delete: ## Destroys the "capdo" kind cluster.
+	kind delete cluster --name=$(KIND_CLUSTER_NAME)
+
+.PHONY: tilt-up
+tilt-up: $(ENVSUBST) $(KUSTOMIZE) $(KUBECTL) kind-create ## start tilt and build kind cluster if needed
+	EXP_CLUSTER_RESOURCE_SET=true tilt up
 
 .PHONY: delete-cluster
 delete-cluster: delete-workload-cluster  ## Deletes the example kind cluster "capdo"
 	kind delete cluster --name=$(KIND_CLUSTER_NAME)
-
-.PHONY: kind-reset
-kind-reset: ## Destroys the "capdo" kind cluster.
-	kind delete cluster --name=$(KIND_CLUSTER_NAME) || true
 
 ## --------------------------------------
 ##@ Verification

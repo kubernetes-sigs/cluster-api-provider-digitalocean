@@ -1,14 +1,14 @@
 ---
 images:
-  - name: gcr.io/k8s-staging-cluster-api/capdo-manager:e2e
+  - name: gcr.io/k8s-staging-cluster-api-do/cluster-api-do-controller:e2e
     loadBehavior: mustLoad
 
 providers:
   - name: cluster-api
     type: CoreProvider
     versions:
-    - name: v0.4.4
-      value: https://github.com/kubernetes-sigs/cluster-api/releases/download/v0.4.4/core-components.yaml
+    - name: v1.0.0
+      value: https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.0.0/core-components.yaml
       type: "url"
       files:
       - sourcePath: "${PWD}/test/e2e/data/metadata/cluster-api/metadata.yaml"
@@ -20,8 +20,8 @@ providers:
   - name: kubeadm
     type: BootstrapProvider
     versions:
-    - name: v0.4.4
-      value: https://github.com/kubernetes-sigs/cluster-api/releases/download/v0.4.4/bootstrap-components.yaml
+    - name: v1.0.0
+      value: https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.0.0/bootstrap-components.yaml
       type: "url"
       files:
       - sourcePath: "${PWD}/test/e2e/data/metadata/cluster-api/metadata.yaml"
@@ -33,8 +33,8 @@ providers:
   - name: kubeadm
     type: ControlPlaneProvider
     versions:
-    - name: v0.4.4
-      value: https://github.com/kubernetes-sigs/cluster-api/releases/download/v0.4.4/control-plane-components.yaml
+    - name: v1.0.0
+      value: https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.0.0/control-plane-components.yaml
       type: "url"
       files:
       - sourcePath: "${PWD}/test/e2e/data/metadata/cluster-api/metadata.yaml"
@@ -46,19 +46,18 @@ providers:
   - name: digitalocean
     type: InfrastructureProvider
     versions:
-    - name: v0.5.0
-      # Use manifest from source files
+    - name: v1.0.0
       value: "${PWD}/config/default"
-      files:
-      - sourcePath: "${PWD}/test/e2e/data/metadata/cluster-api-provider-digitalocean/metadata.yaml"
       replacements:
-        - old: gcr.io/k8s-staging-cluster-api-do/cluster-api-do-controller:master
-          new: gcr.io/k8s-staging-cluster-api/capdo-manager:e2e
+        - old: gcr.io/k8s-staging-cluster-api-do/cluster-api-do-controller:dev
+          new: gcr.io/k8s-staging-cluster-api-do/cluster-api-do-controller:e2e
         - old: "imagePullPolicy: Always"
           new: "imagePullPolicy: IfNotPresent"
-    files:
-    # Add a cluster template
-    - sourcePath: "${PWD}/test/e2e/data/infrastructure-digitalocean/cluster-template.yaml"
+      files:
+      - sourcePath: "${PWD}/metadata.yaml"
+        targetName: "metadata.yaml"
+      - sourcePath: "${PWD}/test/e2e/data/infrastructure-digitalocean/cluster-template.yaml"
+        targetName: "cluster-template.yaml"
 
 variables:
   REDACT_LOG_SCRIPT: "${PWD}/hack/log/redact.sh"

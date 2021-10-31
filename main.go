@@ -30,21 +30,21 @@ import (
 	"k8s.io/klog/v2"
 	"k8s.io/klog/v2/klogr"
 
-	infrav1alpha3 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha3"
-	infrav1alpha4 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha4"
-	"sigs.k8s.io/cluster-api-provider-digitalocean/controllers"
-	dnsutil "sigs.k8s.io/cluster-api-provider-digitalocean/util/dns"
-	dnsresolver "sigs.k8s.io/cluster-api-provider-digitalocean/util/dns/resolver"
-
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 
-	clusterv1 "sigs.k8s.io/cluster-api/api/v1alpha4"
+	clusterv1 "sigs.k8s.io/cluster-api/api/v1beta1"
 	"sigs.k8s.io/cluster-api/util/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
-	"sigs.k8s.io/controller-runtime/pkg/healthz"
+
+	infrav1alpha3 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha3"
+	infrav1alpha4 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha4"
+	infrav1beta1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1beta1"
+	"sigs.k8s.io/cluster-api-provider-digitalocean/controllers"
+	dnsutil "sigs.k8s.io/cluster-api-provider-digitalocean/util/dns"
+	dnsresolver "sigs.k8s.io/cluster-api-provider-digitalocean/util/dns/resolver"
 )
 
 var (
@@ -58,6 +58,7 @@ func init() {
 	_ = clientgoscheme.AddToScheme(scheme)
 	_ = infrav1alpha3.AddToScheme(scheme)
 	_ = infrav1alpha4.AddToScheme(scheme)
+	_ = infrav1beta1.AddToScheme(scheme)
 	_ = clusterv1.AddToScheme(scheme)
 	// +kubebuilder:scaffold:scheme
 }
@@ -145,27 +146,31 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err := (&infrav1alpha4.DOCluster{}).SetupWebhookWithManager(mgr); err != nil {
+	if err := (&infrav1beta1.DOCluster{}).SetupWebhookWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create webhook", "webhook", "DOCluster")
 		os.Exit(1)
 	}
-	if err := (&infrav1alpha4.DOMachine{}).SetupWebhookWithManager(mgr); err != nil {
+	if err = (&infrav1beta1.DOClusterTemplate{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create webhook", "webhook", "DOClusterTemplate")
+		os.Exit(1)
+	}
+	if err := (&infrav1beta1.DOMachine{}).SetupWebhookWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create webhook", "webhook", "DOMachine")
 		os.Exit(1)
 	}
-	if err := (&infrav1alpha4.DOMachineTemplate{}).SetupWebhookWithManager(mgr); err != nil {
+	if err := (&infrav1beta1.DOMachineTemplate{}).SetupWebhookWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create webhook", "webhook", "DOMachineTemplate")
 		os.Exit(1)
 	}
 
 	// +kubebuilder:scaffold:builder
 
-	if err := mgr.AddReadyzCheck("ping", healthz.Ping); err != nil {
+	if err := mgr.AddReadyzCheck("webhook", mgr.GetWebhookServer().StartedChecker()); err != nil {
 		setupLog.Error(err, "unable to create ready check")
 		os.Exit(1)
 	}
 
-	if err := mgr.AddHealthzCheck("ping", healthz.Ping); err != nil {
+	if err := mgr.AddHealthzCheck("webhook", mgr.GetWebhookServer().StartedChecker()); err != nil {
 		setupLog.Error(err, "unable to create health check")
 		os.Exit(1)
 	}
