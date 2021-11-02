@@ -16,8 +16,52 @@ limitations under the License.
 
 package v1alpha4
 
-// Hub marks DOMachineTemplate as a conversion hub.
-func (*DOMachineTemplate) Hub() {}
+import (
+	utilconversion "sigs.k8s.io/cluster-api/util/conversion"
+	"sigs.k8s.io/controller-runtime/pkg/conversion"
 
-// Hub marks DOMachineTemplateList as a conversion hub.
-func (*DOMachineTemplateList) Hub() {}
+	infrav1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1beta1"
+)
+
+// ConvertTo converts this DOMachineTemplate to the Hub version (v1beta1).
+func (src *DOMachineTemplate) ConvertTo(dstRaw conversion.Hub) error { // nolint
+	dst := dstRaw.(*infrav1.DOMachineTemplate)
+	if err := Convert_v1alpha4_DOMachineTemplate_To_v1beta1_DOMachineTemplate(src, dst, nil); err != nil {
+		return err
+	}
+
+	// Manually restore data from annotations
+	restored := &infrav1.DOMachineTemplate{}
+	if ok, err := utilconversion.UnmarshalData(src, restored); err != nil || !ok {
+		return err
+	}
+
+	return nil
+}
+
+// ConvertFrom converts from the Hub version (v1beta1) to this version.
+func (dst *DOMachineTemplate) ConvertFrom(srcRaw conversion.Hub) error { // nolint
+	src := srcRaw.(*infrav1.DOMachineTemplate)
+	if err := Convert_v1beta1_DOMachineTemplate_To_v1alpha4_DOMachineTemplate(src, dst, nil); err != nil {
+		return err
+	}
+
+	// Preserve Hub data on down-conversion.
+	if err := utilconversion.MarshalData(src, dst); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// ConvertTo converts this DOMachineTemplateList to the Hub version (v1beta1).
+func (src *DOMachineTemplateList) ConvertTo(dstRaw conversion.Hub) error { // nolint
+	dst := dstRaw.(*infrav1.DOMachineTemplateList)
+	return Convert_v1alpha4_DOMachineTemplateList_To_v1beta1_DOMachineTemplateList(src, dst, nil)
+}
+
+// ConvertFrom converts from the Hub version (v1beta1) to this version.
+func (dst *DOMachineTemplateList) ConvertFrom(srcRaw conversion.Hub) error { // nolint
+	src := srcRaw.(*infrav1.DOMachineTemplateList)
+	return Convert_v1beta1_DOMachineTemplateList_To_v1alpha4_DOMachineTemplateList(src, dst, nil)
+}

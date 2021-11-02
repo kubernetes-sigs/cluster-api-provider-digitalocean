@@ -1,3 +1,4 @@
+//go:build e2e
 // +build e2e
 
 /*
@@ -35,14 +36,13 @@ import (
 	"github.com/onsi/ginkgo/reporters"
 	. "github.com/onsi/gomega"
 
-	"sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha3"
-
 	"k8s.io/apimachinery/pkg/runtime"
-
 	capi_e2e "sigs.k8s.io/cluster-api/test/e2e"
 	"sigs.k8s.io/cluster-api/test/framework"
 	"sigs.k8s.io/cluster-api/test/framework/bootstrap"
 	"sigs.k8s.io/cluster-api/test/framework/clusterctl"
+
+	infrav1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1beta1"
 )
 
 // Test suite flags.
@@ -163,7 +163,7 @@ var _ = SynchronizedAfterSuite(func() {
 func initScheme() *runtime.Scheme {
 	sc := runtime.NewScheme()
 	framework.TryAddDefaultSchemes(sc)
-	_ = v1alpha3.AddToScheme(sc)
+	Expect(infrav1.AddToScheme(sc)).To(Succeed())
 
 	return sc
 }

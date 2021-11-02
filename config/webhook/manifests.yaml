@@ -12,7 +12,7 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /mutate-infrastructure-cluster-x-k8s-io-v1alpha4-docluster
+      path: /mutate-infrastructure-cluster-x-k8s-io-v1beta1-docluster
   failurePolicy: Fail
   matchPolicy: Equivalent
   name: default.docluster.infrastructure.cluster.x-k8s.io
@@ -20,7 +20,7 @@ webhooks:
   - apiGroups:
     - infrastructure.cluster.x-k8s.io
     apiVersions:
-    - v1alpha4
+    - v1beta1
     operations:
     - CREATE
     - UPDATE
@@ -33,7 +33,28 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /mutate-infrastructure-cluster-x-k8s-io-v1alpha4-domachine
+      path: /mutate-infrastructure-cluster-x-k8s-io-v1beta1-doclustertemplate
+  failurePolicy: Fail
+  matchPolicy: Equivalent
+  name: default.doclustertemplate.infrastructure.cluster.x-k8s.io
+  rules:
+  - apiGroups:
+    - infrastructure.cluster.x-k8s.io
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - doclustertemplates
+  sideEffects: None
+- admissionReviewVersions:
+  - v1beta1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /mutate-infrastructure-cluster-x-k8s-io-v1beta1-domachine
   failurePolicy: Fail
   matchPolicy: Equivalent
   name: default.domachine.infrastructure.cluster.x-k8s.io
@@ -41,12 +62,33 @@ webhooks:
   - apiGroups:
     - infrastructure.cluster.x-k8s.io
     apiVersions:
-    - v1alpha4
+    - v1beta1
     operations:
     - CREATE
     - UPDATE
     resources:
     - domachines
+  sideEffects: None
+- admissionReviewVersions:
+  - v1beta1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /mutate-infrastructure-cluster-x-k8s-io-v1beta1-domachinetemplate
+  failurePolicy: Fail
+  matchPolicy: Equivalent
+  name: default.domachinetemplate.infrastructure.cluster.x-k8s.io
+  rules:
+  - apiGroups:
+    - infrastructure.cluster.x-k8s.io
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - domachinetemplates
   sideEffects: None
 
 ---
@@ -62,7 +104,7 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /validate-infrastructure-cluster-x-k8s-io-v1alpha4-docluster
+      path: /validate-infrastructure-cluster-x-k8s-io-v1beta1-docluster
   failurePolicy: Fail
   matchPolicy: Equivalent
   name: validation.docluster.infrastructure.cluster.x-k8s.io
@@ -70,7 +112,7 @@ webhooks:
   - apiGroups:
     - infrastructure.cluster.x-k8s.io
     apiVersions:
-    - v1alpha4
+    - v1beta1
     operations:
     - CREATE
     - UPDATE
@@ -83,7 +125,28 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /validate-infrastructure-cluster-x-k8s-io-v1alpha4-domachine
+      path: /validate-infrastructure-cluster-x-k8s-io-v1beta1-doclustertemplate
+  failurePolicy: Fail
+  matchPolicy: Equivalent
+  name: validation.doclustertemplate.infrastructure.cluster.x-k8s.io
+  rules:
+  - apiGroups:
+    - infrastructure.cluster.x-k8s.io
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - doclustertemplates
+  sideEffects: None
+- admissionReviewVersions:
+  - v1beta1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-infrastructure-cluster-x-k8s-io-v1beta1-domachine
   failurePolicy: Fail
   matchPolicy: Equivalent
   name: validation.domachine.infrastructure.cluster.x-k8s.io
@@ -91,7 +154,7 @@ webhooks:
   - apiGroups:
     - infrastructure.cluster.x-k8s.io
     apiVersions:
-    - v1alpha4
+    - v1beta1
     operations:
     - CREATE
     - UPDATE
@@ -104,15 +167,15 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /validate-infrastructure-cluster-x-k8s-io-v1alpha4-domachinetemplate
+      path: /validate-infrastructure-cluster-x-k8s-io-v1beta1-domachinetemplate
   failurePolicy: Fail
   matchPolicy: Equivalent
-  name: validation.domachinetemplate.infrastructure.x-k8s.io
+  name: validation.domachinetemplate.infrastructure.cluster.x-k8s.io
   rules:
   - apiGroups:
     - infrastructure.cluster.x-k8s.io
     apiVersions:
-    - v1alpha4
+    - v1beta1
     operations:
     - CREATE
     - UPDATE

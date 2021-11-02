@@ -62,6 +62,7 @@ junit.*.xml
 .tiltbuild
 /tilt.d
 tilt-settings.json
+tilt_config.json
 
 # test results
 _artifacts

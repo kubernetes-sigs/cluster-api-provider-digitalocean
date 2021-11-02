@@ -21,7 +21,7 @@ import (
 
 	"github.com/digitalocean/godo"
 
-	infrav1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha4"
+	infrav1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1beta1"
 )
 
 // GetLoadBalancer get a LB by LB ID.

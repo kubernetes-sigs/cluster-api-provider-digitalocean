@@ -1,0 +1,33 @@
+apiVersion: controlplane.cluster.x-k8s.io/v1beta1
+kind: KubeadmControlPlane
+metadata:
+  name: "${CLUSTER_NAME}-control-plane"
+spec:
+  kubeadmConfigSpec:
+    useExperimentalRetryJoin: true
+    clusterConfiguration:
+      kubernetesVersion: "ci/${CI_VERSION}"
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: DOMachineTemplate
+metadata:
+  name: "${CLUSTER_NAME}-control-plane"
+spec:
+  template:
+    spec:
+      size: "${DO_NODE_MACHINE_TYPE}"
+      image: ${DO_NODE_MACHINE_IMAGE}
+      sshKeys:
+        - ${DO_SSH_KEY_FINGERPRINT}
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: DOMachineTemplate
+metadata:
+  name: "${CLUSTER_NAME}-md-0"
+spec:
+  template:
+    spec:
+      size: "${DO_NODE_MACHINE_TYPE}"
+      image: ${DO_NODE_MACHINE_IMAGE}
+      sshKeys:
+        - ${DO_SSH_KEY_FINGERPRINT}

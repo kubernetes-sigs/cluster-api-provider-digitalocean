@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package v1alpha3 contains API Schema definitions for the infrastructure v1alpha3 API group
 package v1alpha3
 
-// +k8s:conversion-gen=sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha4
+// +k8s:conversion-gen=sigs.k8s.io/cluster-api-provider-digitalocean/api/v1beta1
