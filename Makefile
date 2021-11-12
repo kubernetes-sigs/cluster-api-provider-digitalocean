@@ -137,7 +137,7 @@ RELEASE_NOTES_VER := v0.11.0
 RELEASE_NOTES_BIN := release-notes
 RELEASE_NOTES := $(TOOLS_BIN_DIR)/$(RELEASE_NOTES_BIN)-$(RELEASE_NOTES_VER)
 
-GINKGO_VER := v1.16.4
+GINKGO_VER := v1.16.5
 GINKGO_BIN := ginkgo
 GINKGO := $(TOOLS_BIN_DIR)/$(GINKGO_BIN)-$(GINKGO_VER)
 
@@ -292,7 +292,7 @@ generate-manifests: $(CONTROLLER_GEN) ## Generate manifests e.g. CRD, RBAC etc.
 .PHONY: docker-pull-prerequisites
 docker-pull-prerequisites:
 	docker pull docker/dockerfile:1.1-experimental
-	docker pull docker.io/library/golang:1.16
+	docker pull docker.io/library/golang:1.17
 	docker pull gcr.io/distroless/static:latest
 
 .PHONY: docker-build
@@ -380,8 +380,8 @@ release-binary: $(RELEASE_DIR)
 		-e GOARCH=$(GOARCH) \
 		-v "$$(pwd):/workspace" \
 		-w /workspace \
-		golang:1.16.9 \
-		go build -a -ldflags '-extldflags "-static"' \
+		golang:1.17.3 \
+		go build -a -trimpath -ldflags '-extldflags "-static"' \
 		-o $(RELEASE_DIR)/$(notdir $(RELEASE_BINARY))-$(GOOS)-$(GOARCH) $(RELEASE_BINARY)
 
 .PHONY: release-staging
