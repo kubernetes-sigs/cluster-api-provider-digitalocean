@@ -161,7 +161,7 @@ variables:
   # the management cluster to be upgraded.
   INIT_WITH_BINARY: "https://github.com/kubernetes-sigs/cluster-api/releases/download/v0.3.23/clusterctl-{OS}-{ARCH}"
   INIT_WITH_PROVIDERS_CONTRACT: "v1alpha3"
-  INIT_WITH_KUBERNETES_VERSION: "v1.22.4"
+  INIT_WITH_KUBERNETES_VERSION: "v1.21.2"
 
 intervals:
   default/wait-controllers: ["3m", "10s"]

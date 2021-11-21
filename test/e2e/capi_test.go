@@ -37,17 +37,17 @@ var _ = Describe("Running the Cluster API E2E tests", func() {
 		redactLogs(e2eConfig.GetVariable)
 	})
 
-	Context("Running the quick-start spec", func() {
-		capi_e2e.QuickStartSpec(context.TODO(), func() capi_e2e.QuickStartSpecInput {
-			return capi_e2e.QuickStartSpecInput{
-				E2EConfig:             e2eConfig,
-				ClusterctlConfigPath:  clusterctlConfigPath,
-				BootstrapClusterProxy: bootstrapClusterProxy,
-				ArtifactFolder:        artifactFolder,
-				SkipCleanup:           skipCleanup,
-			}
-		})
-	})
+	// Context("Running the quick-start spec", func() {
+	// 	capi_e2e.QuickStartSpec(context.TODO(), func() capi_e2e.QuickStartSpecInput {
+	// 		return capi_e2e.QuickStartSpecInput{
+	// 			E2EConfig:             e2eConfig,
+	// 			ClusterctlConfigPath:  clusterctlConfigPath,
+	// 			BootstrapClusterProxy: bootstrapClusterProxy,
+	// 			ArtifactFolder:        artifactFolder,
+	// 			SkipCleanup:           skipCleanup,
+	// 		}
+	// 	})
+	// })
 
 	if os.Getenv("LOCAL_ONLY") != "true" {
 		Context("API Version Upgrade", func() {
