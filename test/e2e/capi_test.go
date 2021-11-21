@@ -53,6 +53,9 @@ var _ = Describe("Running the Cluster API E2E tests", func() {
 		Context("API Version Upgrade", func() {
 			Context("upgrade from v1alpha3 to v1beta1, and scale workload clusters created in v1alpha3 ", func() {
 				BeforeEach(func() {
+					imageID := e2eConfig.GetVariable("CLUSTER_API_UPGRADE_INIT_MACHINE_IMAGE")
+					Expect(os.Setenv("DO_NODE_MACHINE_IMAGE", imageID)).To(Succeed())
+					Expect(os.Setenv("DO_CONTROL_PLANE_MACHINE_IMAGE", imageID)).To(Succeed())
 				})
 				capi_e2e.ClusterctlUpgradeSpec(context.TODO(), func() capi_e2e.ClusterctlUpgradeSpecInput {
 					return capi_e2e.ClusterctlUpgradeSpecInput{
@@ -62,6 +65,10 @@ var _ = Describe("Running the Cluster API E2E tests", func() {
 						ArtifactFolder:        artifactFolder,
 						SkipCleanup:           skipCleanup,
 					}
+				})
+				AfterEach(func() {
+					Expect(os.Unsetenv("DO_CONTROL_PLANE_MACHINE_IMAGE")).To(Succeed())
+					Expect(os.Unsetenv("DO_NODE_MACHINE_IMAGE")).To(Succeed())
 				})
 			})
 

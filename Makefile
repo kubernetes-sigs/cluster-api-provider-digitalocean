@@ -159,11 +159,17 @@ test: generate lint ## Run tests
 	source ./scripts/fetch_ext_bins.sh; fetch_tools; setup_envs; go test -v ./api/... ./controllers/... ./cloud/...
 
 .PHONY: test-e2e ## Run e2e tests using clusterctl
-test-e2e: e2e-image $(ENVSUBST) $(GINKGO) $(KIND) $(KUSTOMIZE)  ## Run e2e tests
+test-e2e-run: e2e-image $(ENVSUBST) $(GINKGO) $(KIND) $(KUSTOMIZE)  ## Run e2e tests
 	$(ENVSUBST) < $(E2E_CONF_FILE) > $(E2E_CONF_FILE_ENVSUBST) && \
 	time $(GINKGO) -trace -progress -v -tags=e2e -focus=$(GINKGO_FOCUS) -nodes=$(GINKGO_NODES) --noColor=$(GINKGO_NOCOLOR) ./test/e2e/... -- \
 			-e2e.config="$(E2E_CONF_FILE_ENVSUBST)" \
 			-e2e.artifacts-folder="$(ARTIFACTS)" $(E2E_ARGS)
+
+.PHONY: test-e2e
+test-e2e: ## Run e2e tests
+	PULL_POLICY=IfNotPresent MANAGER_IMAGE=$(CONTROLLER_IMG)-$(ARCH):$(TAG) \
+	$(MAKE) docker-build docker-push \
+	test-e2e-run
 
 .PHONY: test-conformance
 test-conformance: e2e-image $(ENVSUBST) $(GINKGO) $(KIND) $(KUSTOMIZE) ## Run conformance test on workload cluster
@@ -172,10 +178,6 @@ test-conformance: e2e-image $(ENVSUBST) $(GINKGO) $(KIND) $(KUSTOMIZE) ## Run co
 			-e2e.config="$(E2E_CONF_FILE_ENVSUBST)" \
 			-kubetest.config-file=$(KUBETEST_CONF_PATH) \
 			-e2e.artifacts-folder="$(ARTIFACTS)" $(E2E_ARGS)
-
-.PHONY: e2e-image
-e2e-image:
-	docker build --build-arg ldflags="$(LDFLAGS)" --tag="gcr.io/k8s-staging-cluster-api-do/cluster-api-do-controller:e2e" .
 
 
 .PHONY: binaries
