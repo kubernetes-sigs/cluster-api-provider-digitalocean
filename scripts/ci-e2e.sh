@@ -57,5 +57,6 @@ trap 'remove_ssh_key ${SSH_KEY_FINGERPRINT}' EXIT
 
 export DO_SSH_KEY_FINGERPRINT=${SSH_KEY_FINGERPRINT}
 
+gcloud auth configure-docker
 make test-e2e
 test_status="${?}"
