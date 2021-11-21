@@ -7,6 +7,24 @@ providers:
   - name: cluster-api
     type: CoreProvider
     versions:
+    - name: v0.3.23 # latest published release in the v1alpha3 series; this is used for v1alpha3 --> v1beta1 clusterctl upgrades test only.
+      value: https://github.com/kubernetes-sigs/cluster-api/releases/download/v0.3.23/core-components.yaml
+      type: url
+      contract: v1alpha3
+      files:
+        - sourcePath: "../data/shared/v1alpha3/metadata.yaml"
+      replacements:
+        - old: "imagePullPolicy: Always"
+          new: "imagePullPolicy: IfNotPresent"
+    - name: v0.4.4 # latest published release in the v1alpha4 series; this is used for v1alpha4 --> v1beta1 clusterctl upgrades test only.
+      value: "https://github.com/kubernetes-sigs/cluster-api/releases/download/v0.4.4/core-components.yaml"
+      type: "url"
+      contract: v1alpha4
+      replacements:
+        - old: --metrics-addr=127.0.0.1:8080
+          new: --metrics-addr=:8080
+      files:
+        - sourcePath: "../data/shared/v1alpha4/metadata.yaml"
     - name: v1.0.1
       value: https://storage.googleapis.com/artifacts.k8s-staging-cluster-api.appspot.com/components/nightly_main_20211121/core-components.yaml
       type: "url"
@@ -17,6 +35,28 @@ providers:
           new: "imagePullPolicy: IfNotPresent"
         - old: "--enable-leader-election"
           new: "--enable-leader-election=false"
+
+  - name: kubeadm
+    type: BootstrapProvider
+    versions:
+    - name: v0.3.23 # latest published release in the v1alpha3 series; this is used for v1alpha3 --> v1beta1 clusterctl upgrades test only.
+      value: https://github.com/kubernetes-sigs/cluster-api/releases/download/v0.3.23/bootstrap-components.yaml
+      type: url
+      contract: v1alpha3
+      files:
+        - sourcePath: "../data/shared/v1alpha3/metadata.yaml"
+      replacements:
+        - old: "imagePullPolicy: Always"
+          new: "imagePullPolicy: IfNotPresent"
+    - name: v0.4.4 # latest published release in the v1alpha4 series; this is used for v1alpha4 --> v1beta1 clusterctl upgrades test only.
+      value: "https://github.com/kubernetes-sigs/cluster-api/releases/download/v0.4.4/bootstrap-components.yaml"
+      type: "url"
+      contract: v1alpha4
+      replacements:
+        - old: --metrics-addr=127.0.0.1:8080
+          new: --metrics-addr=:8080
+      files:
+        - sourcePath: "../data/shared/v1alpha4/metadata.yaml"
   - name: kubeadm
     type: BootstrapProvider
     versions:
@@ -30,6 +70,29 @@ providers:
           new: "imagePullPolicy: IfNotPresent"
         - old: "--enable-leader-election"
           new: "--enable-leader-election=false"
+
+
+  - name: kubeadm
+    type: ControlPlaneProvider
+    versions:
+    - name: v0.3.23 # latest published release in the v1alpha3 series; this is used for v1alpha3 --> v1beta1 clusterctl upgrades test only.
+      value: https://github.com/kubernetes-sigs/cluster-api/releases/download/v0.3.23/control-plane-components.yaml
+      type: url
+      contract: v1alpha3
+      files:
+        - sourcePath: "../data/shared/v1alpha3/metadata.yaml"
+      replacements:
+        - old: "imagePullPolicy: Always"
+          new: "imagePullPolicy: IfNotPresent"
+    - name: v0.4.4 # latest published release in the v1alpha4 series; this is used for v1alpha4 --> v1beta1 clusterctl upgrades test only.
+      value: "https://github.com/kubernetes-sigs/cluster-api/releases/download/v0.4.4/control-plane-components.yaml"
+      type: "url"
+      contract: v1alpha4
+      replacements:
+        - old: --metrics-addr=127.0.0.1:8080
+          new: --metrics-addr=:8080
+      files:
+        - sourcePath: "../data/shared/v1alpha4/metadata.yaml"
   - name: kubeadm
     type: ControlPlaneProvider
     versions:
@@ -43,6 +106,8 @@ providers:
           new: "imagePullPolicy: IfNotPresent"
         - old: "--enable-leader-election"
           new: "--enable-leader-election=false"
+
+
   - name: digitalocean
     type: InfrastructureProvider
     versions:
@@ -76,6 +141,11 @@ variables:
   CONFORMANCE_WORKER_MACHINE_COUNT: "5"
   CONFORMANCE_CONTROL_PLANE_MACHINE_COUNT: "1"
   IP_FAMILY: "IPv4"
+  # NOTE: INIT_WITH_BINARY and INIT_WITH_KUBERNETES_VERSION are only used by the clusterctl upgrade test to initialize
+  # the management cluster to be upgraded.
+  INIT_WITH_BINARY: "https://github.com/kubernetes-sigs/cluster-api/releases/download/v0.3.23/clusterctl-{OS}-{ARCH}"
+  INIT_WITH_PROVIDERS_CONTRACT: "v1alpha3"
+  INIT_WITH_KUBERNETES_VERSION: "v1.22.4"
 
 intervals:
   default/wait-controllers: ["3m", "10s"]
