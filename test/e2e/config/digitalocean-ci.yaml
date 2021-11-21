@@ -12,7 +12,7 @@ providers:
       type: url
       contract: v1alpha3
       files:
-        - sourcePath: "../data/shared/v1alpha3/metadata.yaml"
+        - sourcePath: "${PWD}/test/e2e/data/shared/v1alpha3/metadata.yaml"
       replacements:
         - old: "imagePullPolicy: Always"
           new: "imagePullPolicy: IfNotPresent"
@@ -24,12 +24,12 @@ providers:
         - old: --metrics-addr=127.0.0.1:8080
           new: --metrics-addr=:8080
       files:
-        - sourcePath: "../data/shared/v1alpha4/metadata.yaml"
+        - sourcePath: "${PWD}/test/e2e/data/shared/v1alpha4/metadata.yaml"
     - name: v1.0.1
       value: https://storage.googleapis.com/artifacts.k8s-staging-cluster-api.appspot.com/components/nightly_main_20211121/core-components.yaml
       type: "url"
       files:
-      - sourcePath: "${PWD}/test/e2e/data/metadata/cluster-api/metadata.yaml"
+      - sourcePath: "${PWD}/test/e2e/data/shared/v1beta1/metadata.yaml"
       replacements:
         - old: "imagePullPolicy: Always"
           new: "imagePullPolicy: IfNotPresent"
@@ -44,7 +44,7 @@ providers:
       type: url
       contract: v1alpha3
       files:
-        - sourcePath: "../data/shared/v1alpha3/metadata.yaml"
+        - sourcePath: "${PWD}/test/e2e/data/shared/v1alpha3/metadata.yaml"
       replacements:
         - old: "imagePullPolicy: Always"
           new: "imagePullPolicy: IfNotPresent"
@@ -56,15 +56,12 @@ providers:
         - old: --metrics-addr=127.0.0.1:8080
           new: --metrics-addr=:8080
       files:
-        - sourcePath: "../data/shared/v1alpha4/metadata.yaml"
-  - name: kubeadm
-    type: BootstrapProvider
-    versions:
+        - sourcePath: "${PWD}/test/e2e/data/shared/v1alpha4/metadata.yaml"
     - name: v1.0.1
       value: https://storage.googleapis.com/artifacts.k8s-staging-cluster-api.appspot.com/components/nightly_main_20211121/bootstrap-components.yaml
       type: "url"
       files:
-      - sourcePath: "${PWD}/test/e2e/data/metadata/cluster-api/metadata.yaml"
+      - sourcePath: "${PWD}/test/e2e/data/shared/v1beta1/metadata.yaml"
       replacements:
         - old: "imagePullPolicy: Always"
           new: "imagePullPolicy: IfNotPresent"
@@ -80,7 +77,7 @@ providers:
       type: url
       contract: v1alpha3
       files:
-        - sourcePath: "../data/shared/v1alpha3/metadata.yaml"
+        - sourcePath: "${PWD}/test/e2e/data/shared/v1alpha3/metadata.yaml"
       replacements:
         - old: "imagePullPolicy: Always"
           new: "imagePullPolicy: IfNotPresent"
@@ -92,15 +89,12 @@ providers:
         - old: --metrics-addr=127.0.0.1:8080
           new: --metrics-addr=:8080
       files:
-        - sourcePath: "../data/shared/v1alpha4/metadata.yaml"
-  - name: kubeadm
-    type: ControlPlaneProvider
-    versions:
+        - sourcePath: "${PWD}/test/e2e/data/shared/v1alpha4/metadata.yaml"
     - name: v1.0.1
       value: https://storage.googleapis.com/artifacts.k8s-staging-cluster-api.appspot.com/components/nightly_main_20211121/control-plane-components.yaml
       type: "url"
       files:
-      - sourcePath: "${PWD}/test/e2e/data/metadata/cluster-api/metadata.yaml"
+      - sourcePath: "${PWD}/test/e2e/data/shared/v1beta1/metadata.yaml"
       replacements:
         - old: "imagePullPolicy: Always"
           new: "imagePullPolicy: IfNotPresent"
@@ -111,6 +105,28 @@ providers:
   - name: digitalocean
     type: InfrastructureProvider
     versions:
+    - name: v0.4.3 # latest published release in the v1alpha3 series; this is used for v1alpha3 --> v1beta1 clusterctl upgrades test only.
+      value: https://github.com/kubernetes-sigs/cluster-api-provider-digitalocean/releases/download/v0.4.3/infrastructure-components.yaml
+      type: url
+      contract: v1alpha3
+      files:
+      - sourcePath: "${PWD}/test/e2e/data/shared/v1alpha3_provider/metadata.yaml"
+      - sourcePath: "${PWD}/test/e2e/data/infrastructure-digitalocean/v1alpha3/cluster-template-prow.yaml"
+        targetName: "cluster-template.yaml"
+      replacements:
+      - old: "imagePullPolicy: Always"
+        new: "imagePullPolicy: IfNotPresent"
+    - name: v0.5.0 # latest published release in the v1alpha4 series; this is used for v1alpha4 --> v1beta1 clusterctl upgrades test only.
+      value: https://github.com/kubernetes-sigs/cluster-api-provider-digitalocean/releases/download/v0.5.0/infrastructure-components.yaml
+      type: url
+      contract: v1alpha4
+      files:
+      - sourcePath: "${PWD}/test/e2e/data/shared/v1alpha4_provider/metadata.yaml"
+      - sourcePath: "${PWD}/test/e2e/data/infrastructure-digitalocean/v1alpha4/cluster-template-prow.yaml"
+        targetName: "cluster-template.yaml"
+      replacements:
+      - old: "imagePullPolicy: Always"
+        new: "imagePullPolicy: IfNotPresent"
     - name: v1.0.1
       value: "${PWD}/config/default"
       replacements:
