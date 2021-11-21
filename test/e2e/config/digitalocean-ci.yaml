@@ -8,7 +8,7 @@ providers:
     type: CoreProvider
     versions:
     - name: v1.0.1
-      value: https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.0.1/core-components.yaml
+      value: https://storage.googleapis.com/artifacts.k8s-staging-cluster-api.appspot.com/components/nightly_main_20211121/core-components.yaml
       type: "url"
       files:
       - sourcePath: "${PWD}/test/e2e/data/metadata/cluster-api/metadata.yaml"
@@ -21,7 +21,7 @@ providers:
     type: BootstrapProvider
     versions:
     - name: v1.0.1
-      value: https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.0.1/bootstrap-components.yaml
+      value: https://storage.googleapis.com/artifacts.k8s-staging-cluster-api.appspot.com/components/nightly_main_20211121/bootstrap-components.yaml
       type: "url"
       files:
       - sourcePath: "${PWD}/test/e2e/data/metadata/cluster-api/metadata.yaml"
@@ -34,7 +34,7 @@ providers:
     type: ControlPlaneProvider
     versions:
     - name: v1.0.1
-      value: https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.0.1/control-plane-components.yaml
+      value: https://storage.googleapis.com/artifacts.k8s-staging-cluster-api.appspot.com/components/nightly_main_20211121/control-plane-components.yaml
       type: "url"
       files:
       - sourcePath: "${PWD}/test/e2e/data/metadata/cluster-api/metadata.yaml"
@@ -61,7 +61,7 @@ providers:
 
 variables:
   REDACT_LOG_SCRIPT: "${PWD}/hack/log/redact.sh"
-  KUBERNETES_VERSION: "v1.20.10"
+  KUBERNETES_VERSION: "v1.22.4"
   EXP_CLUSTER_RESOURCE_SET: "true"
   # Cluster Addons
   CNI: "${PWD}/test/e2e/data/cni/calico/calico.yaml"
@@ -69,9 +69,9 @@ variables:
   # Following CAPDO variables should be set before testing
   DO_REGION: "nyc1"
   DO_CONTROL_PLANE_MACHINE_TYPE: "s-2vcpu-2gb"
-  DO_CONTROL_PLANE_MACHINE_IMAGE: "93100171"
+  DO_CONTROL_PLANE_MACHINE_IMAGE: "96195649"
   DO_NODE_MACHINE_TYPE: "s-2vcpu-2gb"
-  DO_NODE_MACHINE_IMAGE: "93100171"
+  DO_NODE_MACHINE_IMAGE: "96195649"
   CONFORMANCE_CI_ARTIFACTS_KUBERNETES_VERSION: "v1.20.10"
   CONFORMANCE_WORKER_MACHINE_COUNT: "5"
   CONFORMANCE_CONTROL_PLANE_MACHINE_COUNT: "1"
