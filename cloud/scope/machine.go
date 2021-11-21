@@ -70,7 +70,7 @@ func NewMachineScope(params MachineScopeParams) (*MachineScope, error) {
 		return nil, errors.New("DOMachine is required when creating a MachineScope")
 	}
 
-	if params.Logger == nil {
+	if params.Logger == (logr.Logger{}) {
 		params.Logger = klogr.New()
 	}
 

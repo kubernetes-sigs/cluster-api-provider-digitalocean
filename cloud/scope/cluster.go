@@ -48,7 +48,7 @@ func NewClusterScope(params ClusterScopeParams) (*ClusterScope, error) {
 	if params.DOCluster == nil {
 		return nil, errors.New("DOCluster is required when creating a ClusterScope")
 	}
-	if params.Logger == nil {
+	if params.Logger == (logr.Logger{}) {
 		params.Logger = klogr.New()
 	}
 
