@@ -24,6 +24,7 @@ import (
 	"os"
 
 	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 
 	capi_e2e "sigs.k8s.io/cluster-api/test/e2e"
 )
@@ -54,8 +55,10 @@ var _ = Describe("Running the Cluster API E2E tests", func() {
 			Context("upgrade from v1alpha3 to v1beta1, and scale workload clusters created in v1alpha3 ", func() {
 				BeforeEach(func() {
 					imageID := e2eConfig.GetVariable("CLUSTER_API_UPGRADE_INIT_MACHINE_IMAGE")
+					k8sVersion := e2eConfig.GetVariable("INIT_WITH_KUBERNETES_VERSION")
 					Expect(os.Setenv("DO_NODE_MACHINE_IMAGE", imageID)).To(Succeed())
 					Expect(os.Setenv("DO_CONTROL_PLANE_MACHINE_IMAGE", imageID)).To(Succeed())
+					Expect(os.Setenv("KUBERNETES_VERSION", k8sVersion)).To(Succeed())
 				})
 				capi_e2e.ClusterctlUpgradeSpec(context.TODO(), func() capi_e2e.ClusterctlUpgradeSpecInput {
 					return capi_e2e.ClusterctlUpgradeSpecInput{
@@ -72,21 +75,21 @@ var _ = Describe("Running the Cluster API E2E tests", func() {
 				})
 			})
 
-			Context("upgrade from v1alpha4 to v1beta1, and scale workload clusters created in v1alpha4", func() {
-				BeforeEach(func() {
-				})
-				capi_e2e.ClusterctlUpgradeSpec(context.TODO(), func() capi_e2e.ClusterctlUpgradeSpecInput {
-					return capi_e2e.ClusterctlUpgradeSpecInput{
-						E2EConfig:                 e2eConfig,
-						ClusterctlConfigPath:      clusterctlConfigPath,
-						BootstrapClusterProxy:     bootstrapClusterProxy,
-						ArtifactFolder:            artifactFolder,
-						SkipCleanup:               skipCleanup,
-						InitWithProvidersContract: "v1alpha4",
-						InitWithBinary:            "https://github.com/kubernetes-sigs/cluster-api/releases/download/v0.4.4/clusterctl-{OS}-{ARCH}",
-					}
-				})
-			})
+			// Context("upgrade from v1alpha4 to v1beta1, and scale workload clusters created in v1alpha4", func() {
+			// 	BeforeEach(func() {
+			// 	})
+			// 	capi_e2e.ClusterctlUpgradeSpec(context.TODO(), func() capi_e2e.ClusterctlUpgradeSpecInput {
+			// 		return capi_e2e.ClusterctlUpgradeSpecInput{
+			// 			E2EConfig:                 e2eConfig,
+			// 			ClusterctlConfigPath:      clusterctlConfigPath,
+			// 			BootstrapClusterProxy:     bootstrapClusterProxy,
+			// 			ArtifactFolder:            artifactFolder,
+			// 			SkipCleanup:               skipCleanup,
+			// 			InitWithProvidersContract: "v1alpha4",
+			// 			InitWithBinary:            "https://github.com/kubernetes-sigs/cluster-api/releases/download/v0.4.4/clusterctl-{OS}-{ARCH}",
+			// 		}
+			// 	})
+			// })
 		})
 	}
 })
