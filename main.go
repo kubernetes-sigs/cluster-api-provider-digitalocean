@@ -45,6 +45,7 @@ import (
 	"sigs.k8s.io/cluster-api-provider-digitalocean/controllers"
 	dnsutil "sigs.k8s.io/cluster-api-provider-digitalocean/util/dns"
 	dnsresolver "sigs.k8s.io/cluster-api-provider-digitalocean/util/dns/resolver"
+	"sigs.k8s.io/cluster-api-provider-digitalocean/version"
 )
 
 var (
@@ -175,7 +176,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	setupLog.Info("starting manager")
+	setupLog.Info("starting manager", "version", version.Get().String(), "extended_info", version.Get())
 	if err := mgr.Start(ctx); err != nil {
 		setupLog.Error(err, "problem running manager")
 		os.Exit(1)

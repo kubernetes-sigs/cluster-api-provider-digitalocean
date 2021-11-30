@@ -98,6 +98,9 @@ endif
 # CI
 CAPDO_WORKER_CLUSTER_KUBECONFIG ?= "/tmp/kubeconfig"
 
+# Build time versioning details.
+LDFLAGS := $(shell hack/version.sh)
+
 ## --------------------------------------
 ##@ Help
 ## --------------------------------------
@@ -183,7 +186,7 @@ binaries: manager ## Builds and installs all binaries
 
 .PHONY: manager
 manager: ## Build manager binary.
-	go build -o $(BIN_DIR)/manager .
+	go build -trimpath -ldflags "$(LDFLAGS)" -o $(BIN_DIR)/manager .
 
 ## --------------------------------------
 ## Tooling Binaries
