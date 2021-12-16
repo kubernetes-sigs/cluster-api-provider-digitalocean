@@ -69,7 +69,7 @@ func (r *DOCluster) ValidateUpdate(old runtime.Object) error {
 	}
 
 	if !reflect.DeepEqual(clusterv1.APIEndpoint{}, oldDOCluster.Spec.ControlPlaneEndpoint) && !reflect.DeepEqual(r.Spec.ControlPlaneEndpoint, oldDOCluster.Spec.ControlPlaneEndpoint) {
-		allErrs = append(allErrs, field.Invalid(field.NewPath("spec", "controlPlaneEndpoint"), r.Spec.Region, "field is immutable"))
+		allErrs = append(allErrs, field.Invalid(field.NewPath("spec", "controlPlaneEndpoint"), r.Spec.ControlPlaneEndpoint, "field is immutable"))
 	}
 
 	if len(allErrs) == 0 {
