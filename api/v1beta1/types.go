@@ -126,6 +126,9 @@ type DOLoadBalancer struct {
 	// An object specifying health check settings for the Load Balancer. If omitted, default values will be provided.
 	// +optional
 	HealthCheck DOLoadBalancerHealthCheck `json:"healthCheck,omitempty"`
+	// The DO load balancer uuid. If omitted, a new load balancer will be created.
+	// +optional
+	ResourceId string `json:"resourceId,omitempty"`
 }
 
 // DOVPC define the DigitalOcean VPC configuration.
