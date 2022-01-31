@@ -184,7 +184,7 @@ $ kubectl delete cluster capdo-quickstart
 [kind]: https://github.com/kubernetes-sigs/kind#installation-and-usage
 [doctl]: https://github.com/digitalocean/doctl#installing-doctl
 [Minikube]: https://kubernetes.io/docs/tasks/tools/install-minikube/
-[Minikube Driver]: https://github.com/kubernetes/minikube/blob/master/docs/drivers.md
+[Minikube Driver]: https://minikube.sigs.k8s.io/docs/drivers
 [Packer]: https://www.packer.io/intro/getting-started/install.html
 [Ansible]: https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html
 [DigitalOcean]: https://cloud.digitalocean.com/
