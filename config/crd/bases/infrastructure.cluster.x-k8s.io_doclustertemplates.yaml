@@ -148,7 +148,7 @@ spec:
                                 minimum: 1
                                 type: integer
                               resourceId:
-                                description: The DO load balancer uuid. If omitted,
+                                description: The DO load balancer UUID. If omitted,
                                   a new load balancer will be created.
                                 type: string
                             type: object
