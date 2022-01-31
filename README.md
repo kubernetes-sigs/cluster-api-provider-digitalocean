@@ -41,13 +41,13 @@ Check out the [getting started guide](./docs/getting-started.md) for launching a
 This provider's versions are compatible with the following versions of Cluster API:
 
 |                                       | Cluster API v1alpha1 (v0.1) | Cluster API v1alpha2 (v0.2) | Cluster API v1alpha3 (v0.3) | Cluster API v1alpha4 (v0.4) | Cluster API v1 (v1.0) |
-| ------------------------------------- | --------------------------- | --------------------------- | --------------------------- | --------------------------- | --------------------- |
+| ------------------------------------- | --------------------------- | --------------------------- | --------------------------- |-----------------------------| --------------------- |
 | DigitalOcean Provider v1alpha1 (v0.1) | ✓                           |                             |                             |                             |                       |
 | DigitalOcean Provider v1alpha1 (v0.2) | ✓                           |                             |                             |                             |                       |
 | DigitalOcean Provider v1alpha2 (v0.3) |                             | ✓                           |                             |                             |                       |
 | DigitalOcean Provider v1alpha3 (v0.4) |                             |                             | ✓                           |                             |                       |
 | DigitalOcean Provider v1alpha4 (v0.5) |                             |                             |                             | ✓                           |                       |
-| DigitalOcean Provider v1       (v1.0) |                             |                             |                             | ✓                           |                       |
+| DigitalOcean Provider v1       (v1.0) |                             |                             |                             |                             | ✓                     |
 
 This provider's versions are able to install and manage the following versions of Kubernetes:
 
