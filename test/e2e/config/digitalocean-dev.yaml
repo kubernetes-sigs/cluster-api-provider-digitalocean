@@ -46,8 +46,7 @@ providers:
   - name: digitalocean
     type: InfrastructureProvider
     versions:
-    - name: v1.1.0
-      # Use manifest from source files
+    - name: v1.1.99 # Use manifest from source files
       value: ${PWD}/config/default
       replacements:
         - old: gcr.io/k8s-staging-cluster-api-do/cluster-api-do-controller:dev
