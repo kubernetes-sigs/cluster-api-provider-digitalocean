@@ -430,7 +430,7 @@ create-management-cluster: $(KUSTOMIZE) $(ENVSUBST)
 
 	# Deploy CAPI
 	# Using main artifacts
-	curl --retry $(CURL_RETRIES) -sSL https://storage.googleapis.com/artifacts.k8s-staging-cluster-api.appspot.com/components/nightly_master_20211121/cluster-api-components.yaml | $(ENVSUBST) | kubectl apply -f -
+	curl --retry $(CURL_RETRIES) -sSL https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.1.0/cluster-api-components.yaml | $(ENVSUBST) | kubectl apply -f -
 
 	# Deploy CAPG
 	kind load docker-image $(CONTROLLER_IMG)-$(ARCH):$(TAG) --name=capdo
