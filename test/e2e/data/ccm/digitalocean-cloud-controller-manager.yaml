@@ -6,7 +6,6 @@ metadata:
   namespace: kube-system
 stringData:
   access-token: ${DIGITALOCEAN_ACCESS_TOKEN}
-
 ---
 apiVersion: apps/v1
 kind: DaemonSet
@@ -46,7 +45,7 @@ spec:
           operator: Exists
           tolerationSeconds: 300
       containers:
-      - image: digitalocean/digitalocean-cloud-controller-manager:v0.1.22
+      - image: digitalocean/digitalocean-cloud-controller-manager:v0.1.36
         name: digitalocean-cloud-controller-manager
         command:
           - "/bin/digitalocean-cloud-controller-manager"
@@ -67,7 +66,6 @@ spec:
               secretKeyRef:
                 name: digitalocean
                 key: access-token
-
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -126,15 +124,6 @@ rules:
   - serviceaccounts
   verbs:
   - create
-- apiGroups:
-  - ""
-  resources:
-  - persistentvolumes
-  verbs:
-  - get
-  - list
-  - update
-  - watch
 - apiGroups:
   - ""
   resources:
