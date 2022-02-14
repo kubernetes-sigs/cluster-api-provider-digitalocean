@@ -7,8 +7,8 @@ providers:
   - name: cluster-api
     type: CoreProvider
     versions:
-    - name: v1.1.0
-      value: https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.1.0/core-components.yaml
+    - name: v1.1.1
+      value: https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.1.1/core-components.yaml
       type: "url"
       files:
       - sourcePath: "${PWD}/test/e2e/data/metadata/cluster-api/metadata.yaml"
@@ -20,8 +20,8 @@ providers:
   - name: kubeadm
     type: BootstrapProvider
     versions:
-    - name: v1.1.0
-      value: https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.1.0/bootstrap-components.yaml
+    - name: v1.1.1
+      value: https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.1.1/bootstrap-components.yaml
       type: "url"
       files:
       - sourcePath: "${PWD}/test/e2e/data/metadata/cluster-api/metadata.yaml"
@@ -33,8 +33,8 @@ providers:
   - name: kubeadm
     type: ControlPlaneProvider
     versions:
-    - name: v1.1.0
-      value: https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.1.0/control-plane-components.yaml
+    - name: v1.1.1
+      value: https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.1.1/control-plane-components.yaml
       type: "url"
       files:
       - sourcePath: "${PWD}/test/e2e/data/metadata/cluster-api/metadata.yaml"
@@ -46,7 +46,7 @@ providers:
   - name: digitalocean
     type: InfrastructureProvider
     versions:
-    - name: v1.1.0
+    - name: v1.1.99
       value: "${PWD}/config/default"
       replacements:
         - old: gcr.io/k8s-staging-cluster-api-do/cluster-api-do-controller:dev
@@ -61,7 +61,7 @@ providers:
 
 variables:
   REDACT_LOG_SCRIPT: "${PWD}/hack/log/redact.sh"
-  KUBERNETES_VERSION: "v1.22.4"
+  KUBERNETES_VERSION: "v1.22.6"
   EXP_CLUSTER_RESOURCE_SET: "true"
   # Cluster Addons
   CNI: "${PWD}/test/e2e/data/cni/calico/calico.yaml"
@@ -69,10 +69,12 @@ variables:
   # Following CAPDO variables should be set before testing
   DO_REGION: "nyc1"
   DO_CONTROL_PLANE_MACHINE_TYPE: "s-2vcpu-2gb"
-  DO_CONTROL_PLANE_MACHINE_IMAGE: "96195649"
+  # Cluster API Kubernetes v1.22.6 on Ubuntu 20.04
+  DO_CONTROL_PLANE_MACHINE_IMAGE: "101591787"
   DO_NODE_MACHINE_TYPE: "s-2vcpu-2gb"
-  DO_NODE_MACHINE_IMAGE: "96195649"
-  CONFORMANCE_CI_ARTIFACTS_KUBERNETES_VERSION: "v1.20.10"
+  # Cluster API Kubernetes v1.22.6 on Ubuntu 20.04
+  DO_NODE_MACHINE_IMAGE: "101591787"
+  CONFORMANCE_CI_ARTIFACTS_KUBERNETES_VERSION: "v1.23.3"
   CONFORMANCE_WORKER_MACHINE_COUNT: "5"
   CONFORMANCE_CONTROL_PLANE_MACHINE_COUNT: "1"
   IP_FAMILY: "IPv4"
