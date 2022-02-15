@@ -432,7 +432,7 @@ create-management-cluster: $(KUSTOMIZE) $(ENVSUBST)
 	# Using main artifacts
 	curl --retry $(CURL_RETRIES) -sSL https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.1.0/cluster-api-components.yaml | $(ENVSUBST) | kubectl apply -f -
 
-	# Deploy CAPG
+	# Deploy CAPDO
 	kind load docker-image $(CONTROLLER_IMG)-$(ARCH):$(TAG) --name=capdo
 	$(KUSTOMIZE) build config/default | $(ENVSUBST) | kubectl apply -f -
 
