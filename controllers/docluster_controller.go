@@ -29,6 +29,7 @@ import (
 
 	clusterv1 "sigs.k8s.io/cluster-api/api/v1beta1"
 	"sigs.k8s.io/cluster-api/util"
+	"sigs.k8s.io/cluster-api/util/annotations"
 	"sigs.k8s.io/cluster-api/util/predicates"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -78,8 +79,8 @@ func (r *DOClusterReconciler) SetupWithManager(ctx context.Context, mgr ctrl.Man
 func (r *DOClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctrl.Result, reterr error) {
 	log := ctrl.LoggerFrom(ctx)
 
-	docluster := &infrav1.DOCluster{}
-	if err := r.Get(ctx, req.NamespacedName, docluster); err != nil {
+	doCluster := &infrav1.DOCluster{}
+	if err := r.Get(ctx, req.NamespacedName, doCluster); err != nil {
 		if apierrors.IsNotFound(err) {
 			return reconcile.Result{}, nil
 		}
@@ -87,7 +88,7 @@ func (r *DOClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	}
 
 	// Fetch the Cluster.
-	cluster, err := util.GetOwnerCluster(ctx, r.Client, docluster.ObjectMeta)
+	cluster, err := util.GetOwnerCluster(ctx, r.Client, doCluster.ObjectMeta)
 	if err != nil {
 		return reconcile.Result{}, err
 	}
@@ -96,12 +97,18 @@ func (r *DOClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		return reconcile.Result{}, nil
 	}
 
+	// Return early if the object or Cluster is paused.
+	if annotations.IsPaused(cluster, doCluster) {
+		log.Info("DOCluster or linked Cluster is marked as paused. Won't reconcile")
+		return ctrl.Result{}, nil
+	}
+
 	// Create the cluster scope.
 	clusterScope, err := scope.NewClusterScope(scope.ClusterScopeParams{
 		Client:    r.Client,
 		Logger:    log,
 		Cluster:   cluster,
-		DOCluster: docluster,
+		DOCluster: doCluster,
 	})
 	if err != nil {
 		return reconcile.Result{}, errors.Errorf("failed to create scope: %+v", err)
@@ -115,7 +122,7 @@ func (r *DOClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	}()
 
 	// Handle deleted clusters
-	if !docluster.DeletionTimestamp.IsZero() {
+	if !doCluster.DeletionTimestamp.IsZero() {
 		return r.reconcileDelete(ctx, clusterScope)
 	}
 

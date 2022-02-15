@@ -32,6 +32,7 @@ import (
 	clusterv1 "sigs.k8s.io/cluster-api/api/v1beta1"
 	capierrors "sigs.k8s.io/cluster-api/errors"
 	"sigs.k8s.io/cluster-api/util"
+	"sigs.k8s.io/cluster-api/util/annotations"
 	"sigs.k8s.io/cluster-api/util/predicates"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -134,8 +135,8 @@ func (r *DOMachineReconciler) DOClusterToDOMachines(ctx context.Context) handler
 func (r *DOMachineReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctrl.Result, reterr error) {
 	log := ctrl.LoggerFrom(ctx)
 
-	domachine := &infrav1.DOMachine{}
-	if err := r.Get(ctx, req.NamespacedName, domachine); err != nil {
+	doMachine := &infrav1.DOMachine{}
+	if err := r.Get(ctx, req.NamespacedName, doMachine); err != nil {
 		if apierrors.IsNotFound(err) {
 			return reconcile.Result{}, nil
 		}
@@ -143,7 +144,7 @@ func (r *DOMachineReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	}
 
 	// Fetch the Machine.
-	machine, err := util.GetOwnerMachine(ctx, r.Client, domachine.ObjectMeta)
+	machine, err := util.GetOwnerMachine(ctx, r.Client, doMachine.ObjectMeta)
 	if err != nil {
 		return reconcile.Result{}, err
 	}
@@ -159,14 +160,20 @@ func (r *DOMachineReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		return reconcile.Result{}, nil
 	}
 
-	docluster := &infrav1.DOCluster{}
-	doclusterNamespacedName := client.ObjectKey{
-		Namespace: domachine.Namespace,
+	doCluster := &infrav1.DOCluster{}
+	doClusterNamespacedName := client.ObjectKey{
+		Namespace: doMachine.Namespace,
 		Name:      cluster.Spec.InfrastructureRef.Name,
 	}
-	if err := r.Get(ctx, doclusterNamespacedName, docluster); err != nil {
+	if err := r.Get(ctx, doClusterNamespacedName, doCluster); err != nil {
 		log.Info("DOluster is not available yet")
 		return reconcile.Result{}, nil
+	}
+
+	// Return early if the object or Cluster is paused.
+	if annotations.IsPaused(cluster, doCluster) {
+		log.Info("DOMachine or linked Cluster is marked as paused. Won't reconcile")
+		return ctrl.Result{}, nil
 	}
 
 	// Create the cluster scope
@@ -174,7 +181,7 @@ func (r *DOMachineReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		Client:    r.Client,
 		Logger:    log,
 		Cluster:   cluster,
-		DOCluster: docluster,
+		DOCluster: doCluster,
 	})
 	if err != nil {
 		return reconcile.Result{}, err
@@ -186,8 +193,8 @@ func (r *DOMachineReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		Client:    r.Client,
 		Cluster:   cluster,
 		Machine:   machine,
-		DOCluster: docluster,
-		DOMachine: domachine,
+		DOCluster: doCluster,
+		DOMachine: doMachine,
 	})
 	if err != nil {
 		return reconcile.Result{}, errors.Errorf("failed to create scope: %+v", err)
@@ -201,7 +208,7 @@ func (r *DOMachineReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	}()
 
 	// Handle deleted machines
-	if !domachine.ObjectMeta.DeletionTimestamp.IsZero() {
+	if !doMachine.ObjectMeta.DeletionTimestamp.IsZero() {
 		return r.reconcileDelete(ctx, machineScope, clusterScope)
 	}
 
