@@ -58,6 +58,8 @@ providers:
         targetName: "metadata.yaml"
       - sourcePath: "${PWD}/test/e2e/data/infrastructure-digitalocean/cluster-template.yaml"
         targetName: "cluster-template.yaml"
+      - sourcePath: "${PWD}/test/e2e/data/infrastructure-digitalocean/cluster-template-md-remediation.yaml"
+      - sourcePath: "${PWD}/test/e2e/data/infrastructure-digitalocean/cluster-template-kcp-remediation.yaml"
 
 variables:
   REDACT_LOG_SCRIPT: "${PWD}/hack/log/redact.sh"
@@ -90,3 +92,4 @@ intervals:
   default/wait-deployment: ["5m", "10s"]
   default/wait-job: ["5m", "10s"]
   default/wait-service: ["3m", "10s"]
+  node-drain/wait-machine-deleted: [ "10m", "10s" ]
