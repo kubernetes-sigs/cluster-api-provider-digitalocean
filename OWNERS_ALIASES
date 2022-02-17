@@ -2,19 +2,22 @@
 
 aliases:
   sig-cluster-lifecycle-leads:
+    - fabriziopandini
+    - justinsb
     - neolit123
-    - justinsb
     - timothysc
+
   cluster-api-admins:
-    - justinsb
-    - detiber
-    - davidewatson
+    - CecileRobertMichon
     - vincepri
+
   cluster-api-maintainers:
-    - justinsb
-    - detiber
+    - CecileRobertMichon
+    - enxebre
+    - fabriziopandini
+    - sbueringer
     - vincepri
-    - chuckha
+
   cluster-api-do-maintainers:
     - cpanato
     - MorrisLaw
