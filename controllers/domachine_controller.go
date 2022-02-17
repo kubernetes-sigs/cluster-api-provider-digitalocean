@@ -45,12 +45,14 @@ import (
 	infrav1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1beta1"
 	"sigs.k8s.io/cluster-api-provider-digitalocean/cloud/scope"
 	"sigs.k8s.io/cluster-api-provider-digitalocean/cloud/services/computes"
+	"sigs.k8s.io/cluster-api-provider-digitalocean/util/reconciler"
 )
 
 // DOMachineReconciler reconciles a DOMachine object.
 type DOMachineReconciler struct {
 	client.Client
-	Recorder record.EventRecorder
+	Recorder         record.EventRecorder
+	ReconcileTimeout time.Duration
 }
 
 func (r *DOMachineReconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager, options controller.Options) error {
@@ -133,6 +135,9 @@ func (r *DOMachineReconciler) DOClusterToDOMachines(ctx context.Context) handler
 // +kubebuilder:rbac:groups="",resources=secrets;,verbs=get;list;watch
 
 func (r *DOMachineReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctrl.Result, reterr error) {
+	ctx, cancel := context.WithTimeout(ctx, reconciler.DefaultedLoopTimeout(r.ReconcileTimeout))
+	defer cancel()
+
 	log := ctrl.LoggerFrom(ctx)
 
 	doMachine := &infrav1.DOMachine{}

@@ -43,12 +43,14 @@ import (
 	"sigs.k8s.io/cluster-api-provider-digitalocean/cloud/scope"
 	"sigs.k8s.io/cluster-api-provider-digitalocean/cloud/services/networking"
 	dnsutil "sigs.k8s.io/cluster-api-provider-digitalocean/util/dns"
+	"sigs.k8s.io/cluster-api-provider-digitalocean/util/reconciler"
 )
 
 // DOClusterReconciler reconciles a DOCluster object.
 type DOClusterReconciler struct {
 	client.Client
-	Recorder record.EventRecorder
+	Recorder         record.EventRecorder
+	ReconcileTimeout time.Duration
 }
 
 func (r *DOClusterReconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager, options controller.Options) error {
@@ -77,6 +79,9 @@ func (r *DOClusterReconciler) SetupWithManager(ctx context.Context, mgr ctrl.Man
 // +kubebuilder:rbac:groups=cluster.x-k8s.io,resources=clusters;clusters/status,verbs=get;list;watch
 
 func (r *DOClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctrl.Result, reterr error) {
+	ctx, cancel := context.WithTimeout(ctx, reconciler.DefaultedLoopTimeout(r.ReconcileTimeout))
+	defer cancel()
+
 	log := ctrl.LoggerFrom(ctx)
 
 	doCluster := &infrav1.DOCluster{}
