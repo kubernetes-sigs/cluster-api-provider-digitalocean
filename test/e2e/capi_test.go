@@ -23,13 +23,18 @@ import (
 	"context"
 
 	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
+
+	"k8s.io/utils/pointer"
 
 	capi_e2e "sigs.k8s.io/cluster-api/test/e2e"
 )
 
 var _ = Describe("Running the Cluster API E2E tests", func() {
 	BeforeEach(func() {
-
+		Expect(e2eConfig.Variables).To(HaveKey(capi_e2e.KubernetesVersionUpgradeFrom))
+		Expect(e2eConfig.Variables).To(HaveKey(capi_e2e.KubernetesVersionUpgradeTo))
+		Expect(e2eConfig.Variables).To(HaveKey(capi_e2e.MachineTemplateUpgradeTo))
 	})
 
 	AfterEach(func() {
@@ -56,6 +61,34 @@ var _ = Describe("Running the Cluster API E2E tests", func() {
 				BootstrapClusterProxy: bootstrapClusterProxy,
 				ArtifactFolder:        artifactFolder,
 				SkipCleanup:           skipCleanup,
+			}
+		})
+	})
+
+	Context("Running the workload cluster upgrade spec [K8s-Upgrade]", func() {
+		capi_e2e.ClusterUpgradeConformanceSpec(context.TODO(), func() capi_e2e.ClusterUpgradeConformanceSpecInput {
+			return capi_e2e.ClusterUpgradeConformanceSpecInput{
+				E2EConfig:             e2eConfig,
+				ClusterctlConfigPath:  clusterctlConfigPath,
+				BootstrapClusterProxy: bootstrapClusterProxy,
+				ArtifactFolder:        artifactFolder,
+				SkipCleanup:           skipCleanup,
+				SkipConformanceTests:  true,
+			}
+		})
+	})
+
+	Context("Running KCP upgrade in a HA cluster [K8s-Upgrade]", func() {
+		capi_e2e.ClusterUpgradeConformanceSpec(context.TODO(), func() capi_e2e.ClusterUpgradeConformanceSpecInput {
+			return capi_e2e.ClusterUpgradeConformanceSpecInput{
+				E2EConfig:                e2eConfig,
+				ClusterctlConfigPath:     clusterctlConfigPath,
+				BootstrapClusterProxy:    bootstrapClusterProxy,
+				ArtifactFolder:           artifactFolder,
+				ControlPlaneMachineCount: pointer.Int64(3),
+				WorkerMachineCount:       pointer.Int64(0),
+				SkipCleanup:              skipCleanup,
+				SkipConformanceTests:     true,
 			}
 		})
 	})

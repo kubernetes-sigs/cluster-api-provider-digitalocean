@@ -60,6 +60,7 @@ providers:
         targetName: "cluster-template.yaml"
       - sourcePath: "${PWD}/test/e2e/data/infrastructure-digitalocean/cluster-template-md-remediation.yaml"
       - sourcePath: "${PWD}/test/e2e/data/infrastructure-digitalocean/cluster-template-kcp-remediation.yaml"
+      - sourcePath: "${PWD}/test/e2e/data/infrastructure-digitalocean/cluster-template-upgrades.yaml"
 
 variables:
   REDACT_LOG_SCRIPT: "${PWD}/hack/log/redact.sh"
@@ -79,6 +80,16 @@ variables:
   CONFORMANCE_CI_ARTIFACTS_KUBERNETES_VERSION: "v1.23.3"
   CONFORMANCE_WORKER_MACHINE_COUNT: "5"
   CONFORMANCE_CONTROL_PLANE_MACHINE_COUNT: "1"
+  KUBETEST_CONFIGURATION: "${PWD}/test/e2e/data/kubetest/conformance.yaml"
+  ETCD_VERSION_UPGRADE_TO: "3.5.1-0"
+  COREDNS_VERSION_UPGRADE_TO: "v1.8.6"
+  # Cluster API Kubernetes v1.22.6 on Ubuntu 20.04
+  KUBERNETES_IMAGE_UPGRADE_FROM: "101591787"
+  # Cluster API Kubernetes v1.23.3 on Ubuntu 20.04
+  KUBERNETES_IMAGE_UPGRADE_TO: "101593074"
+  MACHINE_TEMPLATE_UPGRADE_TO: "k8s-upgrade-and-conformance"
+  KUBERNETES_VERSION_UPGRADE_TO: "${KUBERNETES_VERSION_UPGRADE_TO:-v1.23.3}"
+  KUBERNETES_VERSION_UPGRADE_FROM: "${KUBERNETES_VERSION_UPGRADE_FROM:-v1.22.6}"
   IP_FAMILY: "IPv4"
 
 intervals:

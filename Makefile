@@ -70,8 +70,10 @@ RBAC_ROOT ?= $(MANIFEST_ROOT)/rbac
 
 # Allow overriding the e2e configurations
 GINKGO_FOCUS ?= Workload cluster creation
+GINKGO_SKIP ?= API Version Upgrade
 GINKGO_NODES ?= 3
 GINKGO_NOCOLOR ?= false
+GINKGO_ARGS ?=
 
 # Allow overriding the imagePullPolicy
 PULL_POLICY ?= Always
@@ -164,14 +166,14 @@ test: generate lint ## Run tests
 .PHONY: test-e2e ## Run e2e tests using clusterctl
 test-e2e: e2e-image $(ENVSUBST) $(GINKGO) $(KIND) $(KUSTOMIZE)  ## Run e2e tests
 	$(ENVSUBST) < $(E2E_CONF_FILE) > $(E2E_CONF_FILE_ENVSUBST) && \
-	time $(GINKGO) -trace -progress -v -tags=e2e -focus=$(GINKGO_FOCUS) -nodes=$(GINKGO_NODES) --noColor=$(GINKGO_NOCOLOR) ./test/e2e/... -- \
+	time $(GINKGO) -trace -progress -v -tags=e2e -focus="$(GINKGO_FOCUS)" -skip="$(GINKGO_SKIP)" -nodes=$(GINKGO_NODES) --noColor=$(GINKGO_NOCOLOR) $(GINKGO_ARGS) ./test/e2e/... -- \
 			-e2e.config="$(E2E_CONF_FILE_ENVSUBST)" \
 			-e2e.artifacts-folder="$(ARTIFACTS)" $(E2E_ARGS)
 
 .PHONY: test-conformance
 test-conformance: e2e-image $(ENVSUBST) $(GINKGO) $(KIND) $(KUSTOMIZE) ## Run conformance test on workload cluster
 	$(ENVSUBST) < $(E2E_CONF_FILE) > $(E2E_CONF_FILE_ENVSUBST) && \
-	time $(GINKGO) -v -trace -stream -progress -tags=e2e -focus=$(GINKGO_FOCUS) -nodes=$(GINKGO_NODES) --noColor=$(GINKGO_NOCOLOR) ./test/e2e/... -- \
+	time $(GINKGO) -v -trace -stream -progress -tags=e2e -focus="$(GINKGO_FOCUS)" -skip="$(GINKGO_SKIP)" -nodes=$(GINKGO_NODES) --noColor=$(GINKGO_NOCOLOR) $(GINKGO_ARGS) ./test/e2e/... -- \
 			-e2e.config="$(E2E_CONF_FILE_ENVSUBST)" \
 			-kubetest.config-file=$(KUBETEST_CONF_PATH) \
 			-e2e.artifacts-folder="$(ARTIFACTS)" $(E2E_ARGS)
