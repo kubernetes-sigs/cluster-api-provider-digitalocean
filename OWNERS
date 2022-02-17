@@ -9,3 +9,6 @@ approvers:
 reviewers:
   - cluster-api-maintainers
   - cluster-api-do-maintainers
+
+emeritus_approvers:
+  - xmudrii
