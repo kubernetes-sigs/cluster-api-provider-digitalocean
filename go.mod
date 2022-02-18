@@ -11,8 +11,8 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/pflag v1.0.5
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
-	k8s.io/api v0.23.0
-	k8s.io/apimachinery v0.23.0
+	k8s.io/api v0.23.4
+	k8s.io/apimachinery v0.23.4
 	k8s.io/client-go v0.23.0
 	k8s.io/klog/v2 v2.30.0
 	k8s.io/utils v0.0.0-20211208161948-7d6a63dca704
@@ -89,7 +89,7 @@ require (
 	github.com/subosito/gotenv v1.2.0 // indirect
 	github.com/valyala/fastjson v1.6.3 // indirect
 	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5 // indirect
-	golang.org/x/net v0.0.0-20211208012354-db4efeb81f4b // indirect
+	golang.org/x/net v0.0.0-20211209124913-491a49abca63 // indirect
 	golang.org/x/sys v0.0.0-20211205182925-97ca703d548d // indirect
 	golang.org/x/term v0.0.0-20210615171337-6886f2dfbf5b // indirect
 	golang.org/x/text v0.3.7 // indirect
@@ -111,7 +111,7 @@ require (
 	k8s.io/kube-openapi v0.0.0-20211115234752-e816edb12b65 // indirect
 	sigs.k8s.io/json v0.0.0-20211020170558-c049b76a60c6 // indirect
 	sigs.k8s.io/kind v0.11.1 // indirect
-	sigs.k8s.io/structured-merge-diff/v4 v4.2.0 // indirect
+	sigs.k8s.io/structured-merge-diff/v4 v4.2.1 // indirect
 	sigs.k8s.io/yaml v1.3.0 // indirect
 )
 
