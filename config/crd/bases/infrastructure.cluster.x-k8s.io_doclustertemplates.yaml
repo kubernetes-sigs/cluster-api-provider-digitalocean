@@ -147,6 +147,10 @@ spec:
                                 maximum: 65535
                                 minimum: 1
                                 type: integer
+                              resourceId:
+                                description: The DO load balancer UUID. If omitted,
+                                  a new load balancer will be created.
+                                type: string
                             type: object
                           vpc:
                             description: VPC defines the VPC configuration.

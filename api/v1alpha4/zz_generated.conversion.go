@@ -420,6 +420,7 @@ func autoConvert_v1alpha4_DOLoadBalancer_To_v1beta1_DOLoadBalancer(in *DOLoadBal
 	if err := Convert_v1alpha4_DOLoadBalancerHealthCheck_To_v1beta1_DOLoadBalancerHealthCheck(&in.HealthCheck, &out.HealthCheck, s); err != nil {
 		return err
 	}
+	out.ResourceID = in.ResourceID
 	return nil
 }
 
@@ -434,6 +435,7 @@ func autoConvert_v1beta1_DOLoadBalancer_To_v1alpha4_DOLoadBalancer(in *v1beta1.D
 	if err := Convert_v1beta1_DOLoadBalancerHealthCheck_To_v1alpha4_DOLoadBalancerHealthCheck(&in.HealthCheck, &out.HealthCheck, s); err != nil {
 		return err
 	}
+	out.ResourceID = in.ResourceID
 	return nil
 }
 

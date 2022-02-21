@@ -145,7 +145,13 @@ func (r *DOClusterReconciler) reconcile(ctx context.Context, clusterScope *scope
 	apiServerLoadbalancer.ApplyDefault()
 
 	apiServerLoadbalancerRef := clusterScope.APIServerLoadbalancersRef()
-	loadbalancer, err := networkingsvc.GetLoadBalancer(apiServerLoadbalancerRef.ResourceID)
+	lbUUID := apiServerLoadbalancerRef.ResourceID
+
+	if apiServerLoadbalancer.ResourceID != "" {
+		lbUUID = apiServerLoadbalancer.ResourceID
+	}
+
+	loadbalancer, err := networkingsvc.GetLoadBalancer(lbUUID)
 	if err != nil {
 		return reconcile.Result{}, err
 	}
@@ -160,6 +166,7 @@ func (r *DOClusterReconciler) reconcile(ctx context.Context, clusterScope *scope
 
 	apiServerLoadbalancerRef.ResourceID = loadbalancer.ID
 	apiServerLoadbalancerRef.ResourceStatus = infrav1.DOResourceStatus(loadbalancer.Status)
+	apiServerLoadbalancer.ResourceID = loadbalancer.ID
 
 	if apiServerLoadbalancerRef.ResourceStatus != infrav1.DOResourceStatusRunning && loadbalancer.IP == "" {
 		clusterScope.Info("Waiting on API server Global IP Address")
