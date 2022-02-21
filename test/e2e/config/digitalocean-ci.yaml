@@ -58,9 +58,12 @@ providers:
         targetName: "metadata.yaml"
       - sourcePath: "${PWD}/test/e2e/data/infrastructure-digitalocean/cluster-template.yaml"
         targetName: "cluster-template.yaml"
+      - sourcePath: "${PWD}/test/e2e/data/infrastructure-digitalocean/cluster-template-prow-ci-version.yaml"
+        targetName: "cluster-template-conformance-ci-artifacts.yaml"
       - sourcePath: "${PWD}/test/e2e/data/infrastructure-digitalocean/cluster-template-md-remediation.yaml"
       - sourcePath: "${PWD}/test/e2e/data/infrastructure-digitalocean/cluster-template-kcp-remediation.yaml"
       - sourcePath: "${PWD}/test/e2e/data/infrastructure-digitalocean/cluster-template-upgrades.yaml"
+
 
 variables:
   REDACT_LOG_SCRIPT: "${PWD}/hack/log/redact.sh"
@@ -77,8 +80,7 @@ variables:
   DO_NODE_MACHINE_TYPE: "s-2vcpu-2gb"
   # Cluster API Kubernetes v1.22.6 on Ubuntu 20.04
   DO_NODE_MACHINE_IMAGE: "101591787"
-  CONFORMANCE_CI_ARTIFACTS_KUBERNETES_VERSION: "v1.23.3"
-  CONFORMANCE_WORKER_MACHINE_COUNT: "5"
+  CONFORMANCE_WORKER_MACHINE_COUNT: "2"
   CONFORMANCE_CONTROL_PLANE_MACHINE_COUNT: "1"
   KUBETEST_CONFIGURATION: "${PWD}/test/e2e/data/kubetest/conformance.yaml"
   ETCD_VERSION_UPGRADE_TO: "3.5.1-0"
