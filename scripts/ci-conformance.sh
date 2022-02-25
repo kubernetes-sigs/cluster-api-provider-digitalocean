@@ -32,6 +32,9 @@ source "${REPO_ROOT}/hack/ensure-doctl.sh"
 
 export ARTIFACTS="${ARTIFACTS:-${REPO_ROOT}/_artifacts}"
 export E2E_CONF_FILE="${REPO_ROOT}/test/e2e/config/digitalocean-ci.yaml"
+KUBERNETES_VERSION=${KUBERNETES_VERSION:-}
+KUBERNETES_MAJOR_VERSION=${KUBERNETES_MAJOR_VERSION:-}
+KUBERNETES_MAJOR_VERSION=${KUBERNETES_MAJOR_VERSION:-}
 
 SSH_KEY_NAME=capdo-conf-$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 12 ; echo '')
 SSH_KEY_PATH=/tmp/${SSH_KEY_NAME}
@@ -58,5 +61,19 @@ trap 'remove_ssh_key ${SSH_KEY_FINGERPRINT}' EXIT
 export DO_SSH_KEY_FINGERPRINT=${SSH_KEY_FINGERPRINT}
 
 export GINKGO_FOCUS="Conformance Tests"
+
+if [[ "${E2E_ARGS:-}" == "-kubetest.use-ci-artifacts" ]]; then
+    CI_VERSION=${CI_VERSION:-$(curl -sSL https://dl.k8s.io/ci/latest.txt)}
+    KUBERNETES_VERSION=${CI_VERSION}
+    KUBERNETES_MAJOR_VERSION=$(echo "${KUBERNETES_VERSION}" | cut -d '.' -f1 - | sed 's/v//')
+    KUBERNETES_MINOR_VERSION=$(echo "${KUBERNETES_VERSION}" | cut -d '.' -f2 -)
+
+    export CI_VERSION
+    export KUBERNETES_VERSION
+    export KUBERNETES_MAJOR_VERSION
+    export KUBERNETES_MAJOR_VERSION
+fi
+echo "Will use K8s version $KUBERNETES_VERSION"
+
 make test-conformance
 test_status="${?}"

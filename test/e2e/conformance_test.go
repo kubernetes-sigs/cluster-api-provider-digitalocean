@@ -60,7 +60,11 @@ var _ = Describe("Conformance Tests", func() {
 		Expect(e2eConfig.Variables).To(HaveKey(capi_e2e.KubernetesVersion))
 		Expect(e2eConfig.Variables).To(HaveKey(capi_e2e.CNIPath))
 
-		clusterName = fmt.Sprintf("capdo-conf-%s", util.RandomString(6))
+		clusterName = os.Getenv("CLUSTER_NAME")
+		if clusterName == "" {
+			clusterName = fmt.Sprintf("capdo-conf-%s", util.RandomString(6))
+		}
+		fmt.Fprintf(GinkgoWriter, "INFO: Cluster name is %s\n", clusterName)
 
 		// Setup a Namespace where to host objects for this spec and create a watcher for the namespace events.
 		namespace, cancelWatches = setupSpecNamespace(ctx, specName, bootstrapClusterProxy, artifactFolder)
@@ -78,6 +82,11 @@ var _ = Describe("Conformance Tests", func() {
 	Measure(specName, func(b Benchmarker) {
 		var err error
 
+		flavor := clusterctl.DefaultFlavor
+		if useCIArtifacts {
+			flavor = "conformance-ci-artifacts"
+		}
+
 		workerMachineCount, err := strconv.ParseInt(e2eConfig.GetVariable("CONFORMANCE_WORKER_MACHINE_COUNT"), 10, 64)
 		Expect(err).NotTo(HaveOccurred())
 		controlPlaneMachineCount, err := strconv.ParseInt(e2eConfig.GetVariable("CONFORMANCE_CONTROL_PLANE_MACHINE_COUNT"), 10, 64)
@@ -91,7 +100,7 @@ var _ = Describe("Conformance Tests", func() {
 					ClusterctlConfigPath:     clusterctlConfigPath,
 					KubeconfigPath:           bootstrapClusterProxy.GetKubeconfigPath(),
 					InfrastructureProvider:   clusterctl.DefaultInfrastructureProvider,
-					Flavor:                   clusterctl.DefaultFlavor,
+					Flavor:                   flavor,
 					Namespace:                namespace.Name,
 					ClusterName:              clusterName,
 					KubernetesVersion:        e2eConfig.GetVariable(capi_e2e.KubernetesVersion),
