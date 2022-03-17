@@ -152,7 +152,19 @@ spec:
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: DOMachineTemplate
 metadata:
-  name: k8s-upgrade-and-conformance
+  name: cp-k8s-upgrade-and-conformance
+spec:
+  template:
+    spec:
+      size: "${DO_CONTROL_PLANE_MACHINE_TYPE}"
+      image: ${KUBERNETES_IMAGE_UPGRADE_TO}
+      sshKeys:
+        - ${DO_SSH_KEY_FINGERPRINT}
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: DOMachineTemplate
+metadata:
+  name: worker-k8s-upgrade-and-conformance
 spec:
   template:
     spec:
