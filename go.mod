@@ -5,7 +5,7 @@ go 1.17
 require (
 	github.com/digitalocean/godo v1.78.0
 	github.com/go-logr/logr v1.2.2
-	github.com/miekg/dns v1.1.47
+	github.com/miekg/dns v1.1.48
 	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.19.0
 	github.com/pkg/errors v0.9.1
