@@ -71,7 +71,7 @@ if [[ "${E2E_ARGS:-}" == "-kubetest.use-ci-artifacts" ]]; then
     export CI_VERSION
     export KUBERNETES_VERSION
     export KUBERNETES_MAJOR_VERSION
-    export KUBERNETES_MAJOR_VERSION
+    export KUBERNETES_MINOR_VERSION
 fi
 echo "Will use K8s version $KUBERNETES_VERSION"
 
