@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-
 # Copyright 2021 The Kubernetes Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 
 set -o errexit
 set -o nounset
@@ -46,22 +46,21 @@ spec:
 END
 )
 
+## Install Kubectl
 REPO_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
-cd "${REPO_ROOT}" || exit 1
-
-# Installation of kubectl
-mkdir -p "${REPO_ROOT}/hack/tools/bin"
-KUBECTL=$(realpath hack/tools/bin/kubectl)
-make "${KUBECTL}" &>/dev/null
+KUBECTL="${REPO_ROOT}/hack/tools/bin/kubectl"
+cd "${REPO_ROOT}" && make "${KUBECTL##*/}"
 
 ## Install cert manager and wait for availability
-"${KUBECTL}" apply -f https://github.com/jetstack/cert-manager/releases/download/v1.5.0/cert-manager.yaml
+"${KUBECTL}" apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.7.1/cert-manager.yaml
 "${KUBECTL}" wait --for=condition=Available --timeout=5m -n cert-manager deployment/cert-manager
 "${KUBECTL}" wait --for=condition=Available --timeout=5m -n cert-manager deployment/cert-manager-cainjector
 "${KUBECTL}" wait --for=condition=Available --timeout=5m -n cert-manager deployment/cert-manager-webhook
 
-echo "$TEST_RESOURCE" | ${KUBECTL} apply -f -
-sleep 5
+for _ in {1..6}; do
+  (echo "$TEST_RESOURCE" | "${KUBECTL}" apply -f -) && break
+   sleep 15
+done
 
 "${KUBECTL}" wait --for=condition=Ready --timeout=300s -n cert-manager-test certificate/selfsigned-cert
 echo "$TEST_RESOURCE" | "${KUBECTL}" delete -f -
