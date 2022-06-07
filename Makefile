@@ -385,7 +385,7 @@ release-binary: $(RELEASE_DIR)
 		-e GOARCH=$(GOARCH) \
 		-v "$$(pwd):/workspace" \
 		-w /workspace \
-		golang:1.17.7 \
+		golang:1.17.11 \
 		go build -a -trimpath -ldflags '-extldflags "-static"' \
 		-o $(RELEASE_DIR)/$(notdir $(RELEASE_BINARY))-$(GOOS)-$(GOARCH) $(RELEASE_BINARY)
 
@@ -431,8 +431,7 @@ create-management-cluster: $(KUSTOMIZE) $(ENVSUBST)
 	./hack/install-cert-manager.sh
 
 	# Deploy CAPI
-	# Using main artifacts
-	curl --retry $(CURL_RETRIES) -sSL https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.1.3/cluster-api-components.yaml | $(ENVSUBST) | kubectl apply -f -
+	curl --retry $(CURL_RETRIES) -sSL https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.1.4/cluster-api-components.yaml | $(ENVSUBST) | kubectl apply -f -
 
 	# Deploy CAPDO
 	kind load docker-image $(CONTROLLER_IMG)-$(ARCH):$(TAG) --name=capdo
