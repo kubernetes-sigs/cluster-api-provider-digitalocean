@@ -250,7 +250,7 @@ lint-full: $(GOLANGCI_LINT) ## Run slower linters to detect possible issues
 
 .PHONY: modules
 modules: ## Runs go mod to ensure proper vendoring.
-	go mod tidy
+	go mod tidy -compat=1.17
 
 .PHONY: generate
 generate: ## Generate code
