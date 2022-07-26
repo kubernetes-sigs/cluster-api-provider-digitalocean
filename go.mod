@@ -1,6 +1,6 @@
 module sigs.k8s.io/cluster-api-provider-digitalocean
 
-go 1.17
+go 1.18
 
 require (
 	github.com/digitalocean/godo v1.82.0
