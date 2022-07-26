@@ -18,13 +18,11 @@ package v1beta1
 
 import (
 	"fmt"
-	"reflect"
 
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	runtime "k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
-	clusterv1 "sigs.k8s.io/cluster-api/api/v1beta1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
@@ -66,10 +64,6 @@ func (r *DOCluster) ValidateUpdate(old runtime.Object) error {
 
 	if r.Spec.Region != oldDOCluster.Spec.Region {
 		allErrs = append(allErrs, field.Invalid(field.NewPath("spec", "region"), r.Spec.Region, "field is immutable"))
-	}
-
-	if !reflect.DeepEqual(clusterv1.APIEndpoint{}, oldDOCluster.Spec.ControlPlaneEndpoint) && !reflect.DeepEqual(r.Spec.ControlPlaneEndpoint, oldDOCluster.Spec.ControlPlaneEndpoint) {
-		allErrs = append(allErrs, field.Invalid(field.NewPath("spec", "controlPlaneEndpoint"), r.Spec.ControlPlaneEndpoint, "field is immutable"))
 	}
 
 	if len(allErrs) == 0 {
