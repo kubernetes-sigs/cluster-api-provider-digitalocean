@@ -115,7 +115,7 @@ help:  ## Display this help
 ## --------------------------------------
 
 # Binaries.
-CONTROLLER_GEN_VER := v0.7.0
+CONTROLLER_GEN_VER := v0.8.0
 CONTROLLER_GEN_BIN := controller-gen
 CONTROLLER_GEN := $(TOOLS_BIN_DIR)/$(CONTROLLER_GEN_BIN)-$(CONTROLLER_GEN_VER)
 
@@ -123,8 +123,9 @@ CONVERSION_GEN_VER := v0.22.2
 CONVERSION_GEN_BIN := conversion-gen
 CONVERSION_GEN := $(TOOLS_BIN_DIR)/$(CONVERSION_GEN_BIN)-$(CONVERSION_GEN_VER)
 
+ENVSUBST_VER := v1.2.0
 ENVSUBST_BIN := envsubst
-ENVSUBST := $(TOOLS_BIN_DIR)/$(ENVSUBST_BIN)-drone
+ENVSUBST := $(TOOLS_BIN_DIR)/$(ENVSUBST_BIN)
 
 GOLANGCI_LINT_VER := v1.46.2
 GOLANGCI_LINT_BIN := golangci-lint
@@ -201,12 +202,7 @@ $(CONVERSION_GEN): ## Build conversion-gen.
 	GOBIN=$(TOOLS_BIN_DIR) $(GO_INSTALL) k8s.io/code-generator/cmd/conversion-gen $(CONVERSION_GEN_BIN) $(CONVERSION_GEN_VER)
 
 $(ENVSUBST): ## Build envsubst from tools folder.
-	rm -f $(TOOLS_BIN_DIR)/$(ENVSUBST_BIN)*
-	mkdir -p $(TOOLS_DIR) && cd $(TOOLS_DIR) && go build -tags=tools -o $(ENVSUBST) github.com/drone/envsubst/v2/cmd/envsubst
-	ln -sf $(ENVSUBST) $(TOOLS_BIN_DIR)/$(ENVSUBST_BIN)
-
-.PHONY: $(ENVSUBST_BIN)
-$(ENVSUBST_BIN): $(ENVSUBST) ## Build envsubst from tools folder.
+	GOBIN=$(TOOLS_BIN_DIR) $(GO_INSTALL) github.com/a8m/envsubst/cmd/envsubst $(ENVSUBST_BIN) $(ENVSUBST_VER)
 
 $(GOLANGCI_LINT): ## Build golangci-lint from tools folder.
 	GOBIN=$(TOOLS_BIN_DIR) $(GO_INSTALL) github.com/golangci/golangci-lint/cmd/golangci-lint $(GOLANGCI_LINT_BIN) $(GOLANGCI_LINT_VER)
@@ -297,7 +293,7 @@ generate-manifests: $(CONTROLLER_GEN) ## Generate manifests e.g. CRD, RBAC etc.
 .PHONY: docker-pull-prerequisites
 docker-pull-prerequisites:
 	docker pull docker/dockerfile:1.1-experimental
-	docker pull docker.io/library/golang:1.17
+	docker pull docker.io/library/golang:1.18
 	docker pull gcr.io/distroless/static:latest
 
 .PHONY: docker-build
@@ -385,7 +381,7 @@ release-binary: $(RELEASE_DIR)
 		-e GOARCH=$(GOARCH) \
 		-v "$$(pwd):/workspace" \
 		-w /workspace \
-		golang:1.17.11 \
+		golang:1.18.5 \
 		go build -a -trimpath -ldflags '-extldflags "-static"' \
 		-o $(RELEASE_DIR)/$(notdir $(RELEASE_BINARY))-$(GOOS)-$(GOARCH) $(RELEASE_BINARY)
 
