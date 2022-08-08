@@ -1,4 +1,12 @@
 ---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: digitalocean
+  namespace: kube-system
+stringData:
+  access-token: ${DIGITALOCEAN_ACCESS_TOKEN}
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
