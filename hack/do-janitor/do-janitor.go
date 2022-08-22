@@ -213,7 +213,7 @@ func keyList(ctx context.Context, client *godo.Client) ([]godo.Key, error) {
     opt := &godo.ListOptions{}
     for {
         keys, resp, err := client.Key.List(ctx, opt)
-        if err ! nil {
+        if err != nil {
             return nil, err
         }
 
