@@ -104,6 +104,21 @@ func main() {
 		}
 	}
 
+    keys, err := keyList(ctx, client)
+    if err != nil {
+        log.Fatalf("failed to list keys: %+v", err.Error())
+    }
+
+    for _, key := range keys {
+        _, err := client.Key.DeleteByID(ctx, key.ID)
+        if err != nil {
+            log.Printf("failed to delete key %s: %+v\n", key.Name, err.Error())
+            continue
+        }
+
+        log.Printf("key %s terminated\n", key.Name)
+    }
+
 	log.Println("Completed DO Janitor")
 	os.Exit(0)
 }
@@ -189,4 +204,32 @@ func volumeList(ctx context.Context, client *godo.Client) ([]godo.Volume, error)
 	}
 
 	return list, nil
+}
+
+func keyList(ctx context.Context, client *godo.Client) ([]godo.Key, error) {
+    list := []godo.Key{}
+
+    // create options. initially, these will be blank.
+    opt := &godo.ListOptions{}
+    for {
+        keys, resp, err := client.Key.List(ctx, opt)
+        if err ! nil {
+            return nil, err
+        }
+
+        list = append(list, keys...)
+
+        if resp.Links == nil || resp.Links.IsLastPage() {
+            break
+        }
+
+        page, err := resp.Links.CurrentPage()
+        if err != nil {
+            return nil, err
+        }
+
+        opt.ListOptions.Page = page + 1
+    }
+
+    return list, nil
 }
