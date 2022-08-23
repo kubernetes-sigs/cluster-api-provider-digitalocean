@@ -104,20 +104,20 @@ func main() {
 		}
 	}
 
-    keys, err := keyList(ctx, client)
-    if err != nil {
-        log.Fatalf("failed to list keys: %+v", err.Error())
-    }
+	keys, err := keyList(ctx, client)
+	if err != nil {
+		log.Fatalf("failed to list keys: %+v", err.Error())
+	}
 
-    for _, key := range keys {
-        _, err := client.Key.DeleteByID(ctx, key.ID)
-        if err != nil {
-            log.Printf("failed to delete key %s: %+v\n", key.Name, err.Error())
-            continue
-        }
+	for _, key := range keys {
+		_, err := client.Keys.DeleteByID(ctx, key.ID)
+		if err != nil {
+			log.Printf("failed to delete key %s: %+v\n", key.Name, err.Error())
+			continue
+		}
 
-        log.Printf("key %s terminated\n", key.Name)
-    }
+		log.Printf("key %s terminated\n", key.Name)
+	}
 
 	log.Println("Completed DO Janitor")
 	os.Exit(0)
@@ -207,29 +207,29 @@ func volumeList(ctx context.Context, client *godo.Client) ([]godo.Volume, error)
 }
 
 func keyList(ctx context.Context, client *godo.Client) ([]godo.Key, error) {
-    list := []godo.Key{}
+	list := []godo.Key{}
 
-    // create options. initially, these will be blank.
-    opt := &godo.ListOptions{}
-    for {
-        keys, resp, err := client.Key.List(ctx, opt)
-        if err != nil {
-            return nil, err
-        }
+	// create options. initially, these will be blank.
+	opt := &godo.ListOptions{}
+	for {
+		keys, resp, err := client.Keys.List(ctx, opt)
+		if err != nil {
+			return nil, err
+		}
 
-        list = append(list, keys...)
+		list = append(list, keys...)
 
-        if resp.Links == nil || resp.Links.IsLastPage() {
-            break
-        }
+		if resp.Links == nil || resp.Links.IsLastPage() {
+			break
+		}
 
-        page, err := resp.Links.CurrentPage()
-        if err != nil {
-            return nil, err
-        }
+		page, err := resp.Links.CurrentPage()
+		if err != nil {
+			return nil, err
+		}
 
-        opt.ListOptions.Page = page + 1
-    }
+		opt.Page = page + 1
+	}
 
-    return list, nil
+	return list, nil
 }
