@@ -50,6 +50,12 @@ spec:
       etcd:
         local:
           dataDir: /var/lib/etcddata/etcd
+    diskSetup:
+      filesystems:
+        - device: /dev/sda
+          filesystem: ext4
+          label: etcd_data
+          partition: "none"
     mounts:
       - - LABEL=etcd_data
         - /var/lib/etcddata
@@ -66,8 +72,6 @@ spec:
       dataDisks:
       - diskSizeGB: 256
         nameSuffix: etcd
-        filesystemType: ext4
-        filesystemLabel: etcd_data
       size: "${DO_CONTROL_PLANE_MACHINE_TYPE}"
       image: ${DO_CONTROL_PLANE_MACHINE_IMAGE}
       sshKeys:
