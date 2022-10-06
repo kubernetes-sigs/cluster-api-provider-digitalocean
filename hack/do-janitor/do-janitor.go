@@ -20,6 +20,7 @@ import (
 	"context"
 	"log"
 	"os"
+	"regexp"
 	"time"
 
 	"github.com/digitalocean/godo"
@@ -110,6 +111,14 @@ func main() {
 	}
 
 	for _, key := range keys {
+		// we only care to delete keys that start with "capdo"
+		match, err := regexp.MatchString(`^capdo`, key.Name)
+		if match != true {
+			continue
+		}
+		if err != nil {
+			log.Fatalf("failed to match against key name %s: %+v\n", key.Name, err.Error())
+		}
 		_, err := client.Keys.DeleteByID(ctx, key.ID)
 		if err != nil {
 			log.Printf("failed to delete key %s: %+v\n", key.Name, err.Error())
