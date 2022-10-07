@@ -20,7 +20,6 @@ import (
 	"context"
 	"log"
 	"os"
-	"regexp"
 	"time"
 
 	"github.com/digitalocean/godo"
