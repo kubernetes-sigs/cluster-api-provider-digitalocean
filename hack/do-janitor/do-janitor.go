@@ -110,22 +110,18 @@ func main() {
 		log.Fatalf("failed to list keys: %+v", err.Error())
 	}
 
+	capdoStr := "capdo" // using this for repeated comparisons in the loop below
 	for _, key := range keys {
-		// we only care to delete keys that start with "capdo"
-		match, err := regexp.MatchString(`^capdo`, key.Name)
-		if match != true {
-			continue
+		// we only care to cleanup keys that start with "capdo"
+		if len(key.Name) >= len(capdoStr) && key.Name[0:len(capdoStr)] == capdoStr {
+			log.Printf("%s contains capdo at the start of it's name so it's safe to terminate\n", key.Name)
+			_, err := client.Keys.DeleteByID(ctx, key.ID)
+			if err != nil {
+				log.Printf("failed to delete key %s: %+v\n", key.Name, err.Error())
+				continue
+			}
+			log.Printf("key %s terminated\n", key.Name)
 		}
-		if err != nil {
-			log.Fatalf("failed to match against key name %s: %+v\n", key.Name, err.Error())
-		}
-		_, err = client.Keys.DeleteByID(ctx, key.ID)
-		if err != nil {
-			log.Printf("failed to delete key %s: %+v\n", key.Name, err.Error())
-			continue
-		}
-
-		log.Printf("key %s terminated\n", key.Name)
 	}
 
 	log.Println("Completed DO Janitor")
