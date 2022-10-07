@@ -127,7 +127,7 @@ type DOVPC struct {
 	VPCUUID string `json:"vpc_uuid,omitempty"`
 }
 
-// DOVolume defnies a DO Block Storage Volume.
+// DOVolume defines a DO Block Storage Volume.
 type DOVolume struct {
 	ID string `json:"id"`
 }
