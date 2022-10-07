@@ -286,6 +286,7 @@ func (r *DOMachineReconciler) reconcile(ctx context.Context, machineScope *scope
 	}
 
 	machineScope.SetProviderID(strconv.Itoa(droplet.ID))
+	machineScope.SetVolumes(droplet.VolumeIDs)
 	machineScope.SetInstanceStatus(infrav1.DOResourceStatus(droplet.Status))
 
 	addrs, err := computesvc.GetDropletAddress(droplet)

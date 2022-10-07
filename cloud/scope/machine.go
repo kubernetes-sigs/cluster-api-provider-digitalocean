@@ -143,6 +143,19 @@ func (m *MachineScope) SetProviderID(dropletID string) {
 	m.DOMachine.Spec.ProviderID = pointer.StringPtr(pid)
 }
 
+// SetVolumes sets the DOMachine volume IDs from doplet in status.
+func (m *MachineScope) SetVolumes(volumeIDs []string) {
+vLoop:
+	for _, vID := range volumeIDs {
+		for _, eVol := range m.DOMachine.Status.Volumes {
+			if eVol.ID == vID {
+				continue vLoop
+			}
+		}
+		m.DOMachine.Status.Volumes = append(m.DOMachine.Status.Volumes, infrav1.DOVolume{ID: vID})
+	}
+}
+
 // GetInstanceID returns the DOMachine droplet instance id by parsing Spec.ProviderID.
 func (m *MachineScope) GetInstanceID() string {
 	parsed, err := noderefutil.NewProviderID(m.GetProviderID())
