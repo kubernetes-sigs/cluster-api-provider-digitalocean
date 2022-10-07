@@ -119,7 +119,7 @@ func main() {
 		if err != nil {
 			log.Fatalf("failed to match against key name %s: %+v\n", key.Name, err.Error())
 		}
-		_, err := client.Keys.DeleteByID(ctx, key.ID)
+		_, err = client.Keys.DeleteByID(ctx, key.ID)
 		if err != nil {
 			log.Printf("failed to delete key %s: %+v\n", key.Name, err.Error())
 			continue
