@@ -13,13 +13,13 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-
 package main
 
 import (
 	"context"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/digitalocean/godo"
@@ -109,16 +109,15 @@ func main() {
 		log.Fatalf("failed to list keys: %+v", err.Error())
 	}
 
-	capdoStr := "capdo" // using this for repeated comparisons in the loop below
 	for _, key := range keys {
-		// we only care to cleanup keys that start with "capdo"
-		if len(key.Name) >= len(capdoStr) && key.Name[0:len(capdoStr)] == capdoStr {
-			log.Printf("%s contains capdo at the start of it's name so it's safe to terminate\n", key.Name)
+		if strings.HasPrefix(key.Name, "capdo-") {
+			log.Printf("%s contains capdo prefix so it's safe to terminate\n", key.Name)
 			_, err := client.Keys.DeleteByID(ctx, key.ID)
 			if err != nil {
 				log.Printf("failed to delete key %s: %+v\n", key.Name, err.Error())
 				continue
 			}
+
 			log.Printf("key %s terminated\n", key.Name)
 		}
 	}
