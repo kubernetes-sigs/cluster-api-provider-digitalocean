@@ -186,7 +186,7 @@ spec:
                 description: Volumes contains the DigitalOcean droplet associated
                   block storage volumes.
                 items:
-                  description: DOVolume defnies a DO Block Storage Volume.
+                  description: DOVolume defines a DO Block Storage Volume.
                   properties:
                     id:
                       type: string
@@ -369,7 +369,7 @@ spec:
                 description: Volumes contains the DigitalOcean droplet associated
                   block storage volumes.
                 items:
-                  description: DOVolume defnies a DO Block Storage Volume.
+                  description: DOVolume defines a DO Block Storage Volume.
                   properties:
                     id:
                       type: string
@@ -552,7 +552,7 @@ spec:
                 description: Volumes contains the DigitalOcean droplet associated
                   block storage volumes.
                 items:
-                  description: DOVolume defnies a DO Block Storage Volume.
+                  description: DOVolume defines a DO Block Storage Volume.
                   properties:
                     id:
                       type: string
