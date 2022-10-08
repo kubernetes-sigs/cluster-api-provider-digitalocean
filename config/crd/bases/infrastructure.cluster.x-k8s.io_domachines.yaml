@@ -182,6 +182,18 @@ spec:
               ready:
                 description: Ready is true when the provider resource is ready.
                 type: boolean
+              volumes:
+                description: Volumes contains the DigitalOcean droplet associated
+                  block storage volumes.
+                items:
+                  description: DOVolume defines a DO Block Storage Volume.
+                  properties:
+                    id:
+                      type: string
+                  required:
+                  - id
+                  type: object
+                type: array
             type: object
         type: object
     served: true
@@ -353,6 +365,18 @@ spec:
               ready:
                 description: Ready is true when the provider resource is ready.
                 type: boolean
+              volumes:
+                description: Volumes contains the DigitalOcean droplet associated
+                  block storage volumes.
+                items:
+                  description: DOVolume defines a DO Block Storage Volume.
+                  properties:
+                    id:
+                      type: string
+                  required:
+                  - id
+                  type: object
+                type: array
             type: object
         type: object
     served: true
@@ -524,6 +548,18 @@ spec:
               ready:
                 description: Ready is true when the provider resource is ready.
                 type: boolean
+              volumes:
+                description: Volumes contains the DigitalOcean droplet associated
+                  block storage volumes.
+                items:
+                  description: DOVolume defines a DO Block Storage Volume.
+                  properties:
+                    id:
+                      type: string
+                  required:
+                  - id
+                  type: object
+                type: array
             type: object
         type: object
     served: true

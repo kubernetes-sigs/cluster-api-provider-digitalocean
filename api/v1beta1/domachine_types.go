@@ -57,6 +57,10 @@ type DOMachineStatus struct {
 	// Addresses contains the DigitalOcean droplet associated addresses.
 	Addresses []corev1.NodeAddress `json:"addresses,omitempty"`
 
+	// Volumes contains the DigitalOcean droplet associated block storage
+	// volumes.
+	Volumes []DOVolume `json:"volumes,omitempty"`
+
 	// InstanceStatus is the status of the DigitalOcean droplet instance for this machine.
 	// +optional
 	InstanceStatus *DOResourceStatus `json:"instanceStatus,omitempty"`
