@@ -87,7 +87,7 @@ $ export DO_NODE_MACHINE_IMAGE=<image-id> # created in the step above.
 Generate templates for creating workload clusters:
 
 ```bash
-$ clusterctl config cluster capdo-quickstart \
+$ clusterctl generate cluster capdo-quickstart \
     --infrastructure digitalocean \
     --kubernetes-version v1.17.11 \
     --control-plane-machine-count 1 \
