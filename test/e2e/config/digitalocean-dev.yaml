@@ -7,8 +7,8 @@ providers:
   - name: cluster-api
     type: CoreProvider
     versions:
-    - name: v1.2.4
-      value: https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.2.4/core-components.yaml
+    - name: v1.2.6
+      value: https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.2.6/core-components.yaml
       type: "url"
       files:
       - sourcePath: "${PWD}/test/e2e/data/metadata/cluster-api/metadata.yaml"
@@ -20,8 +20,8 @@ providers:
   - name: kubeadm
     type: BootstrapProvider
     versions:
-    - name: v1.2.4
-      value: https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.2.4/bootstrap-components.yaml
+    - name: v1.2.6
+      value: https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.2.6/bootstrap-components.yaml
       type: "url"
       files:
       - sourcePath: "${PWD}/test/e2e/data/metadata/cluster-api/metadata.yaml"
@@ -33,8 +33,8 @@ providers:
   - name: kubeadm
     type: ControlPlaneProvider
     versions:
-    - name: v1.2.4
-      value: https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.2.4/control-plane-components.yaml
+    - name: v1.2.6
+      value: https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.2.6/control-plane-components.yaml
       type: "url"
       files:
       - sourcePath: "${PWD}/test/e2e/data/metadata/cluster-api/metadata.yaml"
