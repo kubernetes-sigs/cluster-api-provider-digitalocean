@@ -26,14 +26,11 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 	"testing"
 
 	. "github.com/onsi/ginkgo/v2"
-	"github.com/onsi/ginkgo/v2/config"
-	"github.com/onsi/ginkgo/v2/reporters"
 	. "github.com/onsi/gomega"
 
 	"k8s.io/apimachinery/pkg/runtime"

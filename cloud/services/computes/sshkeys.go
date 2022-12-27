@@ -28,7 +28,7 @@ func (s *Service) GetSSHKey(sshkey intstr.IntOrString) (*godo.Key, error) {
 	var keys *godo.Key
 	var reterr error
 
-	if sshkey.IntValue() != 0 { // nolint
+	if sshkey.IntValue() != 0 { //nolint
 		keys, _, reterr = s.scope.Keys.GetByID(s.ctx, sshkey.IntValue())
 	} else if sshkey.String() != "" && sshkey.String() != "0" {
 		keys, _, reterr = s.scope.Keys.GetByFingerprint(s.ctx, sshkey.String())

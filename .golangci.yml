@@ -3,7 +3,6 @@ linters:
   enable:
   - asciicheck
   - bodyclose
-  - deadcode
   - depguard
   - dogsled
   - errcheck
@@ -18,7 +17,6 @@ linters:
   - gosec
   - gosimple
   - govet
-  - ifshort
   - importas
   - ineffassign
   - misspell
@@ -27,14 +25,12 @@ linters:
   - nolintlint
   - prealloc
   - revive
-  - rowserrcheck
   - staticcheck
-  - structcheck
   - stylecheck
   - typecheck
   - unconvert
   - unparam
-  - varcheck
+  - unused
   - whitespace
 
 linters-settings:
@@ -59,9 +55,9 @@ linters-settings:
       - pkg: sigs.k8s.io/controller-runtime
         alias: ctrl
   staticcheck:
-    go: "1.18"
+    go: "1.19"
   stylecheck:
-    go: "1.18"
+    go: "1.19"
 
 issues:
   max-same-issues: 0
