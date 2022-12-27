@@ -26,7 +26,7 @@ import (
 	"path/filepath"
 	"strconv"
 
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
 	corev1 "k8s.io/api/core/v1"
@@ -79,7 +79,7 @@ var _ = Describe("Conformance Tests", func() {
 		redactLogs(e2eConfig.GetVariable)
 	})
 
-	Measure(specName, func(b Benchmarker) {
+	It("Should run conformance tests", func() {
 		var err error
 
 		flavor := clusterctl.DefaultFlavor
@@ -92,38 +92,33 @@ var _ = Describe("Conformance Tests", func() {
 		controlPlaneMachineCount, err := strconv.ParseInt(e2eConfig.GetVariable("CONFORMANCE_CONTROL_PLANE_MACHINE_COUNT"), 10, 64)
 		Expect(err).NotTo(HaveOccurred())
 
-		runtime := b.Time("cluster creation", func() {
-			clusterctl.ApplyClusterTemplateAndWait(ctx, clusterctl.ApplyClusterTemplateAndWaitInput{
-				ClusterProxy: bootstrapClusterProxy,
-				ConfigCluster: clusterctl.ConfigClusterInput{
-					LogFolder:                clusterctlLogFolder,
-					ClusterctlConfigPath:     clusterctlConfigPath,
-					KubeconfigPath:           bootstrapClusterProxy.GetKubeconfigPath(),
-					InfrastructureProvider:   clusterctl.DefaultInfrastructureProvider,
-					Flavor:                   flavor,
-					Namespace:                namespace.Name,
-					ClusterName:              clusterName,
-					KubernetesVersion:        e2eConfig.GetVariable(capi_e2e.KubernetesVersion),
-					ControlPlaneMachineCount: pointer.Int64Ptr(controlPlaneMachineCount),
-					WorkerMachineCount:       pointer.Int64Ptr(workerMachineCount),
-				},
-				WaitForClusterIntervals:      e2eConfig.GetIntervals(specName, "wait-cluster"),
-				WaitForControlPlaneIntervals: e2eConfig.GetIntervals(specName, "wait-control-plane"),
-				WaitForMachineDeployments:    e2eConfig.GetIntervals(specName, "wait-worker-nodes"),
-			}, result)
-		})
+		By("Initializes the work cluster")
+		clusterctl.ApplyClusterTemplateAndWait(ctx, clusterctl.ApplyClusterTemplateAndWaitInput{
+			ClusterProxy: bootstrapClusterProxy,
+			ConfigCluster: clusterctl.ConfigClusterInput{
+				LogFolder:                clusterctlLogFolder,
+				ClusterctlConfigPath:     clusterctlConfigPath,
+				KubeconfigPath:           bootstrapClusterProxy.GetKubeconfigPath(),
+				InfrastructureProvider:   clusterctl.DefaultInfrastructureProvider,
+				Flavor:                   flavor,
+				Namespace:                namespace.Name,
+				ClusterName:              clusterName,
+				KubernetesVersion:        e2eConfig.GetVariable(capi_e2e.KubernetesVersion),
+				ControlPlaneMachineCount: pointer.Int64Ptr(controlPlaneMachineCount),
+				WorkerMachineCount:       pointer.Int64Ptr(workerMachineCount),
+			},
+			WaitForClusterIntervals:      e2eConfig.GetIntervals(specName, "wait-cluster"),
+			WaitForControlPlaneIntervals: e2eConfig.GetIntervals(specName, "wait-control-plane"),
+			WaitForMachineDeployments:    e2eConfig.GetIntervals(specName, "wait-worker-nodes"),
+		}, result)
 
-		b.RecordValue("cluster creation", runtime.Seconds())
 		workloadProxy := bootstrapClusterProxy.GetWorkloadCluster(ctx, namespace.Name, clusterName)
-		runtime = b.Time("conformance suite", func() {
-			kubetest.Run(context.Background(),
-				kubetest.RunInput{
-					ClusterProxy:   workloadProxy,
-					NumberOfNodes:  int(workerMachineCount),
-					ConfigFilePath: kubetestConfigFilePath,
-				},
-			)
-		})
-		b.RecordValue("conformance suite run time", runtime.Seconds())
-	}, 1)
+		kubetest.Run(context.Background(),
+			kubetest.RunInput{
+				ClusterProxy:   workloadProxy,
+				NumberOfNodes:  int(workerMachineCount),
+				ConfigFilePath: kubetestConfigFilePath,
+			},
+		)
+	})
 })
