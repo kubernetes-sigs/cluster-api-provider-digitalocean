@@ -75,20 +75,20 @@ variables:
   # Following CAPDO variables should be set before testing
   DO_REGION: "nyc1"
   DO_CONTROL_PLANE_MACHINE_TYPE: "s-2vcpu-2gb"
-  # Cluster API Kubernetes v1.22.11 on Ubuntu 20.04
-  DO_CONTROL_PLANE_MACHINE_IMAGE: "110971350"
+  # Cluster API Kubernetes v1.25.5 on Ubuntu 20.04
+  DO_CONTROL_PLANE_MACHINE_IMAGE: "123786633"
   DO_NODE_MACHINE_TYPE: "s-2vcpu-2gb"
-  # Cluster API Kubernetes v1.22.11 on Ubuntu 20.04
-  DO_NODE_MACHINE_IMAGE: "110971350"
+  # Cluster API Kubernetes v1.25.5 on Ubuntu 20.04
+  DO_NODE_MACHINE_IMAGE: "123786633"
   CONFORMANCE_WORKER_MACHINE_COUNT: "2"
   CONFORMANCE_CONTROL_PLANE_MACHINE_COUNT: "1"
   KUBETEST_CONFIGURATION: "${PWD}/test/e2e/data/kubetest/conformance.yaml"
   ETCD_VERSION_UPGRADE_TO: "3.5.1-0"
   COREDNS_VERSION_UPGRADE_TO: "v1.8.6"
-  # Cluster API Kubernetes v1.22.11 on Ubuntu 20.04
-  KUBERNETES_IMAGE_UPGRADE_FROM: "110971350"
-  # Cluster API Kubernetes v1.23.8 on Ubuntu 20.04
-  KUBERNETES_IMAGE_UPGRADE_TO: "110971520"
+  # Cluster API Kubernetes v1.24.9 on Ubuntu 20.04
+  KUBERNETES_IMAGE_UPGRADE_FROM: "123787403"
+  # Cluster API Kubernetes v1.25.5 on Ubuntu 20.04
+  KUBERNETES_IMAGE_UPGRADE_TO: "123786633"
   CONTROL_PLANE_MACHINE_TEMPLATE_UPGRADE_TO: "cp-k8s-upgrade-and-conformance"
   WORKERS_MACHINE_TEMPLATE_UPGRADE_TO: "worker-k8s-upgrade-and-conformance"
   KUBERNETES_VERSION_UPGRADE_TO: "${KUBERNETES_VERSION_UPGRADE_TO:-v1.25.5}"
