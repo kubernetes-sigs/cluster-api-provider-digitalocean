@@ -59,7 +59,7 @@ spec:
   template:
     spec:
       size: "${DO_CONTROL_PLANE_MACHINE_TYPE}"
-      image: ${DO_CONTROL_PLANE_MACHINE_IMAGE}
+      image: ${KUBERNETES_IMAGE_UPGRADE_FROM}
       sshKeys:
         - ${DO_SSH_KEY_FINGERPRINT}
 ---
@@ -94,7 +94,7 @@ spec:
   template:
     spec:
       size: "${DO_NODE_MACHINE_TYPE}"
-      image: ${DO_NODE_MACHINE_IMAGE}
+      image: ${KUBERNETES_IMAGE_UPGRADE_FROM}
       sshKeys:
         - ${DO_SSH_KEY_FINGERPRINT}
 ---
