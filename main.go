@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package main
 package main
 
 import (
@@ -108,7 +109,19 @@ func main() {
 	if profilerAddress != "" {
 		setupLog.Info("Profiler listening for requests", "profiler-address", profilerAddress)
 		go func() {
-			setupLog.Error(http.ListenAndServe(profilerAddress, nil), "listen and serve error")
+			server := &http.Server{
+				Addr: profilerAddress,
+
+				// Timeouts
+				ReadTimeout:       60 * time.Second,
+				ReadHeaderTimeout: 60 * time.Second,
+				WriteTimeout:      60 * time.Second,
+				IdleTimeout:       60 * time.Second,
+			}
+			err := server.ListenAndServe()
+			if err != nil {
+				setupLog.Error(err, "listen and serve error")
+			}
 		}()
 	}
 
