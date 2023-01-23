@@ -43,6 +43,41 @@ func (s *Service) GetLoadBalancer(id string) (*godo.LoadBalancer, error) {
 
 // CreateLoadBalancer creates a LB.
 func (s *Service) CreateLoadBalancer(spec *infrav1.DOLoadBalancer) (*godo.LoadBalancer, error) {
+	request := s.loadBalancerRequest(spec)
+	lb, _, err := s.scope.LoadBalancers.Create(s.ctx, request)
+	if err != nil {
+		return nil, err
+	}
+
+	return lb, nil
+}
+
+// NeedsUpdate checks if the load balancer needs to be updated
+// Example: for a migrated docluster, the LB name and tag needs to be updated to reflect the new capi cluster's uid
+func (s *Service) NeedsUpdate(lb *godo.LoadBalancer) bool {
+	return lb.Tag != infrav1.ClusterNameUIDRoleTag(infrav1.DOSafeName(s.scope.Name()), s.scope.UID(), infrav1.APIServerRoleTagValue)
+}
+
+// UpdateLoadBalancer updates the existing lb
+func (s *Service) UpdateLoadBalancer(oldLB *godo.LoadBalancer, spec *infrav1.DOLoadBalancer) (*godo.LoadBalancer, error) {
+	request := s.loadBalancerRequest(spec)
+	lb, _, err := s.scope.LoadBalancers.Update(s.ctx, oldLB.ID, request)
+	if err != nil {
+		return nil, err
+	}
+	return lb, nil
+}
+
+// DeleteLoadBalancer delete a LB by ID.
+func (s *Service) DeleteLoadBalancer(id string) error {
+	if _, err := s.scope.LoadBalancers.Delete(s.ctx, id); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *Service) loadBalancerRequest(spec *infrav1.DOLoadBalancer) *godo.LoadBalancerRequest {
 	clusterName := infrav1.DOSafeName(s.scope.Name())
 	name := clusterName + "-" + infrav1.APIServerRoleTagValue + "-" + s.scope.UID()
 	request := &godo.LoadBalancerRequest{
@@ -68,20 +103,5 @@ func (s *Service) CreateLoadBalancer(spec *infrav1.DOLoadBalancer) (*godo.LoadBa
 		Tag:     infrav1.ClusterNameUIDRoleTag(clusterName, s.scope.UID(), infrav1.APIServerRoleTagValue),
 		VPCUUID: s.scope.VPC().VPCUUID,
 	}
-
-	lb, _, err := s.scope.LoadBalancers.Create(s.ctx, request)
-	if err != nil {
-		return nil, err
-	}
-
-	return lb, nil
-}
-
-// DeleteLoadBalancer delete a LB by ID.
-func (s *Service) DeleteLoadBalancer(id string) error {
-	if _, err := s.scope.LoadBalancers.Delete(s.ctx, id); err != nil {
-		return err
-	}
-
-	return nil
+	return request
 }
