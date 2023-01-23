@@ -30,4 +30,5 @@ type DOClients struct {
 	Keys          godo.KeysService
 	LoadBalancers godo.LoadBalancersService
 	Domains       godo.DomainsService
+	Tags          godo.TagsService
 }
