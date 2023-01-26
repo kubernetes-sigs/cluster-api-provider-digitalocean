@@ -52,13 +52,13 @@ func (s *Service) CreateLoadBalancer(spec *infrav1.DOLoadBalancer) (*godo.LoadBa
 	return lb, nil
 }
 
-// NeedsUpdate checks if the load balancer needs to be updated
-// Example: for a migrated docluster, the LB name and tag needs to be updated to reflect the new capi cluster's uid
+// NeedsUpdate checks if the load balancer needs to be updated.
+// Example: for a migrated docluster, the LB name and tag needs to be updated to reflect the new capi cluster's uid.
 func (s *Service) NeedsUpdate(lb *godo.LoadBalancer) bool {
-	return lb.Tag != infrav1.ClusterNameUIDRoleTag(infrav1.DOSafeName(s.scope.Name()), s.scope.UID(), infrav1.APIServerRoleTagValue)
+	return lb.Tag != s.getLBTag()
 }
 
-// UpdateLoadBalancer updates the existing lb
+// UpdateLoadBalancer updates the existing lb.
 func (s *Service) UpdateLoadBalancer(oldLB *godo.LoadBalancer, spec *infrav1.DOLoadBalancer) (*godo.LoadBalancer, error) {
 	request := s.loadBalancerRequest(spec)
 	lb, _, err := s.scope.LoadBalancers.Update(s.ctx, oldLB.ID, request)
@@ -100,8 +100,12 @@ func (s *Service) loadBalancerRequest(spec *infrav1.DOLoadBalancer) *godo.LoadBa
 			UnhealthyThreshold:     spec.HealthCheck.UnhealthyThreshold,
 			HealthyThreshold:       spec.HealthCheck.HealthyThreshold,
 		},
-		Tag:     infrav1.ClusterNameUIDRoleTag(clusterName, s.scope.UID(), infrav1.APIServerRoleTagValue),
+		Tag:     s.getLBTag(),
 		VPCUUID: s.scope.VPC().VPCUUID,
 	}
 	return request
+}
+
+func (s *Service) getLBTag() string {
+	return infrav1.ClusterNameUIDRoleTag(infrav1.DOSafeName(s.scope.Name()), s.scope.UID(), infrav1.APIServerRoleTagValue)
 }

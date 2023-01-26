@@ -284,7 +284,6 @@ func (r *DOMachineReconciler) reconcile(ctx context.Context, machineScope *scope
 		}
 		r.Recorder.Eventf(domachine, corev1.EventTypeNormal, "InstanceCreated", "Created new droplet instance - %s", droplet.Name)
 	} else {
-		// do we want to retag control plane and worker capi droplets?
 		err := computesvc.Retag(droplet, machineScope)
 		if err != nil {
 			err = errors.Errorf("Failed to retag droplet instance %d for DOMachine %s/%s: %v", droplet.ID, domachine.Namespace, domachine.Name, err)

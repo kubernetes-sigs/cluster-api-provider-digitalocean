@@ -162,14 +162,17 @@ func (r *DOClusterReconciler) reconcile(ctx context.Context, clusterScope *scope
 		}
 
 		r.Recorder.Eventf(docluster, corev1.EventTypeNormal, "LoadBalancerCreated", "Created new load balancers - %s", loadbalancer.Name)
-	} else {
-		if networkingsvc.NeedsUpdate(loadbalancer) {
-			loadbalancer, err = networkingsvc.UpdateLoadBalancer(loadbalancer, apiServerLoadbalancer)
-			if err != nil {
-				return reconcile.Result{}, errors.Wrapf(err, "failed to update load balancer for DOCluster %s/%s", docluster.Namespace, docluster.Name)
-			}
-			r.Recorder.Eventf(docluster, corev1.EventTypeNormal, "LoadBalancerUpdated", "Updated existing load balancers - %s", loadbalancer.Name)
+	} else if networkingsvc.NeedsUpdate(loadbalancer) {
+		lb := loadbalancer
+		loadbalancer, err = networkingsvc.UpdateLoadBalancer(lb, apiServerLoadbalancer)
+		if err != nil {
+			return reconcile.Result{}, errors.Wrapf(err, "failed to update load balancer %s for DOCluster %s/%s",
+				lb.ID,
+				docluster.Namespace,
+				docluster.Name,
+			)
 		}
+		r.Recorder.Eventf(docluster, corev1.EventTypeNormal, "LoadBalancerUpdated", "Updated existing load balancers - %s", loadbalancer.Name)
 	}
 
 	apiServerLoadbalancerRef.ResourceID = loadbalancer.ID
