@@ -193,6 +193,22 @@ func (mr *MockDropletsServiceMockRecorder) List(arg0, arg1 interface{}) *gomock.
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockDropletsService)(nil).List), arg0, arg1)
 }
 
+// ListByName mocks base method.
+func (m *MockDropletsService) ListByName(arg0 context.Context, arg1 string, arg2 *godo.ListOptions) ([]godo.Droplet, *godo.Response, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListByName", arg0, arg1, arg2)
+	ret0, _ := ret[0].([]godo.Droplet)
+	ret1, _ := ret[1].(*godo.Response)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// ListByName indicates an expected call of ListByName.
+func (mr *MockDropletsServiceMockRecorder) ListByName(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListByName", reflect.TypeOf((*MockDropletsService)(nil).ListByName), arg0, arg1, arg2)
+}
+
 // ListByTag mocks base method.
 func (m *MockDropletsService) ListByTag(arg0 context.Context, arg1 string, arg2 *godo.ListOptions) ([]godo.Droplet, *godo.Response, error) {
 	m.ctrl.T.Helper()
