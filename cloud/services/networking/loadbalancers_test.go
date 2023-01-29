@@ -27,12 +27,12 @@ import (
 	"github.com/digitalocean/godo"
 	"github.com/golang/mock/gomock"
 
-	infrav1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha4"
+	infrav1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1beta1"
 	"sigs.k8s.io/cluster-api-provider-digitalocean/cloud/scope"
 	"sigs.k8s.io/cluster-api-provider-digitalocean/cloud/services/networking/mock_networking"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
-	clusterv1 "sigs.k8s.io/cluster-api/api/v1alpha4"
+	clusterv1 "sigs.k8s.io/cluster-api/api/v1beta1"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
