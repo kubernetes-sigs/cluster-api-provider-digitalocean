@@ -151,7 +151,7 @@ func TestService_GetDroplet(t *testing.T) {
 			ctx := context.TODO()
 			mdroplet := mock_computes.NewMockDropletsService(mctrl)
 			cscope, err := scope.NewClusterScope(scope.ClusterScopeParams{
-				Client:    fake.NewFakeClientWithScheme(scheme),
+				Client:    fake.NewClientBuilder().WithScheme(scheme).Build(),
 				Cluster:   &clusterv1.Cluster{},
 				DOCluster: &infrav1.DOCluster{},
 				DOClients: scope.DOClients{
@@ -795,7 +795,7 @@ func TestService_CreateDroplet(t *testing.T) {
 				},
 			}
 
-			fclient := fake.NewFakeClientWithScheme(scheme, secret)
+			fclient := fake.NewClientBuilder().WithScheme(scheme).WithObjects(secret).Build()
 			mscope, err := scope.NewMachineScope(scope.MachineScopeParams{
 				Client:    fclient,
 				Cluster:   tt.args.cluster,
@@ -898,7 +898,7 @@ func TestService_DeleteDroplet(t *testing.T) {
 			ctx := context.TODO()
 			mdroplet := mock_computes.NewMockDropletsService(mctrl)
 			cscope, err := scope.NewClusterScope(scope.ClusterScopeParams{
-				Client:    fake.NewFakeClientWithScheme(scheme),
+				Client:    fake.NewClientBuilder().WithScheme(scheme).Build(),
 				Cluster:   &clusterv1.Cluster{},
 				DOCluster: &infrav1.DOCluster{},
 				DOClients: scope.DOClients{
@@ -967,7 +967,7 @@ func TestService_GetDropletAddress(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			ctx := context.TODO()
 			cscope, err := scope.NewClusterScope(scope.ClusterScopeParams{
-				Client:    fake.NewFakeClientWithScheme(scheme),
+				Client:    fake.NewClientBuilder().WithScheme(scheme).Build(),
 				Cluster:   &clusterv1.Cluster{},
 				DOCluster: &infrav1.DOCluster{},
 			})

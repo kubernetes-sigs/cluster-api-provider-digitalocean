@@ -124,7 +124,7 @@ func TestService_GetLoadBalancer(t *testing.T) {
 			ctx := context.TODO()
 			mlbalancer := mock_networking.NewMockLoadBalancersService(mctrl)
 			cscope, err := scope.NewClusterScope(scope.ClusterScopeParams{
-				Client:    fake.NewFakeClientWithScheme(scheme),
+				Client:    fake.NewClientBuilder().WithScheme(scheme).Build(),
 				Cluster:   &clusterv1.Cluster{},
 				DOCluster: &infrav1.DOCluster{},
 				DOClients: scope.DOClients{
