@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/digitalocean/godo v1.95.0
 	github.com/go-logr/logr v1.2.3
-	github.com/golang/mock v1.4.4
+	github.com/golang/mock v1.6.0
 	github.com/miekg/dns v1.1.50
 	github.com/onsi/ginkgo/v2 v2.7.0
 	github.com/onsi/gomega v1.26.0
