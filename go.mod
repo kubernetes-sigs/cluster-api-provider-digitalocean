@@ -7,8 +7,8 @@ require (
 	github.com/go-logr/logr v1.2.3
 	github.com/golang/mock v1.6.0
 	github.com/miekg/dns v1.1.51
-	github.com/onsi/ginkgo/v2 v2.9.0
-	github.com/onsi/gomega v1.27.2
+	github.com/onsi/ginkgo/v2 v2.9.1
+	github.com/onsi/gomega v1.27.4
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/pflag v1.0.5
 	golang.org/x/oauth2 v0.6.0
@@ -55,7 +55,7 @@ require (
 	github.com/gobuffalo/flect v0.3.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
-	github.com/golang/protobuf v1.5.2 // indirect
+	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/cel-go v0.12.4 // indirect
 	github.com/google/gnostic v0.6.9 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
@@ -100,13 +100,13 @@ require (
 	github.com/subosito/gotenv v1.4.1 // indirect
 	github.com/valyala/fastjson v1.6.3 // indirect
 	golang.org/x/crypto v0.3.0 // indirect
-	golang.org/x/mod v0.8.0 // indirect
+	golang.org/x/mod v0.9.0 // indirect
 	golang.org/x/net v0.8.0 // indirect
 	golang.org/x/sys v0.6.0 // indirect
 	golang.org/x/term v0.6.0 // indirect
 	golang.org/x/text v0.8.0 // indirect
 	golang.org/x/time v0.0.0-20220922220347-f3bd1da661af // indirect
-	golang.org/x/tools v0.6.0 // indirect
+	golang.org/x/tools v0.7.0 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.2.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20220616135557-88e70c0c3a90 // indirect
