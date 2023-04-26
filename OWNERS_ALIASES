@@ -20,6 +20,6 @@ aliases:
 
   cluster-api-do-maintainers:
     - cpanato
-    - MorrisLaw
+    - gottwald
     - prksu
     - timoreimann
