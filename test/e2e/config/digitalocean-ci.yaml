@@ -7,63 +7,62 @@ providers:
   - name: cluster-api
     type: CoreProvider
     versions:
-    - name: v1.3.5
-      value: https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.3.5/core-components.yaml
-      type: "url"
-      files:
-      - sourcePath: "${PWD}/test/e2e/data/metadata/cluster-api/metadata.yaml"
-      replacements:
-        - old: "imagePullPolicy: Always"
-          new: "imagePullPolicy: IfNotPresent"
-        - old: "--enable-leader-election"
-          new: "--enable-leader-election=false"
+      - name: v1.3.7
+        value: https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.3.7/core-components.yaml
+        type: "url"
+        files:
+          - sourcePath: "${PWD}/test/e2e/data/metadata/cluster-api/metadata.yaml"
+        replacements:
+          - old: "imagePullPolicy: Always"
+            new: "imagePullPolicy: IfNotPresent"
+          - old: "--enable-leader-election"
+            new: "--enable-leader-election=false"
   - name: kubeadm
     type: BootstrapProvider
     versions:
-    - name: v1.3.5
-      value: https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.3.5/bootstrap-components.yaml
-      type: "url"
-      files:
-      - sourcePath: "${PWD}/test/e2e/data/metadata/cluster-api/metadata.yaml"
-      replacements:
-        - old: "imagePullPolicy: Always"
-          new: "imagePullPolicy: IfNotPresent"
-        - old: "--enable-leader-election"
-          new: "--enable-leader-election=false"
+      - name: v1.3.7
+        value: https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.3.7/bootstrap-components.yaml
+        type: "url"
+        files:
+          - sourcePath: "${PWD}/test/e2e/data/metadata/cluster-api/metadata.yaml"
+        replacements:
+          - old: "imagePullPolicy: Always"
+            new: "imagePullPolicy: IfNotPresent"
+          - old: "--enable-leader-election"
+            new: "--enable-leader-election=false"
   - name: kubeadm
     type: ControlPlaneProvider
     versions:
-    - name: v1.3.5
-      value: https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.3.5/control-plane-components.yaml
-      type: "url"
-      files:
-      - sourcePath: "${PWD}/test/e2e/data/metadata/cluster-api/metadata.yaml"
-      replacements:
-        - old: "imagePullPolicy: Always"
-          new: "imagePullPolicy: IfNotPresent"
-        - old: "--enable-leader-election"
-          new: "--enable-leader-election=false"
+      - name: v1.3.7
+        value: https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.3.7/control-plane-components.yaml
+        type: "url"
+        files:
+          - sourcePath: "${PWD}/test/e2e/data/metadata/cluster-api/metadata.yaml"
+        replacements:
+          - old: "imagePullPolicy: Always"
+            new: "imagePullPolicy: IfNotPresent"
+          - old: "--enable-leader-election"
+            new: "--enable-leader-election=false"
   - name: digitalocean
     type: InfrastructureProvider
     versions:
-    - name: v1.3.99
-      value: "${PWD}/config/default"
-      replacements:
-        - old: gcr.io/k8s-staging-cluster-api-do/cluster-api-do-controller:dev
-          new: gcr.io/k8s-staging-cluster-api-do/cluster-api-do-controller:e2e
-        - old: "imagePullPolicy: Always"
-          new: "imagePullPolicy: IfNotPresent"
-      files:
-      - sourcePath: "${PWD}/metadata.yaml"
-        targetName: "metadata.yaml"
-      - sourcePath: "${PWD}/test/e2e/data/infrastructure-digitalocean/cluster-template.yaml"
-        targetName: "cluster-template.yaml"
-      - sourcePath: "${PWD}/test/e2e/data/infrastructure-digitalocean/cluster-template-prow-ci-version.yaml"
-        targetName: "cluster-template-conformance-ci-artifacts.yaml"
-      - sourcePath: "${PWD}/test/e2e/data/infrastructure-digitalocean/cluster-template-md-remediation.yaml"
-      - sourcePath: "${PWD}/test/e2e/data/infrastructure-digitalocean/cluster-template-kcp-remediation.yaml"
-      - sourcePath: "${PWD}/test/e2e/data/infrastructure-digitalocean/cluster-template-upgrades.yaml"
-
+      - name: v1.3.99
+        value: "${PWD}/config/default"
+        replacements:
+          - old: gcr.io/k8s-staging-cluster-api-do/cluster-api-do-controller:dev
+            new: gcr.io/k8s-staging-cluster-api-do/cluster-api-do-controller:e2e
+          - old: "imagePullPolicy: Always"
+            new: "imagePullPolicy: IfNotPresent"
+        files:
+          - sourcePath: "${PWD}/metadata.yaml"
+            targetName: "metadata.yaml"
+          - sourcePath: "${PWD}/test/e2e/data/infrastructure-digitalocean/cluster-template.yaml"
+            targetName: "cluster-template.yaml"
+          - sourcePath: "${PWD}/test/e2e/data/infrastructure-digitalocean/cluster-template-prow-ci-version.yaml"
+            targetName: "cluster-template-conformance-ci-artifacts.yaml"
+          - sourcePath: "${PWD}/test/e2e/data/infrastructure-digitalocean/cluster-template-md-remediation.yaml"
+          - sourcePath: "${PWD}/test/e2e/data/infrastructure-digitalocean/cluster-template-kcp-remediation.yaml"
+          - sourcePath: "${PWD}/test/e2e/data/infrastructure-digitalocean/cluster-template-upgrades.yaml"
 
 variables:
   REDACT_LOG_SCRIPT: "${PWD}/hack/log/redact.sh"
