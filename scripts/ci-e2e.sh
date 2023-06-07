@@ -45,7 +45,7 @@ create_ssh_key() {
 remove_ssh_key() {
     local ssh_fingerprint=$1
     echo "removing ssh key"
-    doctl compute ssh-key delete ${ssh_fingerprint} --force
+    doctl compute ssh-key delete ${ssh_fingerprint} --force || true
     rm -f ${SSH_KEY_PATH}
 
     ${REPO_ROOT}/hack/log/redact.sh || true
