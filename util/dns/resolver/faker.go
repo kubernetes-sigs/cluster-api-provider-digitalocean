@@ -31,7 +31,7 @@ func NewFakeDNSResolver(expectedMsg []*dns.Msg) *FakeDNSResolver {
 	}
 }
 
-func (f *FakeDNSResolver) Query(servers []string, msg *dns.Msg) (*dns.Msg, error) {
+func (f *FakeDNSResolver) Query(_ []string, msg *dns.Msg) (*dns.Msg, error) {
 	if len(f.expectedMsg) <= f.c {
 		return msg, nil
 	}
