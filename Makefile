@@ -130,7 +130,7 @@ ENVSUBST_VER := v1.2.0
 ENVSUBST_BIN := envsubst
 ENVSUBST := $(TOOLS_BIN_DIR)/$(ENVSUBST_BIN)
 
-GOLANGCI_LINT_VER := v1.50.1
+GOLANGCI_LINT_VER := v1.52.2
 GOLANGCI_LINT_BIN := golangci-lint
 GOLANGCI_LINT := $(TOOLS_BIN_DIR)/$(GOLANGCI_LINT_BIN)-$(GOLANGCI_LINT_VER)
 
@@ -303,7 +303,7 @@ generate-manifests: $(CONTROLLER_GEN) ## Generate manifests e.g. CRD, RBAC etc.
 .PHONY: docker-pull-prerequisites
 docker-pull-prerequisites:
 	docker pull docker/dockerfile:1.1-experimental
-	docker pull docker.io/library/golang:1.19.10
+	docker pull docker.io/library/golang:1.19.12
 	docker pull gcr.io/distroless/static:latest
 
 .PHONY: docker-build
@@ -391,7 +391,7 @@ release-binary: $(RELEASE_DIR)
 		-e GOARCH=$(GOARCH) \
 		-v "$$(pwd):/workspace" \
 		-w /workspace \
-		golang:1.19.10 \
+		golang:1.19.12 \
 		go build -a -trimpath -ldflags '-extldflags "-static"' \
 		-o $(RELEASE_DIR)/$(notdir $(RELEASE_BINARY))-$(GOOS)-$(GOARCH) $(RELEASE_BINARY)
 
