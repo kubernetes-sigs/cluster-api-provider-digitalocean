@@ -20,6 +20,8 @@ package scope
 import (
 	"context"
 	"fmt"
+	"regexp"
+	"strings"
 
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
@@ -30,7 +32,6 @@ import (
 	"k8s.io/utils/pointer"
 
 	clusterv1 "sigs.k8s.io/cluster-api/api/v1beta1"
-	"sigs.k8s.io/cluster-api/controllers/noderefutil"
 	capierrors "sigs.k8s.io/cluster-api/errors"
 	"sigs.k8s.io/cluster-api/util"
 	"sigs.k8s.io/cluster-api/util/patch"
@@ -140,7 +141,7 @@ func (m *MachineScope) GetProviderID() string {
 // SetProviderID sets the DOMachine providerID in spec from droplet id.
 func (m *MachineScope) SetProviderID(dropletID string) {
 	pid := fmt.Sprintf("digitalocean://%s", dropletID)
-	m.DOMachine.Spec.ProviderID = pointer.StringPtr(pid)
+	m.DOMachine.Spec.ProviderID = pointer.String(pid)
 }
 
 // SetVolumes sets the DOMachine volume IDs from droplet in status.
@@ -154,11 +155,24 @@ func (m *MachineScope) SetVolumes(volumeIDs []string) {
 
 // GetInstanceID returns the DOMachine droplet instance id by parsing Spec.ProviderID.
 func (m *MachineScope) GetInstanceID() string {
-	parsed, err := noderefutil.NewProviderID(m.GetProviderID())
-	if err != nil {
+	id := m.GetProviderID()
+
+	if id == "" ||
+		!regexp.MustCompile("^[^:]+://.*[^/]$").MatchString(id) {
 		return ""
 	}
-	return parsed.ID()
+
+	colonIndex := strings.Index(id, ":")
+	cloudProvider := id[0:colonIndex]
+
+	lastSlashIndex := strings.LastIndex(id, "/")
+	instance := id[lastSlashIndex+1:]
+
+	if cloudProvider == "" || instance == "" {
+		return ""
+	}
+
+	return instance
 }
 
 // GetInstanceStatus returns the DOMachine droplet instance status from the status.
@@ -178,7 +192,7 @@ func (m *MachineScope) SetReady() {
 
 // SetFailureMessage sets the DOMachine status error message.
 func (m *MachineScope) SetFailureMessage(v error) {
-	m.DOMachine.Status.FailureMessage = pointer.StringPtr(v.Error())
+	m.DOMachine.Status.FailureMessage = pointer.String(v.Error())
 }
 
 // SetFailureReason sets the DOMachine status error reason.

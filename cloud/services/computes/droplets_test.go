@@ -223,7 +223,7 @@ func TestService_CreateDroplet(t *testing.T) {
 					},
 					Spec: clusterv1.MachineSpec{
 						Bootstrap: clusterv1.Bootstrap{
-							DataSecretName: pointer.StringPtr("bootstrap-data"),
+							DataSecretName: pointer.String("bootstrap-data"),
 						},
 					},
 				},
@@ -286,7 +286,7 @@ func TestService_CreateDroplet(t *testing.T) {
 					},
 					Spec: clusterv1.MachineSpec{
 						Bootstrap: clusterv1.Bootstrap{
-							DataSecretName: pointer.StringPtr("bootstrap-data"),
+							DataSecretName: pointer.String("bootstrap-data"),
 						},
 					},
 				},
@@ -349,7 +349,7 @@ func TestService_CreateDroplet(t *testing.T) {
 					},
 					Spec: clusterv1.MachineSpec{
 						Bootstrap: clusterv1.Bootstrap{
-							DataSecretName: pointer.StringPtr("no-exist-bootstrap-data"),
+							DataSecretName: pointer.String("no-exist-bootstrap-data"),
 						},
 					},
 				},
@@ -394,7 +394,7 @@ func TestService_CreateDroplet(t *testing.T) {
 					},
 					Spec: clusterv1.MachineSpec{
 						Bootstrap: clusterv1.Bootstrap{
-							DataSecretName: pointer.StringPtr("bootstrap-data"),
+							DataSecretName: pointer.String("bootstrap-data"),
 						},
 					},
 				},
@@ -466,7 +466,7 @@ func TestService_CreateDroplet(t *testing.T) {
 					},
 					Spec: clusterv1.MachineSpec{
 						Bootstrap: clusterv1.Bootstrap{
-							DataSecretName: pointer.StringPtr("bootstrap-data"),
+							DataSecretName: pointer.String("bootstrap-data"),
 						},
 					},
 				},
@@ -530,7 +530,7 @@ func TestService_CreateDroplet(t *testing.T) {
 					},
 					Spec: clusterv1.MachineSpec{
 						Bootstrap: clusterv1.Bootstrap{
-							DataSecretName: pointer.StringPtr("bootstrap-data"),
+							DataSecretName: pointer.String("bootstrap-data"),
 						},
 					},
 				},
@@ -576,7 +576,7 @@ func TestService_CreateDroplet(t *testing.T) {
 					},
 					Spec: clusterv1.MachineSpec{
 						Bootstrap: clusterv1.Bootstrap{
-							DataSecretName: pointer.StringPtr("bootstrap-data"),
+							DataSecretName: pointer.String("bootstrap-data"),
 						},
 					},
 				},
@@ -625,7 +625,7 @@ func TestService_CreateDroplet(t *testing.T) {
 					},
 					Spec: clusterv1.MachineSpec{
 						Bootstrap: clusterv1.Bootstrap{
-							DataSecretName: pointer.StringPtr("bootstrap-data"),
+							DataSecretName: pointer.String("bootstrap-data"),
 						},
 					},
 				},
@@ -701,7 +701,7 @@ func TestService_CreateDroplet(t *testing.T) {
 					},
 					Spec: clusterv1.MachineSpec{
 						Bootstrap: clusterv1.Bootstrap{
-							DataSecretName: pointer.StringPtr("bootstrap-data"),
+							DataSecretName: pointer.String("bootstrap-data"),
 						},
 					},
 				},
@@ -755,7 +755,7 @@ func TestService_CreateDroplet(t *testing.T) {
 					},
 					Spec: clusterv1.MachineSpec{
 						Bootstrap: clusterv1.Bootstrap{
-							DataSecretName: pointer.StringPtr("bootstrap-data"),
+							DataSecretName: pointer.String("bootstrap-data"),
 						},
 					},
 				},

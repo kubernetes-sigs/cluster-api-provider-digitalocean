@@ -303,7 +303,7 @@ generate-manifests: $(CONTROLLER_GEN) ## Generate manifests e.g. CRD, RBAC etc.
 .PHONY: docker-pull-prerequisites
 docker-pull-prerequisites:
 	docker pull docker/dockerfile:1.1-experimental
-	docker pull docker.io/library/golang:1.19.12
+	docker pull docker.io/library/golang:1.20.8
 	docker pull gcr.io/distroless/static:latest
 
 .PHONY: docker-build
@@ -391,7 +391,7 @@ release-binary: $(RELEASE_DIR)
 		-e GOARCH=$(GOARCH) \
 		-v "$$(pwd):/workspace" \
 		-w /workspace \
-		golang:1.19.12 \
+		golang:1.20.8 \
 		go build -a -trimpath -ldflags '-extldflags "-static"' \
 		-o $(RELEASE_DIR)/$(notdir $(RELEASE_BINARY))-$(GOOS)-$(GOARCH) $(RELEASE_BINARY)
 
@@ -437,7 +437,7 @@ create-management-cluster: $(KUSTOMIZE) $(ENVSUBST)
 	./hack/install-cert-manager.sh
 
 	# Deploy CAPI
-	curl --retry $(CURL_RETRIES) -sSL https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.3.8/cluster-api-components.yaml | $(ENVSUBST) | kubectl apply -f -
+	curl --retry $(CURL_RETRIES) -sSL https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.4.5/cluster-api-components.yaml | $(ENVSUBST) | kubectl apply -f -
 
 	# Deploy CAPDO
 	kind load docker-image $(CONTROLLER_IMG)-$(ARCH):$(TAG) --name=capdo

@@ -27,6 +27,11 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/client-go/tools/record"
 
+	infrav1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1beta1"
+	"sigs.k8s.io/cluster-api-provider-digitalocean/cloud/scope"
+	"sigs.k8s.io/cluster-api-provider-digitalocean/cloud/services/networking"
+	dnsutil "sigs.k8s.io/cluster-api-provider-digitalocean/util/dns"
+	"sigs.k8s.io/cluster-api-provider-digitalocean/util/reconciler"
 	clusterv1 "sigs.k8s.io/cluster-api/api/v1beta1"
 	"sigs.k8s.io/cluster-api/util"
 	"sigs.k8s.io/cluster-api/util/annotations"
@@ -38,12 +43,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
-
-	infrav1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1beta1"
-	"sigs.k8s.io/cluster-api-provider-digitalocean/cloud/scope"
-	"sigs.k8s.io/cluster-api-provider-digitalocean/cloud/services/networking"
-	dnsutil "sigs.k8s.io/cluster-api-provider-digitalocean/util/dns"
-	"sigs.k8s.io/cluster-api-provider-digitalocean/util/reconciler"
 )
 
 // DOClusterReconciler reconciles a DOCluster object.
