@@ -80,6 +80,8 @@ var (
 	profilerAddress             string
 	webhookPort                 int
 	enableLeaderElection        bool
+	restConfigQPS               float32
+	restConfigBurst             int
 )
 
 func initFlags(fs *pflag.FlagSet) {
@@ -95,6 +97,8 @@ func initFlags(fs *pflag.FlagSet) {
 	fs.DurationVar(&syncPeriod, "sync-period", 10*time.Minute, "The minimum interval at which watched resources are reconciled (e.g. 10m)")
 	fs.IntVar(&webhookPort, "webhook-port", 9443, "Webhook Server port, disabled by default. When enabled, the manager will only work as webhook server, no reconcilers are installed.")
 	fs.DurationVar(&reconcileTimeout, "reconcile-timeout", reconciler.DefaultLoopTimeout, "The maximum duration a reconcile loop can run (e.g. 90m)")
+	fs.Float32Var(&restConfigQPS, "kube-api-qps", 20, "Maximum queries per second from the controller client to the Kubernetes API server. Defaults to 20")
+	fs.IntVar(&restConfigBurst, "kube-api-burst", 30, "Maximum number of queries that should be allowed in one burst from the controller client to the Kubernetes API server. Default 30")
 }
 
 func main() {
@@ -134,7 +138,11 @@ func main() {
 		BurstSize: 100,
 	})
 
-	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
+	restConfig := ctrl.GetConfigOrDie()
+	restConfig.QPS = restConfigQPS
+	restConfig.Burst = restConfigBurst
+
+	mgr, err := ctrl.NewManager(restConfig, ctrl.Options{
 		Scheme:                     scheme,
 		MetricsBindAddress:         metricsAddr,
 		LeaderElection:             enableLeaderElection,
