@@ -46,7 +46,7 @@ providers:
   - name: digitalocean
     type: InfrastructureProvider
     versions:
-      - name: v1.4.99
+      - name: v1.5.99
         value: "${PWD}/config/default"
         replacements:
           - old: gcr.io/k8s-staging-cluster-api-do/cluster-api-do-controller:dev
