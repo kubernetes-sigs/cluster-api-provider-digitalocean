@@ -54,9 +54,9 @@ linters-settings:
       - pkg: sigs.k8s.io/controller-runtime
         alias: ctrl
   staticcheck:
-    go: "1.20"
+    go: "1.21"
   stylecheck:
-    go: "1.20"
+    go: "1.21"
 
 issues:
   max-same-issues: 0
