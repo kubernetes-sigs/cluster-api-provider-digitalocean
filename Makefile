@@ -303,7 +303,7 @@ generate-manifests: $(CONTROLLER_GEN) ## Generate manifests e.g. CRD, RBAC etc.
 .PHONY: docker-pull-prerequisites
 docker-pull-prerequisites:
 	docker pull docker/dockerfile:1.1-experimental
-	docker pull docker.io/library/golang:1.21.2
+	docker pull docker.io/library/golang:1.20.8
 	docker pull gcr.io/distroless/static:latest
 
 .PHONY: docker-build
@@ -391,7 +391,7 @@ release-binary: $(RELEASE_DIR)
 		-e GOARCH=$(GOARCH) \
 		-v "$$(pwd):/workspace" \
 		-w /workspace \
-		golang:1.21.2 \
+		golang:1.20.8 \
 		go build -a -trimpath -ldflags '-extldflags "-static"' \
 		-o $(RELEASE_DIR)/$(notdir $(RELEASE_BINARY))-$(GOOS)-$(GOARCH) $(RELEASE_BINARY)
 
