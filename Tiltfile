@@ -16,7 +16,7 @@ settings = {
     "deploy_cert_manager": True,
     "preload_images_for_kind": True,
     "kind_cluster_name": "capdo",
-    "capi_version": "v1.3.8",
+    "capi_version": "v1.4.5",
     "cert_manager_version": "v1.10.1",
     "kubernetes_version": "v1.25.5",
 }
@@ -100,7 +100,7 @@ def validate_auth():
 
 tilt_helper_dockerfile_header = """
 # Tilt image
-FROM golang:1.19 as tilt-helper
+FROM golang:1.20 as tilt-helper
 # Support live reloading with Tilt
 RUN wget --output-document /restart.sh --quiet https://raw.githubusercontent.com/windmilleng/rerun-process-wrapper/master/restart.sh  && \
     wget --output-document /start.sh --quiet https://raw.githubusercontent.com/windmilleng/rerun-process-wrapper/master/start.sh && \

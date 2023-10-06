@@ -55,8 +55,8 @@ var _ = Describe("Running the Cluster API E2E tests", func() {
 	})
 
 	Context("Should successfully remediate unhealthy machines with MachineHealthCheck", func() {
-		capi_e2e.MachineRemediationSpec(context.TODO(), func() capi_e2e.MachineRemediationSpecInput {
-			return capi_e2e.MachineRemediationSpecInput{
+		capi_e2e.MachineDeploymentRemediationSpec(context.TODO(), func() capi_e2e.MachineDeploymentRemediationSpecInput {
+			return capi_e2e.MachineDeploymentRemediationSpecInput{
 				E2EConfig:             e2eConfig,
 				ClusterctlConfigPath:  clusterctlConfigPath,
 				BootstrapClusterProxy: bootstrapClusterProxy,
