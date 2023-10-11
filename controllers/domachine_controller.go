@@ -220,7 +220,7 @@ func (r *DOMachineReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	return r.reconcile(ctx, machineScope, clusterScope)
 }
 
-func (r *DOMachineReconciler) reconcileVolumes(ctx context.Context, mscope *scope.MachineScope, cscope *scope.ClusterScope) (reconcile.Result, error) {
+func (r *DOMachineReconciler) reconcileVolumes(ctx context.Context, mscope *scope.MachineScope, cscope *scope.ClusterScope) (reconcile.Result, error) { //nolint: unparam
 	mscope.Info("Reconciling DOMachine Volumes")
 	computesvc := computes.NewService(ctx, cscope)
 	domachine := mscope.DOMachine
@@ -312,7 +312,7 @@ func (r *DOMachineReconciler) reconcile(ctx context.Context, machineScope *scope
 		return reconcile.Result{}, nil
 	}
 }
-func (r *DOMachineReconciler) reconcileDeleteVolumes(ctx context.Context, mscope *scope.MachineScope, cscope *scope.ClusterScope) (reconcile.Result, error) {
+func (r *DOMachineReconciler) reconcileDeleteVolumes(ctx context.Context, mscope *scope.MachineScope, cscope *scope.ClusterScope) (reconcile.Result, error) { //nolint: unparam
 	mscope.Info("Reconciling delete DOMachine Volumes")
 	computesvc := computes.NewService(ctx, cscope)
 	domachine := mscope.DOMachine
