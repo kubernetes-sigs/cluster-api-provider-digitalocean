@@ -17,6 +17,7 @@ limitations under the License.
 package controllers
 
 import (
+	"context"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -154,7 +155,7 @@ func TestDOMachineReconciler_DOClusterToDOMachines(t *testing.T) {
 			}
 
 			fn := r.DOClusterToDOMachines(ctrl.SetupSignalHandler())
-			out := fn(tt.request)
+			out := fn(context.Background(), tt.request)
 			g.Expect(out).To(Equal(tt.expected))
 		})
 	}

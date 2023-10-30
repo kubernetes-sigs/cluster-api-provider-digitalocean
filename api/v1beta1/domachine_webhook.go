@@ -28,6 +28,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
+	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
 // log is for logging in this package.
@@ -51,22 +52,22 @@ func (r *DOMachine) SetupWebhookWithManager(mgr ctrl.Manager) error {
 func (r *DOMachine) Default() {}
 
 // ValidateCreate implements webhook.Validator so a webhook will be registered for the type.
-func (r *DOMachine) ValidateCreate() error {
-	return nil
+func (r *DOMachine) ValidateCreate() (admission.Warnings, error) {
+	return nil, nil
 }
 
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type.
-func (r *DOMachine) ValidateUpdate(old runtime.Object) error {
+func (r *DOMachine) ValidateUpdate(old runtime.Object) (admission.Warnings, error) {
 	var allErrs field.ErrorList
 
 	newDOMachine, err := runtime.DefaultUnstructuredConverter.ToUnstructured(r)
 	if err != nil {
-		return apierrors.NewInternalError(errors.Wrap(err, "failed to convert new DOMachine to unstructured object"))
+		return nil, apierrors.NewInternalError(errors.Wrap(err, "failed to convert new DOMachine to unstructured object"))
 	}
 
 	oldDOMachine, err := runtime.DefaultUnstructuredConverter.ToUnstructured(old)
 	if err != nil {
-		return apierrors.NewInternalError(errors.Wrap(err, "failed to convert old DOMachine to unstructured object"))
+		return nil, apierrors.NewInternalError(errors.Wrap(err, "failed to convert old DOMachine to unstructured object"))
 	}
 
 	newDOMachineSpec := newDOMachine["spec"].(map[string]interface{})
@@ -85,13 +86,13 @@ func (r *DOMachine) ValidateUpdate(old runtime.Object) error {
 	}
 
 	if len(allErrs) == 0 {
-		return nil
+		return nil, nil
 	}
 
-	return apierrors.NewInvalid(r.GroupVersionKind().GroupKind(), r.Name, allErrs)
+	return nil, apierrors.NewInvalid(r.GroupVersionKind().GroupKind(), r.Name, allErrs)
 }
 
 // ValidateDelete implements webhook.Validator so a webhook will be registered for the type.
-func (r *DOMachine) ValidateDelete() error {
-	return nil
+func (r *DOMachine) ValidateDelete() (admission.Warnings, error) {
+	return nil, nil
 }

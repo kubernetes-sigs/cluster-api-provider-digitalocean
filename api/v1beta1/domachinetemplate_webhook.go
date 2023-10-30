@@ -25,6 +25,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
+	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
 // +kubebuilder:webhook:verbs=create;update,path=/validate-infrastructure-cluster-x-k8s-io-v1beta1-domachinetemplate,mutating=false,failurePolicy=fail,matchPolicy=Equivalent,groups=infrastructure.cluster.x-k8s.io,resources=domachinetemplates,versions=v1beta1,name=validation.domachinetemplate.infrastructure.cluster.x-k8s.io,sideEffects=None,admissionReviewVersions=v1beta1
@@ -42,7 +43,7 @@ func (r *DOMachineTemplate) SetupWebhookWithManager(mgr ctrl.Manager) error {
 var _ webhook.Validator = &DOMachineTemplate{}
 
 // ValidateCreate implements webhook.Validator so a webhook will be registered for the type.
-func (r *DOMachineTemplate) ValidateCreate() error {
+func (r *DOMachineTemplate) ValidateCreate() (admission.Warnings, error) {
 	var allErrs field.ErrorList
 
 	if r.Spec.Template.Spec.ProviderID != nil {
@@ -50,14 +51,14 @@ func (r *DOMachineTemplate) ValidateCreate() error {
 	}
 
 	if len(allErrs) == 0 {
-		return nil
+		return nil, nil
 	}
 
-	return apierrors.NewInvalid(r.GroupVersionKind().GroupKind(), r.Name, allErrs)
+	return nil, apierrors.NewInvalid(r.GroupVersionKind().GroupKind(), r.Name, allErrs)
 }
 
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type.
-func (r *DOMachineTemplate) ValidateUpdate(old runtime.Object) error {
+func (r *DOMachineTemplate) ValidateUpdate(old runtime.Object) (admission.Warnings, error) {
 	var allErrs field.ErrorList
 
 	oldDOMachineTemplate := old.(*DOMachineTemplate)
@@ -66,15 +67,15 @@ func (r *DOMachineTemplate) ValidateUpdate(old runtime.Object) error {
 	}
 
 	if len(allErrs) == 0 {
-		return nil
+		return nil, nil
 	}
 
-	return apierrors.NewInvalid(r.GroupVersionKind().GroupKind(), r.Name, allErrs)
+	return nil, apierrors.NewInvalid(r.GroupVersionKind().GroupKind(), r.Name, allErrs)
 }
 
 // ValidateDelete implements webhook.Validator so a webhook will be registered for the type.
-func (r *DOMachineTemplate) ValidateDelete() error {
-	return nil
+func (r *DOMachineTemplate) ValidateDelete() (admission.Warnings, error) {
+	return nil, nil
 }
 
 // Default implements webhookutil.defaulter so a webhook will be registered for the type.

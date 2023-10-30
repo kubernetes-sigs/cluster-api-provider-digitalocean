@@ -26,6 +26,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
+	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
 // log is for logging in this package.
@@ -49,17 +50,17 @@ func (r *DOCluster) SetupWebhookWithManager(mgr ctrl.Manager) error {
 func (r *DOCluster) Default() {}
 
 // ValidateCreate implements webhook.Validator so a webhook will be registered for the type.
-func (r *DOCluster) ValidateCreate() error {
-	return nil
+func (r *DOCluster) ValidateCreate() (admission.Warnings, error) {
+	return nil, nil
 }
 
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type.
-func (r *DOCluster) ValidateUpdate(old runtime.Object) error {
+func (r *DOCluster) ValidateUpdate(old runtime.Object) (admission.Warnings, error) {
 	var allErrs field.ErrorList
 
 	oldDOCluster, ok := old.(*DOCluster)
 	if !ok {
-		return apierrors.NewBadRequest(fmt.Sprintf("expected an DOCluster but got a %T", old))
+		return nil, apierrors.NewBadRequest(fmt.Sprintf("expected an DOCluster but got a %T", old))
 	}
 
 	if r.Spec.Region != oldDOCluster.Spec.Region {
@@ -67,13 +68,13 @@ func (r *DOCluster) ValidateUpdate(old runtime.Object) error {
 	}
 
 	if len(allErrs) == 0 {
-		return nil
+		return nil, nil
 	}
 
-	return apierrors.NewInvalid(r.GroupVersionKind().GroupKind(), r.Name, allErrs)
+	return nil, apierrors.NewInvalid(r.GroupVersionKind().GroupKind(), r.Name, allErrs)
 }
 
 // ValidateDelete implements webhook.Validator so a webhook will be registered for the type.
-func (r *DOCluster) ValidateDelete() error {
-	return nil
+func (r *DOCluster) ValidateDelete() (admission.Warnings, error) {
+	return nil, nil
 }

@@ -25,6 +25,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
+	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
 // log is for logging in this package.
@@ -49,27 +50,27 @@ func (r *DOClusterTemplate) Default() {
 var _ webhook.Validator = &DOClusterTemplate{}
 
 // ValidateCreate implements webhook.Validator so a webhook will be registered for the type.
-func (r *DOClusterTemplate) ValidateCreate() error {
+func (r *DOClusterTemplate) ValidateCreate() (admission.Warnings, error) {
 	doclustertemplatelog.Info("validate create", "name", r.Name)
 
-	return nil
+	return nil, nil
 }
 
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type.
-func (r *DOClusterTemplate) ValidateUpdate(oldRaw runtime.Object) error {
+func (r *DOClusterTemplate) ValidateUpdate(oldRaw runtime.Object) (admission.Warnings, error) {
 	old, ok := oldRaw.(*DOClusterTemplate)
 	if !ok {
-		return apierrors.NewBadRequest(fmt.Sprintf("expected an DOClusterTemplate but got a %T", oldRaw))
+		return nil, apierrors.NewBadRequest(fmt.Sprintf("expected an DOClusterTemplate but got a %T", oldRaw))
 	}
 
 	if !reflect.DeepEqual(r.Spec, old.Spec) {
-		return apierrors.NewBadRequest("DOClusterTemplate.Spec is immutable")
+		return nil, apierrors.NewBadRequest("DOClusterTemplate.Spec is immutable")
 	}
-	return nil
+	return nil, nil
 }
 
 // ValidateDelete implements webhook.Validator so a webhook will be registered for the type.
-func (r *DOClusterTemplate) ValidateDelete() error {
+func (r *DOClusterTemplate) ValidateDelete() (admission.Warnings, error) {
 	doclustertemplatelog.Info("validate delete", "name", r.Name)
-	return nil
+	return nil, nil
 }
