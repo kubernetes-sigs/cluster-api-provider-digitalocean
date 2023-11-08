@@ -3,7 +3,7 @@ module sigs.k8s.io/cluster-api-provider-digitalocean
 go 1.20
 
 require (
-	github.com/digitalocean/godo v1.105.0
+	github.com/digitalocean/godo v1.105.1
 	github.com/go-logr/logr v1.3.0
 	github.com/golang/mock v1.6.0
 	github.com/miekg/dns v1.1.56
