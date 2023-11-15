@@ -6,7 +6,7 @@ require (
 	github.com/digitalocean/godo v1.105.1
 	github.com/go-logr/logr v1.3.0
 	github.com/golang/mock v1.6.0
-	github.com/miekg/dns v1.1.56
+	github.com/miekg/dns v1.1.57
 	github.com/onsi/ginkgo/v2 v2.13.1
 	github.com/onsi/gomega v1.30.0
 	github.com/pkg/errors v0.9.1
