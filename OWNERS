@@ -7,7 +7,6 @@ approvers:
   - cluster-api-do-maintainers
 
 reviewers:
-  - cluster-api-maintainers
   - cluster-api-do-maintainers
 
 emeritus_approvers:
