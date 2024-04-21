@@ -7,8 +7,8 @@ providers:
   - name: cluster-api
     type: CoreProvider
     versions:
-      - name: v1.5.2
-        value: https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.5.2/core-components.yaml
+      - name: v1.6.4
+        value: https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.6.4/core-components.yaml
         type: "url"
         files:
           - sourcePath: "${PWD}/test/e2e/data/metadata/cluster-api/metadata.yaml"
@@ -20,8 +20,8 @@ providers:
   - name: kubeadm
     type: BootstrapProvider
     versions:
-      - name: v1.5.2
-        value: https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.5.2/bootstrap-components.yaml
+      - name: v1.6.4
+        value: https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.6.4/bootstrap-components.yaml
         type: "url"
         files:
           - sourcePath: "${PWD}/test/e2e/data/metadata/cluster-api/metadata.yaml"
@@ -33,8 +33,8 @@ providers:
   - name: kubeadm
     type: ControlPlaneProvider
     versions:
-      - name: v1.5.2
-        value: https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.5.2/control-plane-components.yaml
+      - name: v1.6.4
+        value: https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.6.4/control-plane-components.yaml
         type: "url"
         files:
           - sourcePath: "${PWD}/test/e2e/data/metadata/cluster-api/metadata.yaml"
@@ -46,7 +46,7 @@ providers:
   - name: digitalocean
     type: InfrastructureProvider
     versions:
-      - name: v1.5.99 # Use manifest from source files
+      - name: v1.6.99 # Use manifest from source files
         value: ${PWD}/config/default
         replacements:
           - old: gcr.io/k8s-staging-cluster-api-do/cluster-api-do-controller:dev
