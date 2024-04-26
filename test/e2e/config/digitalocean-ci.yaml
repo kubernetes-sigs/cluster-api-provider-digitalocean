@@ -66,7 +66,7 @@ providers:
 
 variables:
   REDACT_LOG_SCRIPT: "${PWD}/hack/log/redact.sh"
-  KUBERNETES_VERSION: "v1.25.5"
+  KUBERNETES_VERSION: "v1.29.4"
   EXP_CLUSTER_RESOURCE_SET: "true"
   # Cluster Addons
   CNI: "${PWD}/test/e2e/data/cni/calico/calico.yaml"
@@ -74,24 +74,24 @@ variables:
   # Following CAPDO variables should be set before testing
   DO_REGION: "nyc1"
   DO_CONTROL_PLANE_MACHINE_TYPE: "s-2vcpu-2gb"
-  # Cluster API Kubernetes v1.25.5 on Ubuntu 20.04
-  DO_CONTROL_PLANE_MACHINE_IMAGE: "123786633"
+  # Cluster API Kubernetes v1.29.4 on Ubuntu 22.04
+  DO_CONTROL_PLANE_MACHINE_IMAGE: "154711321"
   DO_NODE_MACHINE_TYPE: "s-2vcpu-2gb"
-  # Cluster API Kubernetes v1.25.5 on Ubuntu 20.04
-  DO_NODE_MACHINE_IMAGE: "123786633"
+  # Cluster API Kubernetes v1.29.4 on Ubuntu 22.04
+  DO_NODE_MACHINE_IMAGE: "154711321"
   CONFORMANCE_WORKER_MACHINE_COUNT: "2"
   CONFORMANCE_CONTROL_PLANE_MACHINE_COUNT: "1"
   KUBETEST_CONFIGURATION: "${PWD}/test/e2e/data/kubetest/conformance.yaml"
   ETCD_VERSION_UPGRADE_TO: "3.5.1-0"
   COREDNS_VERSION_UPGRADE_TO: "v1.8.6"
-  # Cluster API Kubernetes v1.24.9 on Ubuntu 20.04
-  KUBERNETES_IMAGE_UPGRADE_FROM: "123787403"
-  # Cluster API Kubernetes v1.25.5 on Ubuntu 20.04
-  KUBERNETES_IMAGE_UPGRADE_TO: "123786633"
+  # Cluster API Kubernetes v1.28.9 on Ubuntu 22.04
+  KUBERNETES_IMAGE_UPGRADE_FROM: "154711472"
+  # Cluster API Kubernetes v1.29.4 on Ubuntu 22.04
+  KUBERNETES_IMAGE_UPGRADE_TO: "154711321"
   CONTROL_PLANE_MACHINE_TEMPLATE_UPGRADE_TO: "cp-k8s-upgrade-and-conformance"
   WORKERS_MACHINE_TEMPLATE_UPGRADE_TO: "worker-k8s-upgrade-and-conformance"
-  KUBERNETES_VERSION_UPGRADE_TO: "${KUBERNETES_VERSION_UPGRADE_TO:-v1.25.5}"
-  KUBERNETES_VERSION_UPGRADE_FROM: "${KUBERNETES_VERSION_UPGRADE_FROM:-v1.24.9}"
+  KUBERNETES_VERSION_UPGRADE_TO: "${KUBERNETES_VERSION_UPGRADE_TO:-v1.29.4}"
+  KUBERNETES_VERSION_UPGRADE_FROM: "${KUBERNETES_VERSION_UPGRADE_FROM:-v1.28.9}"
   IP_FAMILY: "IPv4"
 
 intervals:
