@@ -29,7 +29,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/klog/v2/klogr"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	clusterv1 "sigs.k8s.io/cluster-api/api/v1beta1"
 	capierrors "sigs.k8s.io/cluster-api/errors"
@@ -141,7 +141,7 @@ func (m *MachineScope) GetProviderID() string {
 // SetProviderID sets the DOMachine providerID in spec from droplet id.
 func (m *MachineScope) SetProviderID(dropletID string) {
 	pid := fmt.Sprintf("digitalocean://%s", dropletID)
-	m.DOMachine.Spec.ProviderID = pointer.String(pid)
+	m.DOMachine.Spec.ProviderID = ptr.To[string](pid)
 }
 
 // SetVolumes sets the DOMachine volume IDs from droplet in status.
@@ -192,7 +192,7 @@ func (m *MachineScope) SetReady() {
 
 // SetFailureMessage sets the DOMachine status error message.
 func (m *MachineScope) SetFailureMessage(v error) {
-	m.DOMachine.Status.FailureMessage = pointer.String(v.Error())
+	m.DOMachine.Status.FailureMessage = ptr.To[string](v.Error())
 }
 
 // SetFailureReason sets the DOMachine status error reason.

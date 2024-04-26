@@ -16,9 +16,9 @@ settings = {
     "deploy_cert_manager": True,
     "preload_images_for_kind": True,
     "kind_cluster_name": "capdo",
-    "capi_version": "v1.5.2",
+    "capi_version": "v1.6.4",
     "cert_manager_version": "v1.10.1",
-    "kubernetes_version": "v1.25.5",
+    "kubernetes_version": "v1.29.4",
 }
 
 keys = ["DO_B64ENCODED_CREDENTIALS"]

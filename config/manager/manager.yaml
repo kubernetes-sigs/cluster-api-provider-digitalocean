@@ -20,24 +20,28 @@ spec:
     spec:
       serviceAccountName: manager
       containers:
-      - args:
-        - --leader-elect
-        - --metrics-bind-addr=127.0.0.1:8080
-        image: controller:latest
-        imagePullPolicy: Always
-        name: manager
-        ports:
-        - containerPort: 9440
-          name: healthz
-          protocol: TCP
-        readinessProbe:
-          httpGet:
-            path: /readyz
-            port: healthz
-        livenessProbe:
-          httpGet:
-            path: /healthz
-            port: healthz
+        - args:
+            - --leader-elect
+            - "--diagnostics-address=:8444"
+            - "--insecure-diagnostics=false"
+          image: controller:latest
+          imagePullPolicy: Always
+          name: manager
+          ports:
+            - containerPort: 9440
+              name: healthz
+              protocol: TCP
+            - containerPort: 8444
+              name: metrics
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: healthz
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: healthz
       terminationGracePeriodSeconds: 10
       tolerations:
         - effect: NoSchedule

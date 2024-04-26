@@ -87,7 +87,7 @@ func TestService_GetLoadBalancer(t *testing.T) {
 			args: args{
 				id: "",
 			},
-			expect:  func(mlb *mock_networking.MockLoadBalancersServiceMockRecorder) {},
+			expect:  func(_ *mock_networking.MockLoadBalancersServiceMockRecorder) {},
 			wantErr: false,
 		},
 		{

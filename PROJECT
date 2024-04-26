@@ -2,16 +2,6 @@ version: "3"
 domain: cluster.x-k8s.io
 repo: sigs.k8s.io/cluster-api-provider-digitalocean
 resources:
-# v1alpha3 types
-- group: infrastructure
-  kind: DOCluster
-  version: v1alpha3
-- group: infrastructure
-  kind: DOMachine
-  version: v1alpha3
-- group: infrastructure
-  kind: DOMachineTemplate
-  version: v1alpha3
 # v1alpha4 types
 - group: infrastructure
   kind: DOCluster
