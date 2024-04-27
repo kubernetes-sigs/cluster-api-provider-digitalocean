@@ -106,6 +106,9 @@ CAPDO_WORKER_CLUSTER_KUBECONFIG ?= "/tmp/kubeconfig"
 # Build time versioning details.
 LDFLAGS := $(shell hack/version.sh)
 
+# Other tools versions
+CERT_MANAGER_VER := v1.14.4
+
 ## --------------------------------------
 ##@ Help
 ## --------------------------------------
@@ -431,7 +434,7 @@ create-management-cluster: $(KUSTOMIZE) $(ENVSUBST)
 	$(MAKE) kind-create
 
 	# Install cert manager and wait for availability
-	./hack/install-cert-manager.sh
+	./hack/install-cert-manager.sh $(CERT_MANAGER_VER)
 
 	# Deploy CAPI
 	curl --retry $(CURL_RETRIES) -sSL https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.5.2/cluster-api-components.yaml | $(ENVSUBST) | kubectl apply -f -
