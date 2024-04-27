@@ -154,6 +154,21 @@ func (mr *MockLoadBalancersServiceMockRecorder) List(arg0, arg1 interface{}) *go
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockLoadBalancersService)(nil).List), arg0, arg1)
 }
 
+// PurgeCache mocks base method.
+func (m *MockLoadBalancersService) PurgeCache(arg0 context.Context, arg1 string) (*godo.Response, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PurgeCache", arg0, arg1)
+	ret0, _ := ret[0].(*godo.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// PurgeCache indicates an expected call of PurgeCache.
+func (mr *MockLoadBalancersServiceMockRecorder) PurgeCache(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PurgeCache", reflect.TypeOf((*MockLoadBalancersService)(nil).PurgeCache), arg0, arg1)
+}
+
 // RemoveDroplets mocks base method.
 func (m *MockLoadBalancersService) RemoveDroplets(arg0 context.Context, arg1 string, arg2 ...int) (*godo.Response, error) {
 	m.ctrl.T.Helper()
