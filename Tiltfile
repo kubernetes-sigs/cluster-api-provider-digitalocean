@@ -17,7 +17,7 @@ settings = {
     "preload_images_for_kind": True,
     "kind_cluster_name": "capdo",
     "capi_version": "v1.6.4",
-    "cert_manager_version": "v1.10.1",
+    "cert_manager_version": "v1.14.4",
     "kubernetes_version": "v1.29.4",
 }
 
