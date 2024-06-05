@@ -19,6 +19,7 @@ package networking
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"os"
 	"reflect"
@@ -34,7 +35,9 @@ import (
 
 	clusterv1 "sigs.k8s.io/cluster-api/api/v1beta1"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 )
@@ -144,6 +147,59 @@ func TestService_GetLoadBalancer(t *testing.T) {
 			}
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Service.GetLoadBalancer() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestLBNeedsUpdate(t *testing.T) {
+	const (
+		clusterName           = "workload-cluster-1"
+		clusterUID  types.UID = "unique"
+	)
+
+	tests := []struct {
+		name         string
+		existingLB   *godo.LoadBalancer
+		expectUpdate bool
+	}{
+		{
+			name: "lb tag needs to be updated",
+			existingLB: &godo.LoadBalancer{
+				Name: "foo",
+				Tag:  "something-else",
+			},
+			expectUpdate: true,
+		},
+		{
+			name: "lb does not need update",
+			existingLB: &godo.LoadBalancer{
+				Name: "foo",
+				Tag:  fmt.Sprintf("%s:%s:%s:%s", "sigs-k8s-io:capdo", clusterName, clusterUID, "apiserver"),
+			},
+		},
+	}
+	for _, tc := range tests {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			service := &Service{
+				scope: &scope.ClusterScope{
+					Cluster: &clusterv1.Cluster{
+						ObjectMeta: metav1.ObjectMeta{
+							Name: clusterName,
+							UID:  clusterUID,
+						},
+					},
+				},
+				ctx: context.Background(),
+			}
+
+			needsUpdate := service.NeedsUpdate(tc.existingLB)
+			if needsUpdate != tc.expectUpdate {
+				t.Errorf("expected != actual, expected: %v, actual: %v", tc.expectUpdate, needsUpdate)
+				return
 			}
 		})
 	}
