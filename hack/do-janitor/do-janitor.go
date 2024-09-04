@@ -187,7 +187,9 @@ func volumeList(ctx context.Context, client *godo.Client) ([]godo.Volume, error)
 	list := []godo.Volume{}
 
 	// create options. initially, these will be blank
-	opt := &godo.ListVolumeParams{}
+	opt := &godo.ListVolumeParams{
+		ListOptions: &godo.ListOptions{},
+	}
 	for {
 		volumes, resp, err := client.Storage.ListVolumes(ctx, opt)
 		if err != nil {
