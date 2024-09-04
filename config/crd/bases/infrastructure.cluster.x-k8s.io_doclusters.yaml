@@ -3,7 +3,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.13.0
+    controller-gen.kubebuilder.io/version: v0.14.0
   name: doclusters.infrastructure.cluster.x-k8s.io
 spec:
   group: infrastructure.cluster.x-k8s.io
@@ -36,14 +36,19 @@ spec:
         description: DOCluster is the Schema for the DOClusters API.
         properties:
           apiVersion:
-            description: 'APIVersion defines the versioned schema of this representation
-              of an object. Servers should convert recognized schemas to the latest
-              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
             type: string
           kind:
-            description: 'Kind is a string value representing the REST resource this
-              object represents. Servers may infer this from the endpoint the client
-              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
             type: string
           metadata:
             type: object
@@ -51,20 +56,20 @@ spec:
             description: DOClusterSpec defines the desired state of DOCluster.
             properties:
               controlPlaneDNS:
-                description: ControlPlaneDNS is a managed DNS name that points to
-                  the load-balancer IP used for the ControlPlaneEndpoint.
+                description: |-
+                  ControlPlaneDNS is a managed DNS name that points to the load-balancer
+                  IP used for the ControlPlaneEndpoint.
                 properties:
                   domain:
-                    description: Domain is the DO domain that this record should live
-                      in. It must be pre-existing in your DO account. The format must
-                      be a string that conforms to the definition of a subdomain in
-                      DNS (RFC 1123)
+                    description: |-
+                      Domain is the DO domain that this record should live in. It must be pre-existing in your DO account.
+                      The format must be a string that conforms to the definition of a subdomain in DNS (RFC 1123)
                     pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$
                     type: string
                   name:
-                    description: Name is the DNS short name of the record (non-FQDN)
-                      The format must consist of alphanumeric characters, '-' or '.',
-                      and must start and end with an alphanumeric character
+                    description: |-
+                      Name is the DNS short name of the record (non-FQDN)
+                      The format must consist of alphanumeric characters, '-' or '.', and must start and end with an alphanumeric character
                     pattern: ^[a-z0-9]([-a-z0-9.]*[a-z0-9])?$
                     type: string
                 required:
@@ -72,9 +77,10 @@ spec:
                 - name
                 type: object
               controlPlaneEndpoint:
-                description: ControlPlaneEndpoint represents the endpoint used to
-                  communicate with the control plane. If ControlPlaneDNS is unset,
-                  the DO load-balancer IP of the Kubernetes API Server is used.
+                description: |-
+                  ControlPlaneEndpoint represents the endpoint used to communicate with the
+                  control plane. If ControlPlaneDNS is unset, the DO load-balancer IP
+                  of the Kubernetes API Server is used.
                 properties:
                   host:
                     description: The hostname on which the API server is serving.
@@ -94,10 +100,9 @@ spec:
                     description: Configures an API Server loadbalancers
                     properties:
                       algorithm:
-                        description: The API Server load balancing algorithm used
-                          to determine which backend Droplet will be selected by a
-                          client. It must be either "round_robin" or "least_connections".
-                          The default value is "round_robin".
+                        description: |-
+                          The API Server load balancing algorithm used to determine which backend Droplet will be selected by a client.
+                          It must be either "round_robin" or "least_connections". The default value is "round_robin".
                         enum:
                         - round_robin
                         - least_connections
@@ -107,33 +112,30 @@ spec:
                           the Load Balancer. If omitted, default values will be provided.
                         properties:
                           healthyThreshold:
-                            description: The number of times a health check must pass
-                              for a backend Droplet to be marked "healthy" and be
-                              re-added to the pool. The vaule must be between 2 and
-                              10. If not specified, the default value is 5.
+                            description: |-
+                              The number of times a health check must pass for a backend Droplet to be marked "healthy" and be re-added to the pool.
+                              The vaule must be between 2 and 10. If not specified, the default value is 5.
                             maximum: 10
                             minimum: 2
                             type: integer
                           interval:
-                            description: The number of seconds between between two
-                              consecutive health checks. The value must be between
-                              3 and 300. If not specified, the default value is 10.
+                            description: |-
+                              The number of seconds between between two consecutive health checks. The value must be between 3 and 300.
+                              If not specified, the default value is 10.
                             maximum: 300
                             minimum: 3
                             type: integer
                           timeout:
-                            description: The number of seconds the Load Balancer instance
-                              will wait for a response until marking a health check
-                              as failed. The value must be between 3 and 300. If not
-                              specified, the default value is 5.
+                            description: |-
+                              The number of seconds the Load Balancer instance will wait for a response until marking a health check as failed.
+                              The value must be between 3 and 300. If not specified, the default value is 5.
                             maximum: 300
                             minimum: 3
                             type: integer
                           unhealthyThreshold:
-                            description: The number of times a health check must fail
-                              for a backend Droplet to be marked "unhealthy" and be
-                              removed from the pool. The vaule must be between 2 and
-                              10. If not specified, the default value is 3.
+                            description: |-
+                              The number of times a health check must fail for a backend Droplet to be marked "unhealthy" and be removed from the pool.
+                              The vaule must be between 2 and 10. If not specified, the default value is 3.
                             maximum: 10
                             minimum: 2
                             type: integer
@@ -153,14 +155,17 @@ spec:
                     description: VPC defines the VPC configuration.
                     properties:
                       vpc_uuid:
-                        description: VPCUUID defines the VPC UUID to use. An empty
-                          value implies using the default VPC.
+                        description: |-
+                          VPCUUID defines the VPC UUID to use. An empty value implies using the
+                          default VPC.
                         type: string
                     type: object
                 type: object
               region:
-                description: The DigitalOcean Region the cluster lives in. It must
-                  be one of available region on DigitalOcean. See https://developers.digitalocean.com/documentation/v2/#list-all-regions
+                description: |-
+                  The DigitalOcean Region the cluster lives in. It must be one of available
+                  region on DigitalOcean. See
+                  https://developers.digitalocean.com/documentation/v2/#list-all-regions
                 type: string
             required:
             - region
@@ -169,8 +174,9 @@ spec:
             description: DOClusterStatus defines the observed state of DOCluster.
             properties:
               controlPlaneDNSRecordReady:
-                description: ControlPlaneDNSRecordReady denotes that the DNS record
-                  is ready and propagated to the DO DNS servers.
+                description: |-
+                  ControlPlaneDNSRecordReady denotes that the DNS record is ready and
+                  propagated to the DO DNS servers.
                 type: boolean
               network:
                 description: Network encapsulates all things related to DigitalOcean
@@ -217,14 +223,19 @@ spec:
         description: DOCluster is the Schema for the DOClusters API.
         properties:
           apiVersion:
-            description: 'APIVersion defines the versioned schema of this representation
-              of an object. Servers should convert recognized schemas to the latest
-              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
             type: string
           kind:
-            description: 'Kind is a string value representing the REST resource this
-              object represents. Servers may infer this from the endpoint the client
-              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
             type: string
           metadata:
             type: object
@@ -232,20 +243,20 @@ spec:
             description: DOClusterSpec defines the desired state of DOCluster.
             properties:
               controlPlaneDNS:
-                description: ControlPlaneDNS is a managed DNS name that points to
-                  the load-balancer IP used for the ControlPlaneEndpoint.
+                description: |-
+                  ControlPlaneDNS is a managed DNS name that points to the load-balancer
+                  IP used for the ControlPlaneEndpoint.
                 properties:
                   domain:
-                    description: Domain is the DO domain that this record should live
-                      in. It must be pre-existing in your DO account. The format must
-                      be a string that conforms to the definition of a subdomain in
-                      DNS (RFC 1123)
+                    description: |-
+                      Domain is the DO domain that this record should live in. It must be pre-existing in your DO account.
+                      The format must be a string that conforms to the definition of a subdomain in DNS (RFC 1123)
                     pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$
                     type: string
                   name:
-                    description: Name is the DNS short name of the record (non-FQDN)
-                      The format must consist of alphanumeric characters, '-' or '.',
-                      and must start and end with an alphanumeric character
+                    description: |-
+                      Name is the DNS short name of the record (non-FQDN)
+                      The format must consist of alphanumeric characters, '-' or '.', and must start and end with an alphanumeric character
                     pattern: ^[a-z0-9]([-a-z0-9.]*[a-z0-9])?$
                     type: string
                 required:
@@ -253,9 +264,10 @@ spec:
                 - name
                 type: object
               controlPlaneEndpoint:
-                description: ControlPlaneEndpoint represents the endpoint used to
-                  communicate with the control plane. If ControlPlaneDNS is unset,
-                  the DO load-balancer IP of the Kubernetes API Server is used.
+                description: |-
+                  ControlPlaneEndpoint represents the endpoint used to communicate with the
+                  control plane. If ControlPlaneDNS is unset, the DO load-balancer IP
+                  of the Kubernetes API Server is used.
                 properties:
                   host:
                     description: The hostname on which the API server is serving.
@@ -275,10 +287,9 @@ spec:
                     description: Configures an API Server loadbalancers
                     properties:
                       algorithm:
-                        description: The API Server load balancing algorithm used
-                          to determine which backend Droplet will be selected by a
-                          client. It must be either "round_robin" or "least_connections".
-                          The default value is "round_robin".
+                        description: |-
+                          The API Server load balancing algorithm used to determine which backend Droplet will be selected by a client.
+                          It must be either "round_robin" or "least_connections". The default value is "round_robin".
                         enum:
                         - round_robin
                         - least_connections
@@ -288,33 +299,30 @@ spec:
                           the Load Balancer. If omitted, default values will be provided.
                         properties:
                           healthyThreshold:
-                            description: The number of times a health check must pass
-                              for a backend Droplet to be marked "healthy" and be
-                              re-added to the pool. The vaule must be between 2 and
-                              10. If not specified, the default value is 5.
+                            description: |-
+                              The number of times a health check must pass for a backend Droplet to be marked "healthy" and be re-added to the pool.
+                              The vaule must be between 2 and 10. If not specified, the default value is 5.
                             maximum: 10
                             minimum: 2
                             type: integer
                           interval:
-                            description: The number of seconds between between two
-                              consecutive health checks. The value must be between
-                              3 and 300. If not specified, the default value is 10.
+                            description: |-
+                              The number of seconds between between two consecutive health checks. The value must be between 3 and 300.
+                              If not specified, the default value is 10.
                             maximum: 300
                             minimum: 3
                             type: integer
                           timeout:
-                            description: The number of seconds the Load Balancer instance
-                              will wait for a response until marking a health check
-                              as failed. The value must be between 3 and 300. If not
-                              specified, the default value is 5.
+                            description: |-
+                              The number of seconds the Load Balancer instance will wait for a response until marking a health check as failed.
+                              The value must be between 3 and 300. If not specified, the default value is 5.
                             maximum: 300
                             minimum: 3
                             type: integer
                           unhealthyThreshold:
-                            description: The number of times a health check must fail
-                              for a backend Droplet to be marked "unhealthy" and be
-                              removed from the pool. The vaule must be between 2 and
-                              10. If not specified, the default value is 3.
+                            description: |-
+                              The number of times a health check must fail for a backend Droplet to be marked "unhealthy" and be removed from the pool.
+                              The vaule must be between 2 and 10. If not specified, the default value is 3.
                             maximum: 10
                             minimum: 2
                             type: integer
@@ -334,14 +342,17 @@ spec:
                     description: VPC defines the VPC configuration.
                     properties:
                       vpc_uuid:
-                        description: VPCUUID defines the VPC UUID to use. An empty
-                          value implies using the default VPC.
+                        description: |-
+                          VPCUUID defines the VPC UUID to use. An empty value implies using the
+                          default VPC.
                         type: string
                     type: object
                 type: object
               region:
-                description: The DigitalOcean Region the cluster lives in. It must
-                  be one of available region on DigitalOcean. See https://developers.digitalocean.com/documentation/v2/#list-all-regions
+                description: |-
+                  The DigitalOcean Region the cluster lives in. It must be one of available
+                  region on DigitalOcean. See
+                  https://developers.digitalocean.com/documentation/v2/#list-all-regions
                 type: string
             required:
             - region
@@ -350,8 +361,9 @@ spec:
             description: DOClusterStatus defines the observed state of DOCluster.
             properties:
               controlPlaneDNSRecordReady:
-                description: ControlPlaneDNSRecordReady denotes that the DNS record
-                  is ready and propagated to the DO DNS servers.
+                description: |-
+                  ControlPlaneDNSRecordReady denotes that the DNS record is ready and
+                  propagated to the DO DNS servers.
                 type: boolean
               network:
                 description: Network encapsulates all things related to DigitalOcean

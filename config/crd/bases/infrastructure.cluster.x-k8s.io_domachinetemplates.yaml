@@ -3,7 +3,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.13.0
+    controller-gen.kubebuilder.io/version: v0.14.0
   name: domachinetemplates.infrastructure.cluster.x-k8s.io
 spec:
   group: infrastructure.cluster.x-k8s.io
@@ -22,14 +22,19 @@ spec:
         description: DOMachineTemplate is the Schema for the domachinetemplates API.
         properties:
           apiVersion:
-            description: 'APIVersion defines the versioned schema of this representation
-              of an object. Servers should convert recognized schemas to the latest
-              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
             type: string
           kind:
-            description: 'Kind is a string value representing the REST resource this
-              object represents. Servers may infer this from the endpoint the client
-              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
             type: string
           metadata:
             type: object
@@ -64,19 +69,20 @@ spec:
                               format: int64
                               type: integer
                             filesystemLabel:
-                              description: 'FilesystemLabel is the label that is applied
-                                to the created filesystem. Character limits apply:
-                                16 for ext4; 12 for xfs. May only be used in conjunction
-                                with filesystemType.'
+                              description: |-
+                                FilesystemLabel is the label that is applied to the created filesystem.
+                                Character limits apply: 16 for ext4; 12 for xfs.
+                                May only be used in conjunction with filesystemType.
                               type: string
                             filesystemType:
-                              description: FilesystemType to be used on the volume.
-                                When provided the volume will be automatically formatted.
+                              description: |-
+                                FilesystemType to be used on the volume. When provided the volume will
+                                be automatically formatted.
                               type: string
                             nameSuffix:
-                              description: NameSuffix is the suffix to be appended
-                                to the machine name to generate the disk name. Each
-                                disk name will be in format <dropletName>-<nameSuffix>.
+                              description: |-
+                                NameSuffix is the suffix to be appended to the machine name to generate the disk name.
+                                Each disk name will be in format <dropletName>-<nameSuffix>.
                               type: string
                           required:
                           - diskSizeGB
@@ -98,9 +104,9 @@ spec:
                           size. See https://developers.digitalocean.com/documentation/v2/#list-all-sizes
                         type: string
                       sshKeys:
-                        description: SSHKeys is the ssh key id or fingerprint to attach
-                          in DigitalOcean droplet. It must be available on DigitalOcean
-                          account. See https://developers.digitalocean.com/documentation/v2/#list-all-keys
+                        description: |-
+                          SSHKeys is the ssh key id or fingerprint to attach in DigitalOcean droplet.
+                          It must be available on DigitalOcean account. See https://developers.digitalocean.com/documentation/v2/#list-all-keys
                         items:
                           anyOf:
                           - type: integer
@@ -127,14 +133,19 @@ spec:
         description: DOMachineTemplate is the Schema for the domachinetemplates API.
         properties:
           apiVersion:
-            description: 'APIVersion defines the versioned schema of this representation
-              of an object. Servers should convert recognized schemas to the latest
-              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
             type: string
           kind:
-            description: 'Kind is a string value representing the REST resource this
-              object represents. Servers may infer this from the endpoint the client
-              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
             type: string
           metadata:
             type: object
@@ -169,19 +180,20 @@ spec:
                               format: int64
                               type: integer
                             filesystemLabel:
-                              description: 'FilesystemLabel is the label that is applied
-                                to the created filesystem. Character limits apply:
-                                16 for ext4; 12 for xfs. May only be used in conjunction
-                                with filesystemType.'
+                              description: |-
+                                FilesystemLabel is the label that is applied to the created filesystem.
+                                Character limits apply: 16 for ext4; 12 for xfs.
+                                May only be used in conjunction with filesystemType.
                               type: string
                             filesystemType:
-                              description: FilesystemType to be used on the volume.
-                                When provided the volume will be automatically formatted.
+                              description: |-
+                                FilesystemType to be used on the volume. When provided the volume will
+                                be automatically formatted.
                               type: string
                             nameSuffix:
-                              description: NameSuffix is the suffix to be appended
-                                to the machine name to generate the disk name. Each
-                                disk name will be in format <dropletName>-<nameSuffix>.
+                              description: |-
+                                NameSuffix is the suffix to be appended to the machine name to generate the disk name.
+                                Each disk name will be in format <dropletName>-<nameSuffix>.
                               type: string
                           required:
                           - diskSizeGB
@@ -203,9 +215,9 @@ spec:
                           size. See https://developers.digitalocean.com/documentation/v2/#list-all-sizes
                         type: string
                       sshKeys:
-                        description: SSHKeys is the ssh key id or fingerprint to attach
-                          in DigitalOcean droplet. It must be available on DigitalOcean
-                          account. See https://developers.digitalocean.com/documentation/v2/#list-all-keys
+                        description: |-
+                          SSHKeys is the ssh key id or fingerprint to attach in DigitalOcean droplet.
+                          It must be available on DigitalOcean account. See https://developers.digitalocean.com/documentation/v2/#list-all-keys
                         items:
                           anyOf:
                           - type: integer
