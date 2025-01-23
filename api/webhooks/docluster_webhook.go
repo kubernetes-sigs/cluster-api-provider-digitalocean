@@ -14,15 +14,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package v1beta1
+package webhooks
 
 import (
+	"context"
 	"fmt"
 
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
+	"sigs.k8s.io/cluster-api-provider-digitalocean/api/v1beta1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
@@ -35,46 +37,57 @@ var _ = logf.Log.WithName("docluster-resource")
 // +kubebuilder:webhook:verbs=create;update,path=/validate-infrastructure-cluster-x-k8s-io-v1beta1-docluster,mutating=false,failurePolicy=fail,matchPolicy=Equivalent,groups=infrastructure.cluster.x-k8s.io,resources=doclusters,versions=v1beta1,name=validation.docluster.infrastructure.cluster.x-k8s.io,sideEffects=None,admissionReviewVersions=v1beta1
 // +kubebuilder:webhook:verbs=create;update,path=/mutate-infrastructure-cluster-x-k8s-io-v1beta1-docluster,mutating=true,failurePolicy=fail,matchPolicy=Equivalent,groups=infrastructure.cluster.x-k8s.io,resources=doclusters,versions=v1beta1,name=default.docluster.infrastructure.cluster.x-k8s.io,sideEffects=None,admissionReviewVersions=v1beta1
 
+type DOClusterWebhook struct{}
+
 var (
-	_ webhook.Defaulter = &DOCluster{}
-	_ webhook.Validator = &DOCluster{}
+	_ webhook.CustomDefaulter = &DOClusterWebhook{}
+	_ webhook.CustomValidator = &DOClusterWebhook{}
 )
 
-func (r *DOCluster) SetupWebhookWithManager(mgr ctrl.Manager) error {
+func (w *DOClusterWebhook) SetupWebhookWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewWebhookManagedBy(mgr).
-		For(r).
+		For(&v1beta1.DOCluster{}).
+		WithDefaulter(&DOClusterWebhook{}).
+		WithValidator(&DOClusterWebhook{}).
 		Complete()
 }
 
-// Default implements webhook.Defaulter so a webhook will be registered for the type.
-func (r *DOCluster) Default() {}
+// Default implements webhook.CustomDefaulter so a webhook will be registered for the type.
+func (w *DOClusterWebhook) Default(context.Context, runtime.Object) error {
+	return nil
+}
 
-// ValidateCreate implements webhook.Validator so a webhook will be registered for the type.
-func (r *DOCluster) ValidateCreate() (admission.Warnings, error) {
+// ValidateCreate implements webhook.CustomValidator so a webhook will be registered for the type.
+func (w *DOClusterWebhook) ValidateCreate(context.Context, runtime.Object) (admission.Warnings, error) {
 	return nil, nil
 }
 
-// ValidateUpdate implements webhook.Validator so a webhook will be registered for the type.
-func (r *DOCluster) ValidateUpdate(old runtime.Object) (admission.Warnings, error) {
+// ValidateUpdate implements webhook.CustomValidator so a webhook will be registered for the type.
+func (w *DOClusterWebhook) ValidateUpdate(_ context.Context, objOld, objNew runtime.Object) (admission.Warnings, error) {
 	var allErrs field.ErrorList
 
-	oldDOCluster, ok := old.(*DOCluster)
+	oldDOCluster, ok := objOld.(*v1beta1.DOCluster)
 	if !ok {
-		return nil, apierrors.NewBadRequest(fmt.Sprintf("expected an DOCluster but got a %T", old))
+		return nil, apierrors.NewBadRequest(fmt.Sprintf("expected an DOCluster old object but got a %T", objOld))
 	}
 
-	if r.Spec.Region != oldDOCluster.Spec.Region {
-		allErrs = append(allErrs, field.Invalid(field.NewPath("spec", "region"), r.Spec.Region, "field is immutable"))
+	newDOCluster, ok := objNew.(*v1beta1.DOCluster)
+	if !ok {
+		return nil, apierrors.NewBadRequest(fmt.Sprintf("expected an DOCluster new object but got a %T", objNew))
+	}
+
+	if newDOCluster.Spec.Region != oldDOCluster.Spec.Region {
+		allErrs = append(allErrs, field.Invalid(field.NewPath("spec", "region"), newDOCluster.Spec.Region, "field is immutable"))
 	}
 
 	if len(allErrs) == 0 {
 		return nil, nil
 	}
 
-	return nil, apierrors.NewInvalid(r.GroupVersionKind().GroupKind(), r.Name, allErrs)
+	return nil, apierrors.NewInvalid(newDOCluster.GroupVersionKind().GroupKind(), newDOCluster.Name, allErrs)
 }
 
-// ValidateDelete implements webhook.Validator so a webhook will be registered for the type.
-func (r *DOCluster) ValidateDelete() (admission.Warnings, error) {
+// ValidateDelete implements webhook.CustomValidator so a webhook will be registered for the type.
+func (w *DOClusterWebhook) ValidateDelete(context.Context, runtime.Object) (admission.Warnings, error) {
 	return nil, nil
 }

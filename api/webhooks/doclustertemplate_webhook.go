@@ -14,14 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package v1beta1
+package webhooks
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"sigs.k8s.io/cluster-api-provider-digitalocean/api/v1beta1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
@@ -31,46 +33,53 @@ import (
 // log is for logging in this package.
 var doclustertemplatelog = logf.Log.WithName("doclustertemplate-resource")
 
-func (r *DOClusterTemplate) SetupWebhookWithManager(mgr ctrl.Manager) error {
+func (w *DOClusterTemplateWebhook) SetupWebhookWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewWebhookManagedBy(mgr).
-		For(r).
+		For(&v1beta1.DOClusterTemplate{}).
+		WithDefaulter(&DOClusterTemplateWebhook{}).
+		WithValidator(&DOClusterTemplateWebhook{}).
 		Complete()
 }
 
 //+kubebuilder:webhook:verbs=create;update,path=/mutate-infrastructure-cluster-x-k8s-io-v1beta1-doclustertemplate,mutating=true,failurePolicy=fail,matchPolicy=Equivalent,groups=infrastructure.cluster.x-k8s.io,resources=doclustertemplates,versions=v1beta1,name=default.doclustertemplate.infrastructure.cluster.x-k8s.io,sideEffects=None,admissionReviewVersions=v1beta1
 //+kubebuilder:webhook:verbs=create;update,path=/validate-infrastructure-cluster-x-k8s-io-v1beta1-doclustertemplate,mutating=false,failurePolicy=fail,matchPolicy=Equivalent,groups=infrastructure.cluster.x-k8s.io,resources=doclustertemplates,versions=v1beta1,name=validation.doclustertemplate.infrastructure.cluster.x-k8s.io,sideEffects=None,admissionReviewVersions=v1beta1
 
-var _ webhook.Defaulter = &DOClusterTemplate{}
+type DOClusterTemplateWebhook struct{}
 
-// Default implements webhook.Defaulter so a webhook will be registered for the type.
-func (r *DOClusterTemplate) Default() {
-	doclustertemplatelog.Info("default", "name", r.Name)
+var (
+	_ webhook.CustomDefaulter = &DOClusterTemplateWebhook{}
+	_ webhook.CustomValidator = &DOClusterTemplateWebhook{}
+)
+
+// Default implements webhook.CustomDefaulter so a webhook will be registered for the type.
+func (w *DOClusterTemplateWebhook) Default(context.Context, runtime.Object) error {
+	return nil
 }
 
-var _ webhook.Validator = &DOClusterTemplate{}
-
-// ValidateCreate implements webhook.Validator so a webhook will be registered for the type.
-func (r *DOClusterTemplate) ValidateCreate() (admission.Warnings, error) {
-	doclustertemplatelog.Info("validate create", "name", r.Name)
-
+// ValidateCreate implements webhook.CustomValidator so a webhook will be registered for the type.
+func (w *DOClusterTemplateWebhook) ValidateCreate(context.Context, runtime.Object) (admission.Warnings, error) {
 	return nil, nil
 }
 
-// ValidateUpdate implements webhook.Validator so a webhook will be registered for the type.
-func (r *DOClusterTemplate) ValidateUpdate(oldRaw runtime.Object) (admission.Warnings, error) {
-	old, ok := oldRaw.(*DOClusterTemplate)
+// ValidateUpdate implements webhook.CustomValidator so a webhook will be registered for the type.
+func (w *DOClusterTemplateWebhook) ValidateUpdate(_ context.Context, objOld, objNew runtime.Object) (admission.Warnings, error) {
+	old, ok := objOld.(*v1beta1.DOClusterTemplate)
 	if !ok {
-		return nil, apierrors.NewBadRequest(fmt.Sprintf("expected an DOClusterTemplate but got a %T", oldRaw))
+		return nil, apierrors.NewBadRequest(fmt.Sprintf("expected an DOClusterTemplate old object but got a %T", objOld))
 	}
 
-	if !reflect.DeepEqual(r.Spec, old.Spec) {
+	new, ok := objNew.(*v1beta1.DOClusterTemplate)
+	if !ok {
+		return nil, apierrors.NewBadRequest(fmt.Sprintf("expected an DOClusterTemplate new object but got a %T", objNew))
+	}
+
+	if !reflect.DeepEqual(new.Spec, old.Spec) {
 		return nil, apierrors.NewBadRequest("DOClusterTemplate.Spec is immutable")
 	}
 	return nil, nil
 }
 
-// ValidateDelete implements webhook.Validator so a webhook will be registered for the type.
-func (r *DOClusterTemplate) ValidateDelete() (admission.Warnings, error) {
-	doclustertemplatelog.Info("validate delete", "name", r.Name)
+// ValidateDelete implements webhook.CustomValidator so a webhook will be registered for the type.
+func (w *DOClusterTemplateWebhook) ValidateDelete(context.Context, runtime.Object) (admission.Warnings, error) {
 	return nil, nil
 }
