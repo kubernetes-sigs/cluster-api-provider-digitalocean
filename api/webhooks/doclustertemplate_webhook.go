@@ -31,7 +31,7 @@ import (
 )
 
 // log is for logging in this package.
-var doclustertemplatelog = logf.Log.WithName("doclustertemplate-resource")
+var _ = logf.Log.WithName("doclustertemplate-resource")
 
 func (w *DOClusterTemplateWebhook) SetupWebhookWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewWebhookManagedBy(mgr).
@@ -44,6 +44,7 @@ func (w *DOClusterTemplateWebhook) SetupWebhookWithManager(mgr ctrl.Manager) err
 //+kubebuilder:webhook:verbs=create;update,path=/mutate-infrastructure-cluster-x-k8s-io-v1beta1-doclustertemplate,mutating=true,failurePolicy=fail,matchPolicy=Equivalent,groups=infrastructure.cluster.x-k8s.io,resources=doclustertemplates,versions=v1beta1,name=default.doclustertemplate.infrastructure.cluster.x-k8s.io,sideEffects=None,admissionReviewVersions=v1beta1
 //+kubebuilder:webhook:verbs=create;update,path=/validate-infrastructure-cluster-x-k8s-io-v1beta1-doclustertemplate,mutating=false,failurePolicy=fail,matchPolicy=Equivalent,groups=infrastructure.cluster.x-k8s.io,resources=doclustertemplates,versions=v1beta1,name=validation.doclustertemplate.infrastructure.cluster.x-k8s.io,sideEffects=None,admissionReviewVersions=v1beta1
 
+// DOClusterTemplateWebhook is a collection of webhooks for DOClusterTemplate objects.
 type DOClusterTemplateWebhook struct{}
 
 var (
@@ -63,17 +64,17 @@ func (w *DOClusterTemplateWebhook) ValidateCreate(context.Context, runtime.Objec
 
 // ValidateUpdate implements webhook.CustomValidator so a webhook will be registered for the type.
 func (w *DOClusterTemplateWebhook) ValidateUpdate(_ context.Context, objOld, objNew runtime.Object) (admission.Warnings, error) {
-	old, ok := objOld.(*v1beta1.DOClusterTemplate)
+	oldTemplate, ok := objOld.(*v1beta1.DOClusterTemplate)
 	if !ok {
 		return nil, apierrors.NewBadRequest(fmt.Sprintf("expected an DOClusterTemplate old object but got a %T", objOld))
 	}
 
-	new, ok := objNew.(*v1beta1.DOClusterTemplate)
+	newTemplate, ok := objNew.(*v1beta1.DOClusterTemplate)
 	if !ok {
 		return nil, apierrors.NewBadRequest(fmt.Sprintf("expected an DOClusterTemplate new object but got a %T", objNew))
 	}
 
-	if !reflect.DeepEqual(new.Spec, old.Spec) {
+	if !reflect.DeepEqual(newTemplate.Spec, oldTemplate.Spec) {
 		return nil, apierrors.NewBadRequest("DOClusterTemplate.Spec is immutable")
 	}
 	return nil, nil

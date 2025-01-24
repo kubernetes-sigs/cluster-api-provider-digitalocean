@@ -40,6 +40,7 @@ var _ = logf.Log.WithName("domachine-resource")
 // +kubebuilder:webhook:verbs=create;update,path=/validate-infrastructure-cluster-x-k8s-io-v1beta1-domachine,mutating=false,failurePolicy=fail,matchPolicy=Equivalent,groups=infrastructure.cluster.x-k8s.io,resources=domachines,versions=v1beta1,name=validation.domachine.infrastructure.cluster.x-k8s.io,sideEffects=None,admissionReviewVersions=v1beta1
 // +kubebuilder:webhook:verbs=create;update,path=/mutate-infrastructure-cluster-x-k8s-io-v1beta1-domachine,mutating=true,failurePolicy=fail,matchPolicy=Equivalent,groups=infrastructure.cluster.x-k8s.io,resources=domachines,versions=v1beta1,name=default.domachine.infrastructure.cluster.x-k8s.io,sideEffects=None,admissionReviewVersions=v1beta1
 
+// DOMachineWebhook is a collection of webhooks for DOMachine objects.
 type DOMachineWebhook struct{}
 
 var (
@@ -69,23 +70,23 @@ func (w *DOMachineWebhook) ValidateCreate(context.Context, runtime.Object) (admi
 func (w *DOMachineWebhook) ValidateUpdate(_ context.Context, objOld, objNew runtime.Object) (admission.Warnings, error) {
 	var allErrs field.ErrorList
 
-	new, ok := objNew.(*v1beta1.DOMachine)
+	newDOMachine, ok := objNew.(*v1beta1.DOMachine)
 	if !ok {
 		return nil, apierrors.NewBadRequest(fmt.Sprintf("expected an DOMachine new object but got a %T", objNew))
 	}
 
-	newDOMachine, err := runtime.DefaultUnstructuredConverter.ToUnstructured(objNew)
+	newDOMachineUnstr, err := runtime.DefaultUnstructuredConverter.ToUnstructured(objNew)
 	if err != nil {
 		return nil, apierrors.NewInternalError(errors.Wrap(err, "failed to convert new DOMachine to unstructured object"))
 	}
 
-	oldDOMachine, err := runtime.DefaultUnstructuredConverter.ToUnstructured(objOld)
+	oldDOMachineUnstr, err := runtime.DefaultUnstructuredConverter.ToUnstructured(objOld)
 	if err != nil {
 		return nil, apierrors.NewInternalError(errors.Wrap(err, "failed to convert old DOMachine to unstructured object"))
 	}
 
-	newDOMachineSpec := newDOMachine["spec"].(map[string]interface{})
-	oldDOMachineSpec := oldDOMachine["spec"].(map[string]interface{})
+	newDOMachineSpec := newDOMachineUnstr["spec"].(map[string]interface{})
+	oldDOMachineSpec := oldDOMachineUnstr["spec"].(map[string]interface{})
 
 	// allow changes to providerID
 	delete(oldDOMachineSpec, "providerID")
@@ -103,7 +104,7 @@ func (w *DOMachineWebhook) ValidateUpdate(_ context.Context, objOld, objNew runt
 		return nil, nil
 	}
 
-	return nil, apierrors.NewInvalid(new.GroupVersionKind().GroupKind(), new.Name, allErrs)
+	return nil, apierrors.NewInvalid(newDOMachine.GroupVersionKind().GroupKind(), newDOMachine.Name, allErrs)
 }
 
 // ValidateDelete implements webhook.CustomValidator so a webhook will be registered for the type.
