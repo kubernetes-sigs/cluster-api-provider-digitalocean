@@ -269,7 +269,7 @@ generate: ## Generate code
 .PHONY: generate-go
 generate-go: $(CONTROLLER_GEN) $(CONVERSION_GEN) $(MOCKGEN) ## Runs Go related generate targets
 	$(CONTROLLER_GEN) \
-		paths=./ \
+		paths=./cmd \
 		paths=./... \
 		paths=./$(EXP_DIR)/api/... \
 		object:headerFile=./hack/boilerplate/boilerplate.generatego.txt
@@ -278,7 +278,7 @@ generate-go: $(CONTROLLER_GEN) $(CONVERSION_GEN) $(MOCKGEN) ## Runs Go related g
 .PHONY: generate-manifests
 generate-manifests: $(CONTROLLER_GEN) ## Generate manifests e.g. CRD, RBAC etc.
 	$(CONTROLLER_GEN) \
-		paths=./ \
+		paths=./cmd \
 		paths=./api/... \
 		crd:crdVersions=v1 \
 		rbac:roleName=manager-role \
@@ -286,8 +286,8 @@ generate-manifests: $(CONTROLLER_GEN) ## Generate manifests e.g. CRD, RBAC etc.
 		output:webhook:dir=$(WEBHOOK_ROOT) \
 		webhook
 	$(CONTROLLER_GEN) \
-		paths=./ \
-		paths=./controllers/... \
+		paths=./cmd \
+		paths=./internal/controller/... \
 		output:rbac:dir=$(RBAC_ROOT) \
 		rbac:roleName=manager-role
 
