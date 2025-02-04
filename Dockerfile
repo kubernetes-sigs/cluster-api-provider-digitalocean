@@ -34,7 +34,7 @@ ARG ARCH
 ARG ldflags
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=${ARCH} GO111MODULE=on \
   go build -a -trimpath -ldflags "${ldflags} -extldflags '-static'" \
-  -o manager main.go
+  -o manager cmd/main.go
 
 # Use distroless as minimal base image to package the manager binary
 # Refer to https://github.com/GoogleContainerTools/distroless for more details

@@ -15,7 +15,7 @@ limitations under the License.
 */
 
 // Package controllers implements controller types.
-package controllers
+package controller
 
 import (
 	"context"

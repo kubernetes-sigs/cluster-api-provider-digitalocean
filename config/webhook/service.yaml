@@ -5,5 +5,8 @@ metadata:
   namespace: system
 spec:
   ports:
-    - port: 443
-      targetPort: webhook-server
+  - port: 443
+    protocol: TCP
+    targetPort: 9443
+  selector:
+    control-plane: controller-manager
