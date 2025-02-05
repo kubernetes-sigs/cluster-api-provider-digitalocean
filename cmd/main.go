@@ -81,7 +81,6 @@ var (
 	healthAddr                  string
 	watchNamespace              string
 	profilerAddress             string
-	webhookCertDir              string
 	webhookPort                 int
 	enableLeaderElection        bool
 	restConfigQPS               float32
@@ -112,7 +111,6 @@ func initFlags(fs *pflag.FlagSet) {
 	fs.DurationVar(&reconcileTimeout, "reconcile-timeout", reconciler.DefaultLoopTimeout, "The maximum duration a reconcile loop can run (e.g. 90m)")
 	fs.Float32Var(&restConfigQPS, "kube-api-qps", 20, "Maximum queries per second from the controller client to the Kubernetes API server.")
 	fs.IntVar(&restConfigBurst, "kube-api-burst", 30, "Maximum number of queries that should be allowed in one burst from the controller client to the Kubernetes API server.")
-	fs.StringVar(&webhookCertDir, "webhook-cert-dir", "/tmp/k8s-webhook-server/serving-certs", "Webhook Server Certificate Directory, is the directory that contains the server key and certificate")
 	fs.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
 	fs.StringVar(&metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
 	fs.StringVar(&webhookCertPath, "webhook-cert-path", "", "The directory that contains the webhook certificate.")
