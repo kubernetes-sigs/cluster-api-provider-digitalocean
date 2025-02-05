@@ -30,28 +30,25 @@ import (
 	// +kubebuilder:scaffold:imports
 
 	"github.com/spf13/pflag"
-	"k8s.io/klog/v2"
-	"sigs.k8s.io/controller-runtime/pkg/certwatcher"
-	"sigs.k8s.io/controller-runtime/pkg/metrics/filters"
-
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/tools/leaderelection/resourcelock"
 	cgrecord "k8s.io/client-go/tools/record"
-	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/cache"
-	"sigs.k8s.io/controller-runtime/pkg/controller"
-	"sigs.k8s.io/controller-runtime/pkg/webhook"
-
+	"k8s.io/klog/v2"
 	clusterv1 "sigs.k8s.io/cluster-api/api/v1beta1"
 	"sigs.k8s.io/cluster-api/util/flags"
 	"sigs.k8s.io/cluster-api/util/record"
-
-	controllers2 "sigs.k8s.io/cluster-api-provider-digitalocean/internal/controller"
+	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/cache"
+	"sigs.k8s.io/controller-runtime/pkg/certwatcher"
+	"sigs.k8s.io/controller-runtime/pkg/controller"
+	"sigs.k8s.io/controller-runtime/pkg/metrics/filters"
+	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
 	infrav1alpha4 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha4"
 	infrav1beta1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1beta1"
 	infrawebhooks "sigs.k8s.io/cluster-api-provider-digitalocean/api/webhooks"
+	capdocontroller "sigs.k8s.io/cluster-api-provider-digitalocean/internal/controller"
 	dnsutil "sigs.k8s.io/cluster-api-provider-digitalocean/util/dns"
 	dnsresolver "sigs.k8s.io/cluster-api-provider-digitalocean/util/dns/resolver"
 	"sigs.k8s.io/cluster-api-provider-digitalocean/util/reconciler"
@@ -284,7 +281,7 @@ func main() {
 
 	dnsutil.InitFromDNSResolver(dnsresolver)
 
-	if err = (&controllers2.DOClusterReconciler{
+	if err = (&capdocontroller.DOClusterReconciler{
 		Client:           mgr.GetClient(),
 		Recorder:         mgr.GetEventRecorderFor("docluster-controller"),
 		ReconcileTimeout: reconcileTimeout,
@@ -292,7 +289,7 @@ func main() {
 		setupLog.Error(err, "unable to create controller", "controller", "DOCluster")
 		os.Exit(1)
 	}
-	if err = (&controllers2.DOMachineReconciler{
+	if err = (&capdocontroller.DOMachineReconciler{
 		Client:           mgr.GetClient(),
 		Recorder:         mgr.GetEventRecorderFor("domachine-controller"),
 		ReconcileTimeout: reconcileTimeout,
