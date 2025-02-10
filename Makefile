@@ -169,7 +169,7 @@ $(ARTIFACTS):
 
 .PHONY: test
 test: generate ## Run tests
-	source ./scripts/fetch_ext_bins.sh; fetch_tools; setup_envs; go test -v -covermode=atomic -coverprofile=coverage.tmp.out ./api/... ./controllers/... ./cloud/...
+	source ./scripts/fetch_ext_bins.sh; fetch_tools; setup_envs; go test -v -covermode=atomic -coverprofile=coverage.tmp.out ./api/... ./internal/controller/... ./cloud/...
 	@cat coverage.tmp.out | grep -v "generated" > coverage.out
 	@rm coverage.tmp.out
 
