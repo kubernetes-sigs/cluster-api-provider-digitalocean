@@ -21,6 +21,7 @@ patchesStrategicMerge:
   - manager_image_patch.yaml
   - manager_pull_policy.yaml
   - manager_credentials_patch.yaml
+  - webhook_service_patch.yaml
 
 resources:
   - credentials.yaml
