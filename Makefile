@@ -202,7 +202,7 @@ binaries: manager ## Builds and installs all binaries
 
 .PHONY: manager
 manager: ## Build manager binary.
-	go build -trimpath -ldflags "$(LDFLAGS)" -o $(BIN_DIR)/manager .
+	go build -trimpath -ldflags "$(LDFLAGS)" -o $(BIN_DIR)/manager ./cmd
 
 ## --------------------------------------
 ## Tooling Binaries
