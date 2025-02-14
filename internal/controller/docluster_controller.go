@@ -234,7 +234,7 @@ func (r *DOClusterReconciler) reconcile(ctx context.Context, clusterScope *scope
 
 	clusterScope.SetControlPlaneEndpoint(clusterv1.APIEndpoint{
 		Host: controlPlaneEndpoint,
-		Port: int32(apiServerLoadbalancer.Port),
+		Port: apiServerLoadbalancer.Port,
 	})
 
 	clusterScope.Info("Set DOCluster status to ready")

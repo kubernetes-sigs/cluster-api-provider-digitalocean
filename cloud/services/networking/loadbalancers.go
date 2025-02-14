@@ -52,14 +52,14 @@ func (s *Service) CreateLoadBalancer(spec *infrav1.DOLoadBalancer) (*godo.LoadBa
 		ForwardingRules: []godo.ForwardingRule{
 			{
 				EntryProtocol:  "tcp",
-				EntryPort:      spec.Port,
+				EntryPort:      int(spec.Port),
 				TargetProtocol: "tcp",
-				TargetPort:     spec.Port,
+				TargetPort:     int(spec.Port),
 			},
 		},
 		HealthCheck: &godo.HealthCheck{
 			Protocol:               "tcp",
-			Port:                   spec.Port,
+			Port:                   int(spec.Port),
 			CheckIntervalSeconds:   spec.HealthCheck.Interval,
 			ResponseTimeoutSeconds: spec.HealthCheck.Timeout,
 			UnhealthyThreshold:     spec.HealthCheck.UnhealthyThreshold,
