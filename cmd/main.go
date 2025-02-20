@@ -18,9 +18,11 @@ limitations under the License.
 package main
 
 import (
+	"crypto/tls"
 	"flag"
 	"net/http"
 	"os"
+	"path/filepath"
 	"time"
 
 	_ "net/http/pprof"
@@ -28,25 +30,25 @@ import (
 	// +kubebuilder:scaffold:imports
 
 	"github.com/spf13/pflag"
-	"k8s.io/klog/v2"
-
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/tools/leaderelection/resourcelock"
 	cgrecord "k8s.io/client-go/tools/record"
-	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/cache"
-	"sigs.k8s.io/controller-runtime/pkg/controller"
-	"sigs.k8s.io/controller-runtime/pkg/webhook"
-
+	"k8s.io/klog/v2"
 	clusterv1 "sigs.k8s.io/cluster-api/api/v1beta1"
 	"sigs.k8s.io/cluster-api/util/flags"
 	"sigs.k8s.io/cluster-api/util/record"
+	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/cache"
+	"sigs.k8s.io/controller-runtime/pkg/certwatcher"
+	"sigs.k8s.io/controller-runtime/pkg/controller"
+	"sigs.k8s.io/controller-runtime/pkg/metrics/filters"
+	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
 	infrav1alpha4 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1alpha4"
 	infrav1beta1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1beta1"
 	infrawebhooks "sigs.k8s.io/cluster-api-provider-digitalocean/api/webhooks"
-	"sigs.k8s.io/cluster-api-provider-digitalocean/controllers"
+	capdocontroller "sigs.k8s.io/cluster-api-provider-digitalocean/internal/controller"
 	dnsutil "sigs.k8s.io/cluster-api-provider-digitalocean/util/dns"
 	dnsresolver "sigs.k8s.io/cluster-api-provider-digitalocean/util/dns/resolver"
 	"sigs.k8s.io/cluster-api-provider-digitalocean/util/reconciler"
@@ -79,11 +81,20 @@ var (
 	healthAddr                  string
 	watchNamespace              string
 	profilerAddress             string
-	webhookCertDir              string
 	webhookPort                 int
 	enableLeaderElection        bool
 	restConfigQPS               float32
 	restConfigBurst             int
+	metricsAddr                 string
+	probeAddr                   string
+	webhookCertPath             string
+	metricsCertPath             string
+	metricsCertName             string
+	metricsCertKey              string
+	secureMetrics               bool
+	webhookCertName             string
+	webhookCertKey              string
+	tlsOpts                     []func(*tls.Config)
 )
 
 func initFlags(fs *pflag.FlagSet) {
@@ -100,7 +111,15 @@ func initFlags(fs *pflag.FlagSet) {
 	fs.DurationVar(&reconcileTimeout, "reconcile-timeout", reconciler.DefaultLoopTimeout, "The maximum duration a reconcile loop can run (e.g. 90m)")
 	fs.Float32Var(&restConfigQPS, "kube-api-qps", 20, "Maximum queries per second from the controller client to the Kubernetes API server.")
 	fs.IntVar(&restConfigBurst, "kube-api-burst", 30, "Maximum number of queries that should be allowed in one burst from the controller client to the Kubernetes API server.")
-	fs.StringVar(&webhookCertDir, "webhook-cert-dir", "/tmp/k8s-webhook-server/serving-certs", "Webhook Server Certificate Directory, is the directory that contains the server key and certificate")
+	fs.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
+	fs.StringVar(&metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
+	fs.StringVar(&webhookCertPath, "webhook-cert-path", "", "The directory that contains the webhook certificate.")
+	fs.StringVar(&metricsCertPath, "metrics-cert-path", "", "The directory that contains the metrics server certificate.")
+	fs.StringVar(&metricsCertName, "metrics-cert-name", "tls.crt", "The name of the metrics server certificate file.")
+	fs.StringVar(&metricsCertKey, "metrics-cert-key", "tls.key", "The name of the metrics server key file.")
+	fs.BoolVar(&secureMetrics, "metrics-secure", true, "If set, the metrics endpoint is served securely via HTTPS. Use --metrics-secure=false to use HTTP instead.")
+	fs.StringVar(&webhookCertName, "webhook-cert-name", "tls.crt", "The name of the webhook certificate file.")
+	fs.StringVar(&webhookCertKey, "webhook-cert-key", "tls.key", "The name of the webhook key file.")
 	flags.AddDiagnosticsOptions(fs, &diagnosticsOptions)
 }
 
@@ -155,6 +174,77 @@ func main() {
 	restConfig.QPS = restConfigQPS
 	restConfig.Burst = restConfigBurst
 
+	// Create watchers for metrics and webhooks certificates
+	var metricsCertWatcher, webhookCertWatcher *certwatcher.CertWatcher
+
+	// Initial webhook TLS options
+	webhookTLSOpts := tlsOpts
+
+	if len(webhookCertPath) > 0 {
+		setupLog.Info("Initializing webhook certificate watcher using provided certificates",
+			"webhook-cert-path", webhookCertPath, "webhook-cert-name", webhookCertName, "webhook-cert-key", webhookCertKey)
+
+		var err error
+		webhookCertWatcher, err = certwatcher.New(
+			filepath.Join(webhookCertPath, webhookCertName),
+			filepath.Join(webhookCertPath, webhookCertKey),
+		)
+		if err != nil {
+			setupLog.Error(err, "Failed to initialize webhook certificate watcher")
+			os.Exit(1)
+		}
+
+		webhookTLSOpts = append(webhookTLSOpts, func(config *tls.Config) {
+			config.GetCertificate = webhookCertWatcher.GetCertificate
+		})
+	}
+
+	webhookServer := webhook.NewServer(webhook.Options{
+		TLSOpts: webhookTLSOpts,
+		Port:    9443,
+	})
+
+	// Metrics endpoint is enabled in 'config/default/kustomization.yaml'. The Metrics options configure the server.
+	// More info:
+	// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.20.0/pkg/metrics/server
+	// - https://book.kubebuilder.io/reference/metrics.html
+	metricsServerOptions := diagnosticsOpts
+	if metricsAddr != "" {
+		metricsServerOptions.BindAddress = metricsAddr
+	}
+
+	if secureMetrics {
+		// FilterProvider is used to protect the metrics endpoint with authn/authz.
+		// These configurations ensure that only authorized users and service accounts
+		// can access the metrics endpoint. The RBAC are configured in 'config/rbac/kustomization.yaml'. More info:
+		// https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.20.0/pkg/metrics/filters#WithAuthenticationAndAuthorization
+		metricsServerOptions.FilterProvider = filters.WithAuthenticationAndAuthorization
+	}
+
+	if len(metricsCertPath) > 0 {
+		setupLog.Info("Initializing metrics certificate watcher using provided certificates",
+			"metrics-cert-path", metricsCertPath, "metrics-cert-name", metricsCertName, "metrics-cert-key", metricsCertKey)
+
+		var err error
+		metricsCertWatcher, err = certwatcher.New(
+			filepath.Join(metricsCertPath, metricsCertName),
+			filepath.Join(metricsCertPath, metricsCertKey),
+		)
+		if err != nil {
+			setupLog.Error(err, "to initialize metrics certificate watcher", "error", err)
+			os.Exit(1)
+		}
+
+		metricsServerOptions.TLSOpts = append(metricsServerOptions.TLSOpts, func(config *tls.Config) {
+			config.GetCertificate = metricsCertWatcher.GetCertificate
+		})
+	}
+
+	healthProbeBindAddress := healthAddr
+	if probeAddr != "" {
+		healthProbeBindAddress = probeAddr
+	}
+
 	mgr, err := ctrl.NewManager(restConfig, ctrl.Options{
 		Scheme:                     scheme,
 		Metrics:                    diagnosticsOpts,
@@ -169,11 +259,8 @@ func main() {
 			DefaultNamespaces: watchNamespaces,
 			SyncPeriod:        &syncPeriod,
 		},
-		WebhookServer: webhook.NewServer(webhook.Options{
-			Port:    webhookPort,
-			CertDir: webhookCertDir,
-		}),
-		HealthProbeBindAddress: healthAddr,
+		WebhookServer:          webhookServer,
+		HealthProbeBindAddress: healthProbeBindAddress,
 		EventBroadcaster:       broadcaster,
 	})
 	if err != nil {
@@ -192,7 +279,7 @@ func main() {
 
 	dnsutil.InitFromDNSResolver(dnsresolver)
 
-	if err = (&controllers.DOClusterReconciler{
+	if err = (&capdocontroller.DOClusterReconciler{
 		Client:           mgr.GetClient(),
 		Recorder:         mgr.GetEventRecorderFor("docluster-controller"),
 		ReconcileTimeout: reconcileTimeout,
@@ -200,7 +287,7 @@ func main() {
 		setupLog.Error(err, "unable to create controller", "controller", "DOCluster")
 		os.Exit(1)
 	}
-	if err = (&controllers.DOMachineReconciler{
+	if err = (&capdocontroller.DOMachineReconciler{
 		Client:           mgr.GetClient(),
 		Recorder:         mgr.GetEventRecorderFor("domachine-controller"),
 		ReconcileTimeout: reconcileTimeout,
@@ -239,6 +326,22 @@ func main() {
 	if err := mgr.AddHealthzCheck("webhook", mgr.GetWebhookServer().StartedChecker()); err != nil {
 		setupLog.Error(err, "unable to create health check")
 		os.Exit(1)
+	}
+
+	if metricsCertWatcher != nil {
+		setupLog.Info("Adding metrics certificate watcher to manager")
+		if err := mgr.Add(metricsCertWatcher); err != nil {
+			setupLog.Error(err, "unable to add metrics certificate watcher to manager")
+			os.Exit(1)
+		}
+	}
+
+	if webhookCertWatcher != nil {
+		setupLog.Info("Adding webhook certificate watcher to manager")
+		if err := mgr.Add(webhookCertWatcher); err != nil {
+			setupLog.Error(err, "unable to add webhook certificate watcher to manager")
+			os.Exit(1)
+		}
 	}
 
 	setupLog.Info("starting manager", "version", version.Get().String(), "extended_info", version.Get())

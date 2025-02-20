@@ -169,7 +169,7 @@ $(ARTIFACTS):
 
 .PHONY: test
 test: generate ## Run tests
-	source ./scripts/fetch_ext_bins.sh; fetch_tools; setup_envs; go test -v -covermode=atomic -coverprofile=coverage.tmp.out ./api/... ./controllers/... ./cloud/...
+	source ./scripts/fetch_ext_bins.sh; fetch_tools; setup_envs; go test -v -covermode=atomic -coverprofile=coverage.tmp.out ./api/... ./internal/controller/... ./cloud/...
 	@cat coverage.tmp.out | grep -v "generated" > coverage.out
 	@rm coverage.tmp.out
 
@@ -202,7 +202,7 @@ binaries: manager ## Builds and installs all binaries
 
 .PHONY: manager
 manager: ## Build manager binary.
-	go build -trimpath -ldflags "$(LDFLAGS)" -o $(BIN_DIR)/manager .
+	go build -trimpath -ldflags "$(LDFLAGS)" -o $(BIN_DIR)/manager ./cmd
 
 ## --------------------------------------
 ## Tooling Binaries
@@ -269,7 +269,7 @@ generate: ## Generate code
 .PHONY: generate-go
 generate-go: $(CONTROLLER_GEN) $(CONVERSION_GEN) $(MOCKGEN) ## Runs Go related generate targets
 	$(CONTROLLER_GEN) \
-		paths=./ \
+		paths=./cmd \
 		paths=./... \
 		paths=./$(EXP_DIR)/api/... \
 		object:headerFile=./hack/boilerplate/boilerplate.generatego.txt
@@ -278,7 +278,7 @@ generate-go: $(CONTROLLER_GEN) $(CONVERSION_GEN) $(MOCKGEN) ## Runs Go related g
 .PHONY: generate-manifests
 generate-manifests: $(CONTROLLER_GEN) ## Generate manifests e.g. CRD, RBAC etc.
 	$(CONTROLLER_GEN) \
-		paths=./ \
+		paths=./cmd \
 		paths=./api/... \
 		crd:crdVersions=v1 \
 		rbac:roleName=manager-role \
@@ -286,8 +286,8 @@ generate-manifests: $(CONTROLLER_GEN) ## Generate manifests e.g. CRD, RBAC etc.
 		output:webhook:dir=$(WEBHOOK_ROOT) \
 		webhook
 	$(CONTROLLER_GEN) \
-		paths=./ \
-		paths=./controllers/... \
+		paths=./cmd \
+		paths=./internal/controller/... \
 		output:rbac:dir=$(RBAC_ROOT) \
 		rbac:roleName=manager-role
 

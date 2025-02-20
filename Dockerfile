@@ -34,13 +34,15 @@ ARG ARCH
 ARG ldflags
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=${ARCH} GO111MODULE=on \
   go build -a -trimpath -ldflags "${ldflags} -extldflags '-static'" \
-  -o manager main.go
+  -o manager cmd/main.go
 
 # Use distroless as minimal base image to package the manager binary
 # Refer to https://github.com/GoogleContainerTools/distroless for more details
-FROM gcr.io/distroless/static:latest
+FROM gcr.io/distroless/static:nonroot
 WORKDIR /
 COPY --from=builder /workspace/manager .
-USER nobody
+# Use uid of nonroot user (65532) because kubernetes expects numeric user when applying pod security policies
+# See: https://github.com/kubernetes-sigs/cluster-api/pull/4064/files
+USER 65532
 
 ENTRYPOINT ["/manager"]

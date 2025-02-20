@@ -1,5 +1,7 @@
 version: "3"
 domain: cluster.x-k8s.io
+layout:
+- go.kubebuilder.io/v4
 repo: sigs.k8s.io/cluster-api-provider-digitalocean
 resources:
 # v1alpha4 types
