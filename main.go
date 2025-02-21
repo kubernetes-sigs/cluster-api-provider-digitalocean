@@ -157,7 +157,7 @@ func main() {
 
 	mgr, err := ctrl.NewManager(restConfig, ctrl.Options{
 		Scheme:                     scheme,
-		Metrics:                    diagnosticsOpts,
+		Metrics:                    metricsServerOptions,
 		LeaderElection:             enableLeaderElection,
 		LeaderElectionID:           "controller-leader-election-capdo",
 		LeaderElectionNamespace:    leaderElectionNamespace,
