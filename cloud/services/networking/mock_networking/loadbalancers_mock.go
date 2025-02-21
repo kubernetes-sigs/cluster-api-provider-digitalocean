@@ -160,6 +160,38 @@ func (mr *MockLoadBalancersServiceMockRecorder) List(arg0, arg1 any) *gomock.Cal
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockLoadBalancersService)(nil).List), arg0, arg1)
 }
 
+// ListByNames mocks base method.
+func (m *MockLoadBalancersService) ListByNames(arg0 context.Context, arg1 []string, arg2 *godo.ListOptions) ([]godo.LoadBalancer, *godo.Response, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListByNames", arg0, arg1, arg2)
+	ret0, _ := ret[0].([]godo.LoadBalancer)
+	ret1, _ := ret[1].(*godo.Response)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// ListByNames indicates an expected call of ListByNames.
+func (mr *MockLoadBalancersServiceMockRecorder) ListByNames(arg0, arg1, arg2 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListByNames", reflect.TypeOf((*MockLoadBalancersService)(nil).ListByNames), arg0, arg1, arg2)
+}
+
+// ListByUUIDs mocks base method.
+func (m *MockLoadBalancersService) ListByUUIDs(arg0 context.Context, arg1 []string, arg2 *godo.ListOptions) ([]godo.LoadBalancer, *godo.Response, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListByUUIDs", arg0, arg1, arg2)
+	ret0, _ := ret[0].([]godo.LoadBalancer)
+	ret1, _ := ret[1].(*godo.Response)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// ListByUUIDs indicates an expected call of ListByUUIDs.
+func (mr *MockLoadBalancersServiceMockRecorder) ListByUUIDs(arg0, arg1, arg2 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListByUUIDs", reflect.TypeOf((*MockLoadBalancersService)(nil).ListByUUIDs), arg0, arg1, arg2)
+}
+
 // PurgeCache mocks base method.
 func (m *MockLoadBalancersService) PurgeCache(ctx context.Context, lbID string) (*godo.Response, error) {
 	m.ctrl.T.Helper()

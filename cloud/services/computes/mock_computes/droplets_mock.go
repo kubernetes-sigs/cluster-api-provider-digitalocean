@@ -167,6 +167,22 @@ func (mr *MockDropletsServiceMockRecorder) Get(arg0, arg1 any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockDropletsService)(nil).Get), arg0, arg1)
 }
 
+// GetBackupPolicy mocks base method.
+func (m *MockDropletsService) GetBackupPolicy(arg0 context.Context, arg1 int) (*godo.DropletBackupPolicy, *godo.Response, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetBackupPolicy", arg0, arg1)
+	ret0, _ := ret[0].(*godo.DropletBackupPolicy)
+	ret1, _ := ret[1].(*godo.Response)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// GetBackupPolicy indicates an expected call of GetBackupPolicy.
+func (mr *MockDropletsServiceMockRecorder) GetBackupPolicy(arg0, arg1 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBackupPolicy", reflect.TypeOf((*MockDropletsService)(nil).GetBackupPolicy), arg0, arg1)
+}
+
 // Kernels mocks base method.
 func (m *MockDropletsService) Kernels(arg0 context.Context, arg1 int, arg2 *godo.ListOptions) ([]godo.Kernel, *godo.Response, error) {
 	m.ctrl.T.Helper()
@@ -199,6 +215,22 @@ func (mr *MockDropletsServiceMockRecorder) List(arg0, arg1 any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockDropletsService)(nil).List), arg0, arg1)
 }
 
+// ListBackupPolicies mocks base method.
+func (m *MockDropletsService) ListBackupPolicies(arg0 context.Context, arg1 *godo.ListOptions) (map[int]*godo.DropletBackupPolicy, *godo.Response, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListBackupPolicies", arg0, arg1)
+	ret0, _ := ret[0].(map[int]*godo.DropletBackupPolicy)
+	ret1, _ := ret[1].(*godo.Response)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// ListBackupPolicies indicates an expected call of ListBackupPolicies.
+func (mr *MockDropletsServiceMockRecorder) ListBackupPolicies(arg0, arg1 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListBackupPolicies", reflect.TypeOf((*MockDropletsService)(nil).ListBackupPolicies), arg0, arg1)
+}
+
 // ListByName mocks base method.
 func (m *MockDropletsService) ListByName(arg0 context.Context, arg1 string, arg2 *godo.ListOptions) ([]godo.Droplet, *godo.Response, error) {
 	m.ctrl.T.Helper()
@@ -229,6 +261,38 @@ func (m *MockDropletsService) ListByTag(arg0 context.Context, arg1 string, arg2 
 func (mr *MockDropletsServiceMockRecorder) ListByTag(arg0, arg1, arg2 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListByTag", reflect.TypeOf((*MockDropletsService)(nil).ListByTag), arg0, arg1, arg2)
+}
+
+// ListSupportedBackupPolicies mocks base method.
+func (m *MockDropletsService) ListSupportedBackupPolicies(arg0 context.Context) ([]*godo.SupportedBackupPolicy, *godo.Response, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListSupportedBackupPolicies", arg0)
+	ret0, _ := ret[0].([]*godo.SupportedBackupPolicy)
+	ret1, _ := ret[1].(*godo.Response)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// ListSupportedBackupPolicies indicates an expected call of ListSupportedBackupPolicies.
+func (mr *MockDropletsServiceMockRecorder) ListSupportedBackupPolicies(arg0 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListSupportedBackupPolicies", reflect.TypeOf((*MockDropletsService)(nil).ListSupportedBackupPolicies), arg0)
+}
+
+// ListWithGPUs mocks base method.
+func (m *MockDropletsService) ListWithGPUs(arg0 context.Context, arg1 *godo.ListOptions) ([]godo.Droplet, *godo.Response, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListWithGPUs", arg0, arg1)
+	ret0, _ := ret[0].([]godo.Droplet)
+	ret1, _ := ret[1].(*godo.Response)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// ListWithGPUs indicates an expected call of ListWithGPUs.
+func (mr *MockDropletsServiceMockRecorder) ListWithGPUs(arg0, arg1 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListWithGPUs", reflect.TypeOf((*MockDropletsService)(nil).ListWithGPUs), arg0, arg1)
 }
 
 // Neighbors mocks base method.
