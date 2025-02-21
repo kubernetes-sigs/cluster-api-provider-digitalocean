@@ -13,7 +13,7 @@
 # limitations under the License.
 
 # Build the manager binary
-FROM golang:1.23.5@sha256:51a6466e8dbf3e00e422eb0f7a97ac450b2d57b33617bbe8d2ee0bddcd9d0d37 as builder
+FROM golang:1.23.6@sha256:927112936d6b496ed95f55f362cc09da6e3e624ef868814c56d55bd7323e0959 as builder
 WORKDIR /workspace
 
 # Run this with docker build --build_arg $(go env GOPROXY) to override the goproxy
@@ -34,13 +34,15 @@ ARG ARCH
 ARG ldflags
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=${ARCH} GO111MODULE=on \
   go build -a -trimpath -ldflags "${ldflags} -extldflags '-static'" \
-  -o manager main.go
+  -o manager cmd/main.go
 
 # Use distroless as minimal base image to package the manager binary
 # Refer to https://github.com/GoogleContainerTools/distroless for more details
-FROM gcr.io/distroless/static:latest
+FROM gcr.io/distroless/static:nonroot
 WORKDIR /
 COPY --from=builder /workspace/manager .
-USER nobody
+# Use uid of nonroot user (65532) because kubernetes expects numeric user when applying pod security policies
+# See: https://github.com/kubernetes-sigs/cluster-api/pull/4064/files
+USER 65532
 
 ENTRYPOINT ["/manager"]

@@ -138,6 +138,7 @@ spec:
                               port:
                                 description: API Server port. It must be valid ports
                                   range (1-65535). If omitted, default value is 6443.
+                                format: int32
                                 maximum: 65535
                                 minimum: 1
                                 type: integer
