@@ -117,7 +117,7 @@ type DOLoadBalancer struct {
 	// +optional
 	// +kubebuilder:validation:Minimum=1
 	// +kubebuilder:validation:Maximum=65535
-	Port int `json:"port,omitempty"`
+	Port int32 `json:"port,omitempty"`
 	// The API Server load balancing algorithm used to determine which backend Droplet will be selected by a client.
 	// It must be either "round_robin" or "least_connections". The default value is "round_robin".
 	// +optional
@@ -146,7 +146,7 @@ type DOVolume struct {
 
 var (
 	// DefaultLBPort default LoadBalancer port.
-	DefaultLBPort = 6443
+	DefaultLBPort int32 = 6443
 	// DefaultLBAlgorithm default LoadBalancer algorithm.
 	DefaultLBAlgorithm = "round_robin"
 	// DefaultLBHealthCheckInterval default LoadBalancer health check interval.
