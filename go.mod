@@ -1,7 +1,6 @@
 module sigs.k8s.io/cluster-api-provider-digitalocean
 
 go 1.22.0
-
 toolchain go1.23.5
 
 require (
@@ -13,7 +12,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/pflag v1.0.6
 	go.uber.org/mock v0.5.0
-	golang.org/x/oauth2 v0.26.0
+	golang.org/x/oauth2 v0.27.0
 	k8s.io/api v0.29.13
 	k8s.io/apimachinery v0.29.13
 	k8s.io/client-go v0.29.13
