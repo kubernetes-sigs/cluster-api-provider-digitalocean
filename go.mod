@@ -5,7 +5,7 @@ go 1.23.0
 toolchain go1.23.6
 
 require (
-	github.com/digitalocean/godo v1.138.0
+	github.com/digitalocean/godo v1.139.0
 	github.com/go-logr/logr v1.4.2
 	github.com/miekg/dns v1.1.63
 	github.com/onsi/ginkgo/v2 v2.23.0
