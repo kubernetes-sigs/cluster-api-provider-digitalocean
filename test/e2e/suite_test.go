@@ -34,11 +34,13 @@ import (
 	. "github.com/onsi/gomega"
 
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/klog/v2"
 	capi_e2e "sigs.k8s.io/cluster-api/test/e2e"
 	"sigs.k8s.io/cluster-api/test/framework"
 	"sigs.k8s.io/cluster-api/test/framework/bootstrap"
 	"sigs.k8s.io/cluster-api/test/framework/clusterctl"
 	"sigs.k8s.io/cluster-api/test/framework/ginkgoextensions"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
 
 	infrav1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1beta1"
 )
@@ -120,6 +122,9 @@ func TestE2E(t *testing.T) {
 // Using a SynchronizedBeforeSuite for controlling how to create resources shared across ParallelNodes (~ginkgo threads).
 // The local clusterctl repository & the bootstrap cluster are created once and shared across all the tests.
 var _ = SynchronizedBeforeSuite(func() []byte {
+	klog.InitFlags(nil)
+	klog.SetOutput(GinkgoWriter)
+	logf.SetLogger(klog.Background())
 	// Before all ParallelNodes.
 
 	Expect(configPath).To(BeAnExistingFile(), "Invalid test suite argument. e2e.config should be an existing file.")
