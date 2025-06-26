@@ -29,23 +29,22 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/client-go/tools/record"
 
+	infrav1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1beta1"
+	"sigs.k8s.io/cluster-api-provider-digitalocean/cloud/scope"
+	"sigs.k8s.io/cluster-api-provider-digitalocean/cloud/services/computes"
+	"sigs.k8s.io/cluster-api-provider-digitalocean/util/reconciler"
 	clusterv1 "sigs.k8s.io/cluster-api/api/v1beta1"
 	capierrors "sigs.k8s.io/cluster-api/errors"
 	"sigs.k8s.io/cluster-api/util"
 	"sigs.k8s.io/cluster-api/util/annotations"
 	"sigs.k8s.io/cluster-api/util/predicates"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	"sigs.k8s.io/controller-runtime/pkg/source"
-
-	infrav1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1beta1"
-	"sigs.k8s.io/cluster-api-provider-digitalocean/cloud/scope"
-	"sigs.k8s.io/cluster-api-provider-digitalocean/cloud/services/computes"
-	"sigs.k8s.io/cluster-api-provider-digitalocean/util/reconciler"
 )
 
 // DOMachineReconciler reconciles a DOMachine object.
@@ -56,9 +55,14 @@ type DOMachineReconciler struct {
 }
 
 func (r *DOMachineReconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager, _ controller.Options) error {
-	c, err := ctrl.NewControllerManagedBy(mgr).
+	clusterToObjectFunc, err := util.ClusterToTypedObjectsMapper(r.Client, &infrav1.DOMachineList{}, mgr.GetScheme())
+	if err != nil {
+		return errors.Wrapf(err, "failed to create mapper for Cluster to DOMachines")
+	}
+
+	return ctrl.NewControllerManagedBy(mgr).
 		For(&infrav1.DOMachine{}).
-		WithEventFilter(predicates.ResourceNotPaused(ctrl.LoggerFrom(ctx))). // don't queue reconcile if resource is paused
+		WithEventFilter(predicates.ResourceNotPaused(mgr.GetScheme(), ctrl.LoggerFrom(ctx))). // don't queue reconcile if resource is paused
 		Watches(
 			&clusterv1.Machine{},
 			handler.EnqueueRequestsFromMapFunc(util.MachineToInfrastructureMapFunc(infrav1.GroupVersion.WithKind("DOMachine"))),
@@ -67,26 +71,12 @@ func (r *DOMachineReconciler) SetupWithManager(ctx context.Context, mgr ctrl.Man
 			&infrav1.DOCluster{},
 			handler.EnqueueRequestsFromMapFunc(r.DOClusterToDOMachines(ctx)),
 		).
-		Build(r)
-	if err != nil {
-		return errors.Wrapf(err, "error creating controller")
-	}
-
-	clusterToObjectFunc, err := util.ClusterToTypedObjectsMapper(r.Client, &infrav1.DOMachineList{}, mgr.GetScheme())
-	if err != nil {
-		return errors.Wrapf(err, "failed to create mapper for Cluster to DOMachines")
-	}
-
-	// Add a watch on clusterv1.Cluster object for unpause & ready notifications.
-	if err := c.Watch(
-		source.Kind(mgr.GetCache(), &clusterv1.Cluster{}),
-		handler.EnqueueRequestsFromMapFunc(clusterToObjectFunc),
-		predicates.ClusterUnpausedAndInfrastructureReady(ctrl.LoggerFrom(ctx)),
-	); err != nil {
-		return errors.Wrapf(err, "failed adding a watch for ready clusters")
-	}
-
-	return nil
+		Watches(
+			&clusterv1.Cluster{},
+			handler.EnqueueRequestsFromMapFunc(clusterToObjectFunc),
+			builder.WithPredicates(predicates.ClusterPausedTransitionsOrInfrastructureReady(mgr.GetScheme(), ctrl.LoggerFrom(ctx))),
+		).
+		Complete(r)
 }
 
 // DOClusterToDOMachines convert the cluster to machines spec.
