@@ -7,11 +7,11 @@ toolchain go1.24.1
 require (
 	github.com/digitalocean/godo v1.154.0
 	github.com/go-logr/logr v1.4.3
-	github.com/miekg/dns v1.1.66
+	github.com/miekg/dns v1.1.67
 	github.com/onsi/ginkgo/v2 v2.23.4
 	github.com/onsi/gomega v1.36.3
 	github.com/pkg/errors v0.9.1
-	github.com/spf13/pflag v1.0.6
+	github.com/spf13/pflag v1.0.7
 	go.uber.org/mock v0.5.2
 	golang.org/x/oauth2 v0.30.0
 	k8s.io/api v0.31.3
