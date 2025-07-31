@@ -89,7 +89,7 @@ Generate templates for creating workload clusters:
 ```bash
 $ clusterctl generate cluster capdo-quickstart \
     --infrastructure digitalocean \
-    --kubernetes-version v1.17.11 \
+    --kubernetes-version v1.32.0 \
     --control-plane-machine-count 1 \
     --worker-machine-count 3 > capdo-quickstart-cluster.yaml
 ```
@@ -152,7 +152,7 @@ $ KUBECONFIG=capdo-quickstart.kubeconfig kubectl apply -f https://docs.projectca
 $ KUBECONFIG=capdo-quickstart.kubeconfig kubectl create secret generic digitalocean --namespace kube-system --from-literal access-token=$DIGITALOCEAN_ACCESS_TOKEN
 
 # Deploy DigitalOcean Cloud Controller Manager
-$ KUBECONFIG=capdo-quickstart.kubeconfig kubectl apply -f https://raw.githubusercontent.com/digitalocean/digitalocean-cloud-controller-manager/master/releases/v0.1.27.yml
+$ KUBECONFIG=capdo-quickstart.kubeconfig kubectl apply -f https://raw.githubusercontent.com/digitalocean/digitalocean-cloud-controller-manager/master/releases/digitalocean-cloud-controller-manager/v0.1.62.yml
 
 # Deploy DigitalOcean CSI (optional)
 $ KUBECONFIG=capdo-quickstart.kubeconfig kubectl apply -f https://raw.githubusercontent.com/digitalocean/csi-digitalocean/master/deploy/kubernetes/releases/csi-digitalocean-v1.3.0.yaml
