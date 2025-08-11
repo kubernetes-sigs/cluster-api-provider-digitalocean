@@ -155,7 +155,9 @@ $ KUBECONFIG=capdo-quickstart.kubeconfig kubectl create secret generic digitaloc
 $ KUBECONFIG=capdo-quickstart.kubeconfig kubectl apply -f https://raw.githubusercontent.com/digitalocean/digitalocean-cloud-controller-manager/master/releases/digitalocean-cloud-controller-manager/v0.1.62.yml
 
 # Deploy DigitalOcean CSI (optional)
-$ KUBECONFIG=capdo-quickstart.kubeconfig kubectl apply -f https://raw.githubusercontent.com/digitalocean/csi-digitalocean/master/deploy/kubernetes/releases/csi-digitalocean-v1.3.0.yaml
+$ KUBECONFIG=capdo-quickstart.kubeconfig kubectl apply -f https://raw.githubusercontent.com/digitalocean/csi-digitalocean/v4.14.0/deploy/kubernetes/releases/csi-digitalocean-v4.14.0/crds.yaml
+$ KUBECONFIG=capdo-quickstart.kubeconfig kubectl apply -f https://raw.githubusercontent.com/digitalocean/csi-digitalocean/v4.14.0/deploy/kubernetes/releases/csi-digitalocean-v4.14.0/driver.yaml
+$ KUBECONFIG=capdo-quickstart.kubeconfig kubectl apply -f https://raw.githubusercontent.com/digitalocean/csi-digitalocean/v4.14.0/deploy/kubernetes/releases/csi-digitalocean-v4.14.0/snapshot-controller.yaml
 ```
 
 After the [CNI](https://github.com/containernetworking/cni) and the [CCM](https://github.com/digitalocean/digitalocean-cloud-controller-manager) have deployed your workload cluster nodes should be in the `ready` state. You can verify this by using:
