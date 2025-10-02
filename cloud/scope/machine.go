@@ -72,7 +72,7 @@ func NewMachineScope(params MachineScopeParams) (*MachineScope, error) {
 	}
 
 	if params.Logger == (logr.Logger{}) {
-		params.Logger = klogr.New()
+		params.Logger = klogr.New() //nolint:staticcheck
 	}
 
 	helper, err := patch.NewHelper(params.DOMachine, params.Client)
