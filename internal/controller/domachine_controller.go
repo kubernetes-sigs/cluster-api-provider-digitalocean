@@ -203,7 +203,7 @@ func (r *DOMachineReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	}()
 
 	// Handle deleted machines
-	if !doMachine.ObjectMeta.DeletionTimestamp.IsZero() {
+	if !doMachine.DeletionTimestamp.IsZero() {
 		return r.reconcileDelete(ctx, machineScope, clusterScope)
 	}
 
