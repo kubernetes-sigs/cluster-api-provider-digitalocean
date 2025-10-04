@@ -51,7 +51,7 @@ func init() {
 
 func TestService_GetLoadBalancer(t *testing.T) {
 	os.Setenv("DIGITALOCEAN_ACCESS_TOKEN", "super-secret-token")
-	defer os.Unsetenv("DIGITALOCEAN_ACCESS_TOKEN")
+	defer os.Unsetenv("DIGITALOCEAN_ACCESS_TOKEN") //nolint:errcheck
 
 	mctrl := gomock.NewController(t)
 	defer mctrl.Finish()

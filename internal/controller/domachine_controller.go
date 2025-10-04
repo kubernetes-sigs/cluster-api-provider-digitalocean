@@ -34,7 +34,7 @@ import (
 	"sigs.k8s.io/cluster-api-provider-digitalocean/cloud/services/computes"
 	"sigs.k8s.io/cluster-api-provider-digitalocean/util/reconciler"
 	clusterv1 "sigs.k8s.io/cluster-api/api/v1beta1"
-	capierrors "sigs.k8s.io/cluster-api/errors"
+	capierrors "sigs.k8s.io/cluster-api/errors" //nolint:staticcheck
 	"sigs.k8s.io/cluster-api/util"
 	"sigs.k8s.io/cluster-api/util/annotations"
 	"sigs.k8s.io/cluster-api/util/predicates"
@@ -203,7 +203,7 @@ func (r *DOMachineReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	}()
 
 	// Handle deleted machines
-	if !doMachine.ObjectMeta.DeletionTimestamp.IsZero() {
+	if !doMachine.DeletionTimestamp.IsZero() {
 		return r.reconcileDelete(ctx, machineScope, clusterScope)
 	}
 
