@@ -49,40 +49,40 @@ func NewClusterScope(params ClusterScopeParams) (*ClusterScope, error) {
 		return nil, errors.New("DOCluster is required when creating a ClusterScope")
 	}
 	if params.Logger == (logr.Logger{}) {
-		params.Logger = klogr.New()
+		params.Logger = klogr.New() //nolint:staticcheck
 	}
 
-	session, err := params.DOClients.Session()
+	session, err := params.Session()
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create DO session")
 	}
 
-	if params.DOClients.Actions == nil {
-		params.DOClients.Actions = session.Actions
+	if params.Actions == nil {
+		params.Actions = session.Actions
 	}
 
-	if params.DOClients.Droplets == nil {
-		params.DOClients.Droplets = session.Droplets
+	if params.Droplets == nil {
+		params.Droplets = session.Droplets
 	}
 
-	if params.DOClients.Storage == nil {
-		params.DOClients.Storage = session.Storage
+	if params.Storage == nil {
+		params.Storage = session.Storage
 	}
 
-	if params.DOClients.Images == nil {
-		params.DOClients.Images = session.Images
+	if params.Images == nil {
+		params.Images = session.Images
 	}
 
-	if params.DOClients.Keys == nil {
-		params.DOClients.Keys = session.Keys
+	if params.Keys == nil {
+		params.Keys = session.Keys
 	}
 
-	if params.DOClients.LoadBalancers == nil {
-		params.DOClients.LoadBalancers = session.LoadBalancers
+	if params.LoadBalancers == nil {
+		params.LoadBalancers = session.LoadBalancers
 	}
 
-	if params.DOClients.Domains == nil {
-		params.DOClients.Domains = session.Domains
+	if params.Domains == nil {
+		params.Domains = session.Domains
 	}
 
 	helper, err := patch.NewHelper(params.DOCluster, params.Client)

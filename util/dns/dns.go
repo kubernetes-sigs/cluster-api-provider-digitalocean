@@ -85,7 +85,7 @@ func CheckDNSPropagated(fqdn, ip string) (bool, error) {
 func LookupAuthoritativeServer(fqdn string) (string, error) {
 	m := new(dns.Msg)
 	m.SetQuestion(fqdn, dns.TypeSOA)
-	m.MsgHdr.RecursionDesired = true
+	m.RecursionDesired = true
 	resp, err := defaultResolver.LocalQuery(m)
 	if err != nil {
 		return "", err

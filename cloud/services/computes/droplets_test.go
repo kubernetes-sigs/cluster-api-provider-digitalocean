@@ -55,7 +55,7 @@ func init() {
 
 func TestService_GetDroplet(t *testing.T) {
 	os.Setenv("DIGITALOCEAN_ACCESS_TOKEN", "super-secret-token")
-	defer os.Unsetenv("DIGITALOCEAN_ACCESS_TOKEN")
+	defer os.Unsetenv("DIGITALOCEAN_ACCESS_TOKEN") //nolint:errcheck
 
 	mctrl := gomock.NewController(t)
 	defer mctrl.Finish()
@@ -178,7 +178,7 @@ func TestService_GetDroplet(t *testing.T) {
 
 func TestService_CreateDroplet(t *testing.T) {
 	os.Setenv("DIGITALOCEAN_ACCESS_TOKEN", "super-secret-token")
-	defer os.Unsetenv("DIGITALOCEAN_ACCESS_TOKEN")
+	defer os.Unsetenv("DIGITALOCEAN_ACCESS_TOKEN") //nolint:errcheck
 
 	mctrl := gomock.NewController(t)
 	defer mctrl.Finish()
@@ -842,7 +842,7 @@ func TestService_CreateDroplet(t *testing.T) {
 
 func TestService_DeleteDroplet(t *testing.T) {
 	os.Setenv("DIGITALOCEAN_ACCESS_TOKEN", "super-secret-token")
-	defer os.Unsetenv("DIGITALOCEAN_ACCESS_TOKEN")
+	defer os.Unsetenv("DIGITALOCEAN_ACCESS_TOKEN") //nolint:errcheck
 
 	mctrl := gomock.NewController(t)
 	defer mctrl.Finish()
@@ -920,7 +920,7 @@ func TestService_DeleteDroplet(t *testing.T) {
 
 func TestService_GetDropletAddress(t *testing.T) {
 	os.Setenv("DIGITALOCEAN_ACCESS_TOKEN", "super-secret-token")
-	defer os.Unsetenv("DIGITALOCEAN_ACCESS_TOKEN")
+	defer os.Unsetenv("DIGITALOCEAN_ACCESS_TOKEN") //nolint:errcheck
 
 	type args struct {
 		droplet *godo.Droplet
