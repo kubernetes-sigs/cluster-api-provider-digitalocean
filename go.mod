@@ -8,7 +8,7 @@ require (
 	github.com/digitalocean/godo v1.165.1
 	github.com/go-logr/logr v1.4.3
 	github.com/miekg/dns v1.1.68
-	github.com/onsi/ginkgo/v2 v2.26.0
+	github.com/onsi/ginkgo/v2 v2.27.1
 	github.com/onsi/gomega v1.38.2
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/pflag v1.0.10
