@@ -26,7 +26,7 @@ if [[ -n "${TRACE}" ]]; then
   set -x
 fi
 
-k8s_version=1.16.4
+k8s_version=v1.35.0
 goarch=amd64
 goos="unknown"
 
@@ -60,7 +60,7 @@ function header_text {
 
 tmp_root=/tmp
 
-kb_root_dir=${tmp_root}/kubebuilder
+kb_root_dir=${tmp_root}/controller-tools/envtest
 
 # Skip fetching and untaring the tools by setting the SKIP_FETCH_TOOLS variable
 # in your environment to any value:
@@ -90,11 +90,12 @@ function fetch_tools {
   fi
 
   header_text "fetching tools"
-  kb_tools_archive_name="kubebuilder-tools-${k8s_version}-${goos}-${goarch}.tar.gz"
-  kb_tools_download_url="https://storage.googleapis.com/kubebuilder-tools/${kb_tools_archive_name}"
+  kb_tools_archive_name="envtest-$k8s_version-$goos-$goarch.tar.gz"
+  kb_tools_download_url="https://github.com/kubernetes-sigs/controller-tools/releases/download/envtest-$k8s_version/$kb_tools_archive_name"
 
   kb_tools_archive_path="${tmp_root}/${kb_tools_archive_name}"
   if [[ ! -f ${kb_tools_archive_path} ]]; then
+    echo "Downloading $kb_tools_download_url to $kb_tools_archive_path"
     curl -fsL ${kb_tools_download_url} -o "${kb_tools_archive_path}"
   fi
   tar -zvxf "${kb_tools_archive_path}" -C "${tmp_root}/"

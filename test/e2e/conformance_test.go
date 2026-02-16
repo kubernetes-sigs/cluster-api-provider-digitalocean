@@ -76,7 +76,7 @@ var _ = Describe("Conformance Tests", func() {
 	})
 
 	AfterEach(func() {
-		dumpSpecResourcesAndCleanup(ctx, specName, bootstrapClusterProxy, artifactFolder, namespace, cancelWatches, result.Cluster, e2eConfig.GetIntervals, skipCleanup)
+		dumpSpecResourcesAndCleanup(ctx, specName, bootstrapClusterProxy, artifactFolder, namespace, cancelWatches, result.Cluster, e2eConfig.GetIntervals, skipCleanup, clusterctlConfigPath)
 		redactLogs(e2eConfig.MustGetVariable)
 	})
 
