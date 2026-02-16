@@ -31,3 +31,15 @@ releaseSeries:
 - major: 1
   minor: 7
   contract: v1beta1
+- major: 1
+  minor: 8
+  contract: v1beta1
+- major: 1
+  minor: 9
+  contract: v1beta1
+- major: 1
+  minor: 10
+  contract: v1beta1
+- major: 1
+  minor: 11
+  contract: v1beta2
