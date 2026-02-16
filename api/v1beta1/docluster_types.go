@@ -18,7 +18,7 @@ package v1beta1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	clusterv1 "sigs.k8s.io/cluster-api/api/v1beta1"
+	clusterv1beta1 "sigs.k8s.io/cluster-api/api/core/v1beta1"
 )
 
 const (
@@ -40,7 +40,7 @@ type DOClusterSpec struct {
 	// control plane. If ControlPlaneDNS is unset, the DO load-balancer IP
 	// of the Kubernetes API Server is used.
 	// +optional
-	ControlPlaneEndpoint clusterv1.APIEndpoint `json:"controlPlaneEndpoint"`
+	ControlPlaneEndpoint clusterv1beta1.APIEndpoint `json:"controlPlaneEndpoint"`
 	// ControlPlaneDNS is a managed DNS name that points to the load-balancer
 	// IP used for the ControlPlaneEndpoint.
 	// +optional

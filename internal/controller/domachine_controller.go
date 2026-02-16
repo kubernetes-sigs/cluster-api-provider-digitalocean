@@ -28,12 +28,13 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/client-go/tools/record"
+	"k8s.io/utils/ptr"
 
 	infrav1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1beta1"
 	"sigs.k8s.io/cluster-api-provider-digitalocean/cloud/scope"
 	"sigs.k8s.io/cluster-api-provider-digitalocean/cloud/services/computes"
 	"sigs.k8s.io/cluster-api-provider-digitalocean/util/reconciler"
-	clusterv1 "sigs.k8s.io/cluster-api/api/v1beta1"
+	clusterv1 "sigs.k8s.io/cluster-api/api/core/v1beta2"
 	capierrors "sigs.k8s.io/cluster-api/errors" //nolint:staticcheck
 	"sigs.k8s.io/cluster-api/util"
 	"sigs.k8s.io/cluster-api/util/annotations"
@@ -74,7 +75,7 @@ func (r *DOMachineReconciler) SetupWithManager(ctx context.Context, mgr ctrl.Man
 		Watches(
 			&clusterv1.Cluster{},
 			handler.EnqueueRequestsFromMapFunc(clusterToObjectFunc),
-			builder.WithPredicates(predicates.ClusterPausedTransitionsOrInfrastructureReady(mgr.GetScheme(), ctrl.LoggerFrom(ctx))),
+			builder.WithPredicates(predicates.ClusterPausedTransitionsOrInfrastructureProvisioned(mgr.GetScheme(), ctrl.LoggerFrom(ctx))),
 		).
 		Complete(r)
 }
@@ -243,8 +244,8 @@ func (r *DOMachineReconciler) reconcile(ctx context.Context, machineScope *scope
 	// If the DOMachine doesn't have our finalizer, add it.
 	controllerutil.AddFinalizer(domachine, infrav1.MachineFinalizer)
 
-	if !machineScope.Cluster.Status.InfrastructureReady {
-		machineScope.Info("Cluster infrastructure is not ready yet")
+	if !ptr.Deref(machineScope.Cluster.Status.Initialization.InfrastructureProvisioned, false) {
+		machineScope.Info("Cluster infrastructure is not provisioned yet")
 		return reconcile.Result{}, nil
 	}
 
