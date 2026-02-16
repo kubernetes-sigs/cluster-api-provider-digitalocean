@@ -39,7 +39,7 @@ var _ = Describe("Running the Cluster API E2E tests", func() {
 	})
 
 	AfterEach(func() {
-		redactLogs(e2eConfig.GetVariable)
+		redactLogs(e2eConfig.MustGetVariable)
 	})
 
 	Context("Running the quick-start spec", func() {

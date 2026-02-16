@@ -77,7 +77,7 @@ var _ = Describe("Conformance Tests", func() {
 
 	AfterEach(func() {
 		dumpSpecResourcesAndCleanup(ctx, specName, bootstrapClusterProxy, artifactFolder, namespace, cancelWatches, result.Cluster, e2eConfig.GetIntervals, skipCleanup)
-		redactLogs(e2eConfig.GetVariable)
+		redactLogs(e2eConfig.MustGetVariable)
 	})
 
 	It("Should run conformance tests", func() {
@@ -88,9 +88,9 @@ var _ = Describe("Conformance Tests", func() {
 			flavor = "conformance-ci-artifacts"
 		}
 
-		workerMachineCount, err := strconv.ParseInt(e2eConfig.GetVariable("CONFORMANCE_WORKER_MACHINE_COUNT"), 10, 64)
+		workerMachineCount, err := strconv.ParseInt(e2eConfig.MustGetVariable("CONFORMANCE_WORKER_MACHINE_COUNT"), 10, 64)
 		Expect(err).NotTo(HaveOccurred())
-		controlPlaneMachineCount, err := strconv.ParseInt(e2eConfig.GetVariable("CONFORMANCE_CONTROL_PLANE_MACHINE_COUNT"), 10, 64)
+		controlPlaneMachineCount, err := strconv.ParseInt(e2eConfig.MustGetVariable("CONFORMANCE_CONTROL_PLANE_MACHINE_COUNT"), 10, 64)
 		Expect(err).NotTo(HaveOccurred())
 
 		By("Initializes the work cluster")
@@ -104,7 +104,7 @@ var _ = Describe("Conformance Tests", func() {
 				Flavor:                   flavor,
 				Namespace:                namespace.Name,
 				ClusterName:              clusterName,
-				KubernetesVersion:        e2eConfig.GetVariable(capi_e2e.KubernetesVersion),
+				KubernetesVersion:        e2eConfig.MustGetVariable(capi_e2e.KubernetesVersion),
 				ControlPlaneMachineCount: ptr.To[int64](controlPlaneMachineCount),
 				WorkerMachineCount:       ptr.To[int64](workerMachineCount),
 			},
