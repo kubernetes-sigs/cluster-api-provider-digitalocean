@@ -32,7 +32,8 @@ import (
 	"sigs.k8s.io/cluster-api-provider-digitalocean/cloud/services/networking"
 	dnsutil "sigs.k8s.io/cluster-api-provider-digitalocean/util/dns"
 	"sigs.k8s.io/cluster-api-provider-digitalocean/util/reconciler"
-	clusterv1 "sigs.k8s.io/cluster-api/api/v1beta1"
+	clusterv1beta1 "sigs.k8s.io/cluster-api/api/core/v1beta1"
+	clusterv1beta2 "sigs.k8s.io/cluster-api/api/core/v1beta2"
 	"sigs.k8s.io/cluster-api/util"
 	"sigs.k8s.io/cluster-api/util/annotations"
 	"sigs.k8s.io/cluster-api/util/predicates"
@@ -57,7 +58,7 @@ func (r *DOClusterReconciler) SetupWithManager(ctx context.Context, mgr ctrl.Man
 		For(&infrav1.DOCluster{}).
 		WithEventFilter(predicates.ResourceNotPaused(mgr.GetScheme(), ctrl.LoggerFrom(ctx))). // don't queue reconcile if resource is paused
 		Watches(
-			&clusterv1.Cluster{},
+			&clusterv1beta2.Cluster{},
 			handler.EnqueueRequestsFromMapFunc(util.ClusterToInfrastructureMapFunc(ctx, infrav1.GroupVersion.WithKind("DOCluster"), mgr.GetClient(), &infrav1.DOCluster{})),
 			builder.WithPredicates(predicates.ClusterUnpaused(mgr.GetScheme(), ctrl.LoggerFrom(ctx))),
 		).
@@ -222,7 +223,7 @@ func (r *DOClusterReconciler) reconcile(ctx context.Context, clusterScope *scope
 		r.Recorder.Eventf(docluster, corev1.EventTypeNormal, "DomainRecordReady", "DNS Record '%s.%s' with IP '%s'", recordSpec.Name, recordSpec.Domain, loadbalancer.IP)
 	}
 
-	clusterScope.SetControlPlaneEndpoint(clusterv1.APIEndpoint{
+	clusterScope.SetControlPlaneEndpoint(clusterv1beta1.APIEndpoint{
 		Host: controlPlaneEndpoint,
 		Port: apiServerLoadbalancer.Port,
 	})

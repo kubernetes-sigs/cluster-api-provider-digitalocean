@@ -35,6 +35,9 @@ spec:
       apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
       name: "${CLUSTER_NAME}-control-plane"
   kubeadmConfigSpec:
+    preKubeadmCommands:
+      - sed -i 's/SystemdCgroup = false/SystemdCgroup = true/' /etc/containerd/config.toml
+      - systemctl restart containerd
     initConfiguration:
       nodeRegistration:
         kubeletExtraArgs:
@@ -102,6 +105,9 @@ metadata:
 spec:
   template:
     spec:
+      preKubeadmCommands:
+        - sed -i 's/SystemdCgroup = false/SystemdCgroup = true/' /etc/containerd/config.toml
+        - systemctl restart containerd
       joinConfiguration:
         nodeRegistration:
           name: '{{ ds.meta_data.local_hostname }}'

@@ -36,7 +36,7 @@ import (
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
-	clusterv1 "sigs.k8s.io/cluster-api/api/v1beta1"
+	clusterv1beta2 "sigs.k8s.io/cluster-api/api/core/v1beta2"
 
 	infrav1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1beta1"
 	"sigs.k8s.io/cluster-api-provider-digitalocean/cloud/scope"
@@ -50,7 +50,7 @@ var (
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 	utilruntime.Must(infrav1.AddToScheme(scheme))
-	utilruntime.Must(clusterv1.AddToScheme(scheme))
+	utilruntime.Must(clusterv1beta2.AddToScheme(scheme))
 }
 
 func TestService_GetDroplet(t *testing.T) {
@@ -152,7 +152,7 @@ func TestService_GetDroplet(t *testing.T) {
 			mdroplet := mock_computes.NewMockDropletsService(mctrl)
 			cscope, err := scope.NewClusterScope(scope.ClusterScopeParams{
 				Client:    fake.NewClientBuilder().WithScheme(scheme).Build(),
-				Cluster:   &clusterv1.Cluster{},
+				Cluster:   &clusterv1beta2.Cluster{},
 				DOCluster: &infrav1.DOCluster{},
 				DOClients: scope.DOClients{
 					Droplets: mdroplet,
@@ -184,9 +184,9 @@ func TestService_CreateDroplet(t *testing.T) {
 	defer mctrl.Finish()
 
 	type args struct {
-		cluster   *clusterv1.Cluster
+		cluster   *clusterv1beta2.Cluster
 		docluster *infrav1.DOCluster
-		machine   *clusterv1.Machine
+		machine   *clusterv1beta2.Machine
 		domachine *infrav1.DOMachine
 	}
 	tests := []struct {
@@ -199,7 +199,7 @@ func TestService_CreateDroplet(t *testing.T) {
 		{
 			name: "default",
 			args: args{
-				cluster: &clusterv1.Cluster{
+				cluster: &clusterv1beta2.Cluster{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      "capdo-test",
 						Namespace: "default",
@@ -214,15 +214,15 @@ func TestService_CreateDroplet(t *testing.T) {
 						Region: "nyc1",
 					},
 				},
-				machine: &clusterv1.Machine{
+				machine: &clusterv1beta2.Machine{
 					ObjectMeta: metav1.ObjectMeta{
 						Name: "capdo-test-control-plane-h8f6l",
 						Labels: map[string]string{
 							"cluster.x-k8s.io/control-plane": "",
 						},
 					},
-					Spec: clusterv1.MachineSpec{
-						Bootstrap: clusterv1.Bootstrap{
+					Spec: clusterv1beta2.MachineSpec{
+						Bootstrap: clusterv1beta2.Bootstrap{
 							DataSecretName: ptr.To[string]("bootstrap-data"),
 						},
 					},
@@ -262,7 +262,7 @@ func TestService_CreateDroplet(t *testing.T) {
 		{
 			name: "failed creating droplet (should return an error)",
 			args: args{
-				cluster: &clusterv1.Cluster{
+				cluster: &clusterv1beta2.Cluster{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      "capdo-test",
 						Namespace: "default",
@@ -277,15 +277,15 @@ func TestService_CreateDroplet(t *testing.T) {
 						Region: "nyc1",
 					},
 				},
-				machine: &clusterv1.Machine{
+				machine: &clusterv1beta2.Machine{
 					ObjectMeta: metav1.ObjectMeta{
 						Name: "capdo-test-control-plane-h8f6l",
 						Labels: map[string]string{
 							"cluster.x-k8s.io/control-plane": "",
 						},
 					},
-					Spec: clusterv1.MachineSpec{
-						Bootstrap: clusterv1.Bootstrap{
+					Spec: clusterv1beta2.MachineSpec{
+						Bootstrap: clusterv1beta2.Bootstrap{
 							DataSecretName: ptr.To[string]("bootstrap-data"),
 						},
 					},
@@ -325,7 +325,7 @@ func TestService_CreateDroplet(t *testing.T) {
 		{
 			name: "failed getting bootstrap data (should return an error)",
 			args: args{
-				cluster: &clusterv1.Cluster{
+				cluster: &clusterv1beta2.Cluster{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      "capdo-test",
 						Namespace: "default",
@@ -340,15 +340,15 @@ func TestService_CreateDroplet(t *testing.T) {
 						Region: "nyc1",
 					},
 				},
-				machine: &clusterv1.Machine{
+				machine: &clusterv1beta2.Machine{
 					ObjectMeta: metav1.ObjectMeta{
 						Name: "capdo-test-control-plane-h8f6l",
 						Labels: map[string]string{
 							"cluster.x-k8s.io/control-plane": "",
 						},
 					},
-					Spec: clusterv1.MachineSpec{
-						Bootstrap: clusterv1.Bootstrap{
+					Spec: clusterv1beta2.MachineSpec{
+						Bootstrap: clusterv1beta2.Bootstrap{
 							DataSecretName: ptr.To[string]("no-exist-bootstrap-data"),
 						},
 					},
@@ -370,7 +370,7 @@ func TestService_CreateDroplet(t *testing.T) {
 		{
 			name: "with provided ssh key fingerprint",
 			args: args{
-				cluster: &clusterv1.Cluster{
+				cluster: &clusterv1beta2.Cluster{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      "capdo-test",
 						Namespace: "default",
@@ -385,15 +385,15 @@ func TestService_CreateDroplet(t *testing.T) {
 						Region: "nyc1",
 					},
 				},
-				machine: &clusterv1.Machine{
+				machine: &clusterv1beta2.Machine{
 					ObjectMeta: metav1.ObjectMeta{
 						Name: "capdo-test-control-plane-h8f6l",
 						Labels: map[string]string{
 							"cluster.x-k8s.io/control-plane": "",
 						},
 					},
-					Spec: clusterv1.MachineSpec{
-						Bootstrap: clusterv1.Bootstrap{
+					Spec: clusterv1beta2.MachineSpec{
+						Bootstrap: clusterv1beta2.Bootstrap{
 							DataSecretName: ptr.To[string]("bootstrap-data"),
 						},
 					},
@@ -442,7 +442,7 @@ func TestService_CreateDroplet(t *testing.T) {
 		{
 			name: "with image slug (should getting image id by slug)",
 			args: args{
-				cluster: &clusterv1.Cluster{
+				cluster: &clusterv1beta2.Cluster{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      "capdo-test",
 						Namespace: "default",
@@ -457,15 +457,15 @@ func TestService_CreateDroplet(t *testing.T) {
 						Region: "nyc1",
 					},
 				},
-				machine: &clusterv1.Machine{
+				machine: &clusterv1beta2.Machine{
 					ObjectMeta: metav1.ObjectMeta{
 						Name: "capdo-test-control-plane-h8f6l",
 						Labels: map[string]string{
 							"cluster.x-k8s.io/control-plane": "",
 						},
 					},
-					Spec: clusterv1.MachineSpec{
-						Bootstrap: clusterv1.Bootstrap{
+					Spec: clusterv1beta2.MachineSpec{
+						Bootstrap: clusterv1beta2.Bootstrap{
 							DataSecretName: ptr.To[string]("bootstrap-data"),
 						},
 					},
@@ -506,7 +506,7 @@ func TestService_CreateDroplet(t *testing.T) {
 		{
 			name: "failed getting image (should return an error)",
 			args: args{
-				cluster: &clusterv1.Cluster{
+				cluster: &clusterv1beta2.Cluster{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      "capdo-test",
 						Namespace: "default",
@@ -521,15 +521,15 @@ func TestService_CreateDroplet(t *testing.T) {
 						Region: "nyc1",
 					},
 				},
-				machine: &clusterv1.Machine{
+				machine: &clusterv1beta2.Machine{
 					ObjectMeta: metav1.ObjectMeta{
 						Name: "capdo-test-control-plane-h8f6l",
 						Labels: map[string]string{
 							"cluster.x-k8s.io/control-plane": "",
 						},
 					},
-					Spec: clusterv1.MachineSpec{
-						Bootstrap: clusterv1.Bootstrap{
+					Spec: clusterv1beta2.MachineSpec{
+						Bootstrap: clusterv1beta2.Bootstrap{
 							DataSecretName: ptr.To[string]("bootstrap-data"),
 						},
 					},
@@ -552,7 +552,7 @@ func TestService_CreateDroplet(t *testing.T) {
 		{
 			name: "with provided ssh key fingerprint but failed getting keys (should return an error)",
 			args: args{
-				cluster: &clusterv1.Cluster{
+				cluster: &clusterv1beta2.Cluster{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      "capdo-test",
 						Namespace: "default",
@@ -567,15 +567,15 @@ func TestService_CreateDroplet(t *testing.T) {
 						Region: "nyc1",
 					},
 				},
-				machine: &clusterv1.Machine{
+				machine: &clusterv1beta2.Machine{
 					ObjectMeta: metav1.ObjectMeta{
 						Name: "capdo-test-control-plane-h8f6l",
 						Labels: map[string]string{
 							"cluster.x-k8s.io/control-plane": "",
 						},
 					},
-					Spec: clusterv1.MachineSpec{
-						Bootstrap: clusterv1.Bootstrap{
+					Spec: clusterv1beta2.MachineSpec{
+						Bootstrap: clusterv1beta2.Bootstrap{
 							DataSecretName: ptr.To[string]("bootstrap-data"),
 						},
 					},
@@ -601,7 +601,7 @@ func TestService_CreateDroplet(t *testing.T) {
 		{
 			name: "with provided data disk",
 			args: args{
-				cluster: &clusterv1.Cluster{
+				cluster: &clusterv1beta2.Cluster{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      "capdo-test",
 						Namespace: "default",
@@ -616,15 +616,15 @@ func TestService_CreateDroplet(t *testing.T) {
 						Region: "nyc1",
 					},
 				},
-				machine: &clusterv1.Machine{
+				machine: &clusterv1beta2.Machine{
 					ObjectMeta: metav1.ObjectMeta{
 						Name: "capdo-test-control-plane-h8f6l",
 						Labels: map[string]string{
 							"cluster.x-k8s.io/control-plane": "",
 						},
 					},
-					Spec: clusterv1.MachineSpec{
-						Bootstrap: clusterv1.Bootstrap{
+					Spec: clusterv1beta2.MachineSpec{
+						Bootstrap: clusterv1beta2.Bootstrap{
 							DataSecretName: ptr.To[string]("bootstrap-data"),
 						},
 					},
@@ -677,7 +677,7 @@ func TestService_CreateDroplet(t *testing.T) {
 		{
 			name: "with provided data disk but volume doesn't exists (should return an error)",
 			args: args{
-				cluster: &clusterv1.Cluster{
+				cluster: &clusterv1beta2.Cluster{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      "capdo-test",
 						Namespace: "default",
@@ -692,15 +692,15 @@ func TestService_CreateDroplet(t *testing.T) {
 						Region: "nyc1",
 					},
 				},
-				machine: &clusterv1.Machine{
+				machine: &clusterv1beta2.Machine{
 					ObjectMeta: metav1.ObjectMeta{
 						Name: "capdo-test-control-plane-h8f6l",
 						Labels: map[string]string{
 							"cluster.x-k8s.io/control-plane": "",
 						},
 					},
-					Spec: clusterv1.MachineSpec{
-						Bootstrap: clusterv1.Bootstrap{
+					Spec: clusterv1beta2.MachineSpec{
+						Bootstrap: clusterv1beta2.Bootstrap{
 							DataSecretName: ptr.To[string]("bootstrap-data"),
 						},
 					},
@@ -731,7 +731,7 @@ func TestService_CreateDroplet(t *testing.T) {
 		{
 			name: "with provided data disk but failed getting volume (should return an error)",
 			args: args{
-				cluster: &clusterv1.Cluster{
+				cluster: &clusterv1beta2.Cluster{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      "capdo-test",
 						Namespace: "default",
@@ -746,15 +746,15 @@ func TestService_CreateDroplet(t *testing.T) {
 						Region: "nyc1",
 					},
 				},
-				machine: &clusterv1.Machine{
+				machine: &clusterv1beta2.Machine{
 					ObjectMeta: metav1.ObjectMeta{
 						Name: "capdo-test-control-plane-h8f6l",
 						Labels: map[string]string{
 							"cluster.x-k8s.io/control-plane": "",
 						},
 					},
-					Spec: clusterv1.MachineSpec{
-						Bootstrap: clusterv1.Bootstrap{
+					Spec: clusterv1beta2.MachineSpec{
+						Bootstrap: clusterv1beta2.Bootstrap{
 							DataSecretName: ptr.To[string]("bootstrap-data"),
 						},
 					},
@@ -899,7 +899,7 @@ func TestService_DeleteDroplet(t *testing.T) {
 			mdroplet := mock_computes.NewMockDropletsService(mctrl)
 			cscope, err := scope.NewClusterScope(scope.ClusterScopeParams{
 				Client:    fake.NewClientBuilder().WithScheme(scheme).Build(),
-				Cluster:   &clusterv1.Cluster{},
+				Cluster:   &clusterv1beta2.Cluster{},
 				DOCluster: &infrav1.DOCluster{},
 				DOClients: scope.DOClients{
 					Droplets: mdroplet,
@@ -968,7 +968,7 @@ func TestService_GetDropletAddress(t *testing.T) {
 			ctx := context.TODO()
 			cscope, err := scope.NewClusterScope(scope.ClusterScopeParams{
 				Client:    fake.NewClientBuilder().WithScheme(scheme).Build(),
-				Cluster:   &clusterv1.Cluster{},
+				Cluster:   &clusterv1beta2.Cluster{},
 				DOCluster: &infrav1.DOCluster{},
 			})
 			if err != nil {

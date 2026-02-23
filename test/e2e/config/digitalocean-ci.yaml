@@ -7,8 +7,8 @@ providers:
   - name: cluster-api
     type: CoreProvider
     versions:
-      - name: v1.7.9
-        value: https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.7.9/core-components.yaml
+      - name: v1.11.5
+        value: https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.11.5/core-components.yaml
         type: "url"
         files:
           - sourcePath: "${PWD}/test/e2e/data/metadata/cluster-api/metadata.yaml"
@@ -20,8 +20,8 @@ providers:
   - name: kubeadm
     type: BootstrapProvider
     versions:
-      - name: v1.7.9
-        value: https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.7.9/bootstrap-components.yaml
+      - name: v1.11.5
+        value: https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.11.5/bootstrap-components.yaml
         type: "url"
         files:
           - sourcePath: "${PWD}/test/e2e/data/metadata/cluster-api/metadata.yaml"
@@ -33,8 +33,8 @@ providers:
   - name: kubeadm
     type: ControlPlaneProvider
     versions:
-      - name: v1.7.9
-        value: https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.7.9/control-plane-components.yaml
+      - name: v1.11.5
+        value: https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.11.5/control-plane-components.yaml
         type: "url"
         files:
           - sourcePath: "${PWD}/test/e2e/data/metadata/cluster-api/metadata.yaml"
@@ -46,7 +46,7 @@ providers:
   - name: digitalocean
     type: InfrastructureProvider
     versions:
-      - name: v1.7.99
+      - name: v1.11.5
         value: "${PWD}/config/default"
         replacements:
           - old: gcr.io/k8s-staging-cluster-api-do/cluster-api-do-controller:dev
@@ -66,7 +66,7 @@ providers:
 
 variables:
   REDACT_LOG_SCRIPT: "${PWD}/hack/log/redact.sh"
-  KUBERNETES_VERSION: "v1.29.4"
+  KUBERNETES_VERSION: "v1.32.4"
   EXP_CLUSTER_RESOURCE_SET: "true"
   # Cluster Addons
   CNI: "${PWD}/test/e2e/data/cni/calico/calico.yaml"
@@ -74,11 +74,11 @@ variables:
   # Following CAPDO variables should be set before testing
   DO_REGION: "nyc1"
   DO_CONTROL_PLANE_MACHINE_TYPE: "s-2vcpu-2gb"
-  # Cluster API Kubernetes v1.29.4 on Ubuntu 22.04
-  DO_CONTROL_PLANE_MACHINE_IMAGE: "154711321"
+  # Cluster API Kubernetes v1.32.4 on Ubuntu 24.04
+  DO_CONTROL_PLANE_MACHINE_IMAGE: "216139771"
   DO_NODE_MACHINE_TYPE: "s-2vcpu-2gb"
-  # Cluster API Kubernetes v1.29.4 on Ubuntu 22.04
-  DO_NODE_MACHINE_IMAGE: "154711321"
+  # Cluster API Kubernetes v1.32.4 on Ubuntu 24.04
+  DO_NODE_MACHINE_IMAGE: "216139771"
   CONFORMANCE_WORKER_MACHINE_COUNT: "2"
   CONFORMANCE_CONTROL_PLANE_MACHINE_COUNT: "1"
   KUBETEST_CONFIGURATION: "${PWD}/test/e2e/data/kubetest/conformance.yaml"
@@ -86,11 +86,11 @@ variables:
   COREDNS_VERSION_UPGRADE_TO: "v1.8.6"
   # Cluster API Kubernetes v1.28.9 on Ubuntu 22.04
   KUBERNETES_IMAGE_UPGRADE_FROM: "154711472"
-  # Cluster API Kubernetes v1.29.4 on Ubuntu 22.04
-  KUBERNETES_IMAGE_UPGRADE_TO: "154711321"
+  # Cluster API Kubernetes v1.32.4 on Ubuntu 24.04
+  KUBERNETES_IMAGE_UPGRADE_TO: "216139771"
   CONTROL_PLANE_MACHINE_TEMPLATE_UPGRADE_TO: "cp-k8s-upgrade-and-conformance"
   WORKERS_MACHINE_TEMPLATE_UPGRADE_TO: "worker-k8s-upgrade-and-conformance"
-  KUBERNETES_VERSION_UPGRADE_TO: "${KUBERNETES_VERSION_UPGRADE_TO:-v1.29.4}"
+  KUBERNETES_VERSION_UPGRADE_TO: "${KUBERNETES_VERSION_UPGRADE_TO:-v1.32.4}"
   KUBERNETES_VERSION_UPGRADE_FROM: "${KUBERNETES_VERSION_UPGRADE_FROM:-v1.28.9}"
   IP_FAMILY: "IPv4"
 

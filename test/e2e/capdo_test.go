@@ -68,8 +68,8 @@ var _ = Describe("Workload cluster creation", func() {
 	})
 
 	AfterEach(func() {
-		dumpSpecResourcesAndCleanup(ctx, specName, bootstrapClusterProxy, artifactFolder, namespace, cancelWatches, result.Cluster, e2eConfig.GetIntervals, skipCleanup)
-		redactLogs(e2eConfig.GetVariable)
+		dumpSpecResourcesAndCleanup(ctx, specName, bootstrapClusterProxy, artifactFolder, namespace, cancelWatches, result.Cluster, e2eConfig.GetIntervals, skipCleanup, clusterctlConfigPath)
+		redactLogs(e2eConfig.MustGetVariable)
 	})
 
 	Context("Creating a single control-plane cluster", func() {
@@ -85,7 +85,7 @@ var _ = Describe("Workload cluster creation", func() {
 					Flavor:                   clusterctl.DefaultFlavor,
 					Namespace:                namespace.Name,
 					ClusterName:              clusterName,
-					KubernetesVersion:        e2eConfig.GetVariable(KubernetesVersion),
+					KubernetesVersion:        e2eConfig.MustGetVariable(KubernetesVersion),
 					ControlPlaneMachineCount: ptr.To[int64](1),
 					WorkerMachineCount:       ptr.To[int64](1),
 				},
@@ -105,7 +105,7 @@ var _ = Describe("Workload cluster creation", func() {
 					Flavor:                   clusterctl.DefaultFlavor,
 					Namespace:                namespace.Name,
 					ClusterName:              clusterName,
-					KubernetesVersion:        e2eConfig.GetVariable(KubernetesVersion),
+					KubernetesVersion:        e2eConfig.MustGetVariable(KubernetesVersion),
 					ControlPlaneMachineCount: ptr.To[int64](1),
 					WorkerMachineCount:       ptr.To[int64](3),
 				},
@@ -129,7 +129,7 @@ var _ = Describe("Workload cluster creation", func() {
 					Flavor:                   clusterctl.DefaultFlavor,
 					Namespace:                namespace.Name,
 					ClusterName:              clusterName,
-					KubernetesVersion:        e2eConfig.GetVariable(KubernetesVersion),
+					KubernetesVersion:        e2eConfig.MustGetVariable(KubernetesVersion),
 					ControlPlaneMachineCount: ptr.To[int64](3),
 					WorkerMachineCount:       ptr.To[int64](2),
 				},

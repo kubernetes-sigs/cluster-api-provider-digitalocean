@@ -28,7 +28,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	clusterv1 "sigs.k8s.io/cluster-api/api/v1beta1"
+	clusterv1beta2 "sigs.k8s.io/cluster-api/api/core/v1beta2"
 	"sigs.k8s.io/cluster-api/test/framework"
 	"sigs.k8s.io/cluster-api/util"
 )
@@ -57,7 +57,7 @@ func setupSpecNamespace(ctx context.Context, specName string, clusterProxy frame
 	return namespace, cancelWatches
 }
 
-func dumpSpecResourcesAndCleanup(ctx context.Context, specName string, clusterProxy framework.ClusterProxy, artifactFolder string, namespace *corev1.Namespace, cancelWatches context.CancelFunc, cluster *clusterv1.Cluster, intervalsGetter func(spec, key string) []interface{}, skipCleanup bool) {
+func dumpSpecResourcesAndCleanup(ctx context.Context, specName string, clusterProxy framework.ClusterProxy, artifactFolder string, namespace *corev1.Namespace, cancelWatches context.CancelFunc, cluster *clusterv1beta2.Cluster, intervalsGetter func(spec, key string) []interface{}, skipCleanup bool, clusterctlConfigPath string) {
 	Byf("Dumping logs from the %q workload cluster", cluster.Name)
 
 	// Dump all the logs from the workload cluster before deleting them.
@@ -67,9 +67,11 @@ func dumpSpecResourcesAndCleanup(ctx context.Context, specName string, clusterPr
 
 	// Dump all Cluster API related resources to artifacts before deleting them.
 	framework.DumpAllResources(ctx, framework.DumpAllResourcesInput{
-		Lister:    clusterProxy.GetClient(),
-		Namespace: namespace.Name,
-		LogPath:   filepath.Join(artifactFolder, "clusters", clusterProxy.GetName(), "resources"),
+		Lister:               clusterProxy.GetClient(),
+		Namespace:            namespace.Name,
+		LogPath:              filepath.Join(artifactFolder, "clusters", clusterProxy.GetName(), "resources"),
+		KubeConfigPath:       clusterProxy.GetKubeconfigPath(),
+		ClusterctlConfigPath: clusterctlConfigPath,
 	})
 
 	if !skipCleanup {
@@ -78,7 +80,8 @@ func dumpSpecResourcesAndCleanup(ctx context.Context, specName string, clusterPr
 		// that cluster variable is not set even if the cluster exists, so we are calling DeleteAllClustersAndWait
 		// instead of DeleteClusterAndWait
 		framework.DeleteAllClustersAndWait(ctx, framework.DeleteAllClustersAndWaitInput{
-			Client:    clusterProxy.GetClient(),
+			ClusterctlConfigPath: clusterctlConfigPath,
+			ClusterProxy: clusterProxy,
 			Namespace: namespace.Name,
 		}, intervalsGetter(specName, "wait-delete-cluster")...)
 

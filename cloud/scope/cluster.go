@@ -23,8 +23,9 @@ import (
 	"github.com/pkg/errors"
 
 	"k8s.io/klog/v2/klogr"
-	clusterv1 "sigs.k8s.io/cluster-api/api/v1beta1"
-	"sigs.k8s.io/cluster-api/util/patch"
+	clusterv1beta1 "sigs.k8s.io/cluster-api/api/core/v1beta1"
+	clusterv1beta2 "sigs.k8s.io/cluster-api/api/core/v1beta2"
+	"sigs.k8s.io/cluster-api/util/deprecated/v1beta1/patch"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	infrav1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1beta1"
@@ -35,7 +36,7 @@ type ClusterScopeParams struct {
 	DOClients
 	Client    client.Client
 	Logger    logr.Logger
-	Cluster   *clusterv1.Cluster
+	Cluster   *clusterv1beta2.Cluster
 	DOCluster *infrav1.DOCluster
 }
 
@@ -107,7 +108,7 @@ type ClusterScope struct {
 	patchHelper *patch.Helper
 
 	DOClients
-	Cluster   *clusterv1.Cluster
+	Cluster   *clusterv1beta2.Cluster
 	DOCluster *infrav1.DOCluster
 }
 
@@ -152,7 +153,7 @@ func (s *ClusterScope) SetControlPlaneDNSRecordReady(ready bool) {
 }
 
 // SetControlPlaneEndpoint sets the DOCluster status APIEndpoints.
-func (s *ClusterScope) SetControlPlaneEndpoint(apiEndpoint clusterv1.APIEndpoint) {
+func (s *ClusterScope) SetControlPlaneEndpoint(apiEndpoint clusterv1beta1.APIEndpoint) {
 	s.DOCluster.Spec.ControlPlaneEndpoint = apiEndpoint
 }
 
