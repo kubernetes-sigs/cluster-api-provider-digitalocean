@@ -35,7 +35,7 @@ import (
 	"k8s.io/client-go/tools/leaderelection/resourcelock"
 	cgrecord "k8s.io/client-go/tools/record"
 	"k8s.io/klog/v2"
-	clusterv1 "sigs.k8s.io/cluster-api/api/core/v1beta2"
+	clusterv1beta2 "sigs.k8s.io/cluster-api/api/core/v1beta2"
 	"sigs.k8s.io/cluster-api/util/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
@@ -66,7 +66,7 @@ func init() {
 	_ = clientgoscheme.AddToScheme(scheme)
 	_ = infrav1alpha4.AddToScheme(scheme)
 	_ = infrav1beta1.AddToScheme(scheme)
-	_ = clusterv1.AddToScheme(scheme)
+	_ = clusterv1beta2.AddToScheme(scheme)
 	// +kubebuilder:scaffold:scheme
 }
 

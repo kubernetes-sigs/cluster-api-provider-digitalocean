@@ -26,7 +26,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/record"
 
-	clusterv1 "sigs.k8s.io/cluster-api/api/core/v1beta2"
+	clusterv1beta2 "sigs.k8s.io/cluster-api/api/core/v1beta2"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -44,14 +44,14 @@ func setupScheme() (*runtime.Scheme, error) {
 	if err := infrav1.AddToScheme(scheme); err != nil {
 		return nil, err
 	}
-	if err := clusterv1.AddToScheme(scheme); err != nil {
+	if err := clusterv1beta2.AddToScheme(scheme); err != nil {
 		return nil, err
 	}
 	return scheme, nil
 }
 
-func newCluster(name string) *clusterv1.Cluster {
-	return &clusterv1.Cluster{
+func newCluster(name string) *clusterv1beta2.Cluster {
+	return &clusterv1beta2.Cluster{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: namespace,
@@ -59,11 +59,11 @@ func newCluster(name string) *clusterv1.Cluster {
 	}
 }
 
-func newMachine(clusterName, machineName string) *clusterv1.Machine {
-	return &clusterv1.Machine{
+func newMachine(clusterName, machineName string) *clusterv1beta2.Machine {
+	return &clusterv1beta2.Machine{
 		ObjectMeta: metav1.ObjectMeta{
 			Labels: map[string]string{
-				clusterv1.ClusterNameLabel: clusterName,
+				clusterv1beta2.ClusterNameLabel: clusterName,
 			},
 			Name:      machineName,
 			Namespace: namespace,
@@ -71,9 +71,9 @@ func newMachine(clusterName, machineName string) *clusterv1.Machine {
 	}
 }
 
-func newMachineWithInfrastructureRef(clusterName, machineName string) *clusterv1.Machine {
+func newMachineWithInfrastructureRef(clusterName, machineName string) *clusterv1beta2.Machine {
 	m := newMachine(clusterName, machineName)
-	m.Spec.InfrastructureRef = clusterv1.ContractVersionedObjectReference{
+	m.Spec.InfrastructureRef = clusterv1beta2.ContractVersionedObjectReference{
 		Kind: "DOMachine",
 		Name: machineName,
 	}
@@ -123,7 +123,7 @@ func TestDOMachineReconciler_DOClusterToDOMachines(t *testing.T) {
 						{
 							Name:       clusterName,
 							Kind:       "Cluster",
-							APIVersion: clusterv1.GroupVersion.String(),
+							APIVersion: clusterv1beta2.GroupVersion.String(),
 						},
 					},
 				},

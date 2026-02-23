@@ -32,7 +32,7 @@ import (
 	"sigs.k8s.io/cluster-api-provider-digitalocean/cloud/services/networking/mock_networking"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
-	clusterv1 "sigs.k8s.io/cluster-api/api/core/v1beta2"
+	clusterv1beta2 "sigs.k8s.io/cluster-api/api/core/v1beta2"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
@@ -46,7 +46,7 @@ var (
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 	utilruntime.Must(infrav1.AddToScheme(scheme))
-	utilruntime.Must(clusterv1.AddToScheme(scheme))
+	utilruntime.Must(clusterv1beta2.AddToScheme(scheme))
 }
 
 func TestService_GetLoadBalancer(t *testing.T) {
@@ -125,7 +125,7 @@ func TestService_GetLoadBalancer(t *testing.T) {
 			mlbalancer := mock_networking.NewMockLoadBalancersService(mctrl)
 			cscope, err := scope.NewClusterScope(scope.ClusterScopeParams{
 				Client:    fake.NewClientBuilder().WithScheme(scheme).Build(),
-				Cluster:   &clusterv1.Cluster{},
+				Cluster:   &clusterv1beta2.Cluster{},
 				DOCluster: &infrav1.DOCluster{},
 				DOClients: scope.DOClients{
 					LoadBalancers: mlbalancer,

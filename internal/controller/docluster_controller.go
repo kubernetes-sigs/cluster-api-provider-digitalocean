@@ -33,7 +33,7 @@ import (
 	dnsutil "sigs.k8s.io/cluster-api-provider-digitalocean/util/dns"
 	"sigs.k8s.io/cluster-api-provider-digitalocean/util/reconciler"
 	clusterv1beta1 "sigs.k8s.io/cluster-api/api/core/v1beta1"
-	clusterv1 "sigs.k8s.io/cluster-api/api/core/v1beta2"
+	clusterv1beta2 "sigs.k8s.io/cluster-api/api/core/v1beta2"
 	"sigs.k8s.io/cluster-api/util"
 	"sigs.k8s.io/cluster-api/util/annotations"
 	"sigs.k8s.io/cluster-api/util/predicates"
@@ -58,7 +58,7 @@ func (r *DOClusterReconciler) SetupWithManager(ctx context.Context, mgr ctrl.Man
 		For(&infrav1.DOCluster{}).
 		WithEventFilter(predicates.ResourceNotPaused(mgr.GetScheme(), ctrl.LoggerFrom(ctx))). // don't queue reconcile if resource is paused
 		Watches(
-			&clusterv1.Cluster{},
+			&clusterv1beta2.Cluster{},
 			handler.EnqueueRequestsFromMapFunc(util.ClusterToInfrastructureMapFunc(ctx, infrav1.GroupVersion.WithKind("DOCluster"), mgr.GetClient(), &infrav1.DOCluster{})),
 			builder.WithPredicates(predicates.ClusterUnpaused(mgr.GetScheme(), ctrl.LoggerFrom(ctx))),
 		).
