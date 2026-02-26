@@ -17,12 +17,13 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-
 REPO_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 KUBECTL=$REPO_ROOT/hack/tools/bin/kubectl
 
 # desired kind cluster name; default is "capdo"
 KIND_CLUSTER_NAME="${KIND_CLUSTER_NAME:-capdo}"
+# Note: Use available kindest/node image versions from https://hub.docker.com/r/kindest/node/tags
+KUBERNETES_VERSION="${KUBERNETES_VERSION:-v1.31.14}"
 
 if [[ "$(kind get clusters)" =~ .*"${KIND_CLUSTER_NAME}".* ]]; then
   echo "cluster already exists, moving on"
@@ -39,7 +40,7 @@ if [ "${running}" != 'true' ]; then
 fi
 
 # create a cluster with the local registry enabled in containerd
-cat <<EOF | kind create cluster --name "${KIND_CLUSTER_NAME}" --config=-
+cat <<EOF | kind create cluster --name "${KIND_CLUSTER_NAME}" --image "kindest/node:${KUBERNETES_VERSION}" --config=-
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
 containerdConfigPatches:
