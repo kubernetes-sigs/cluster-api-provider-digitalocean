@@ -100,7 +100,7 @@ def validate_auth():
 
 tilt_helper_dockerfile_header = """
 # Tilt image
-FROM golang:1.20 as tilt-helper
+FROM golang:1.23.6 as tilt-helper
 # Support live reloading with Tilt
 RUN wget --output-document /restart.sh --quiet https://raw.githubusercontent.com/windmilleng/rerun-process-wrapper/master/restart.sh  && \
     wget --output-document /start.sh --quiet https://raw.githubusercontent.com/windmilleng/rerun-process-wrapper/master/start.sh && \
@@ -109,10 +109,13 @@ RUN wget --output-document /restart.sh --quiet https://raw.githubusercontent.com
 
 tilt_dockerfile_header = """
 FROM gcr.io/distroless/base:debug as tilt
-WORKDIR /
+WORKDIR /app
 COPY --from=tilt-helper /start.sh .
 COPY --from=tilt-helper /restart.sh .
 COPY manager .
+RUN ["/busybox/chmod", "+x", "/app/start.sh", "/app/restart.sh", "/app/manager"]
+RUN ["/busybox/chown", "-R", "65532:65532", "/app"]
+USER 65532:65532
 """
 
 # Build CAPDO and add feature gates
@@ -135,8 +138,8 @@ def capdo():
     # Set up a local_resource build of the provider's manager binary.
     local_resource(
         "manager",
-        cmd = 'mkdir -p .tiltbuild;CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags \'-extldflags "-static"\' -o .tiltbuild/manager',
-        deps = ["api", "cloud", "config", "controllers", "exp", "feature", "pkg", "go.mod", "go.sum", "main.go"]
+        cmd = 'mkdir -p .tiltbuild;CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags \'-extldflags "-static"\' -o .tiltbuild/manager ./cmd',
+        deps = ["api", "cloud", "config", "internal", "cmd", "util", "version", "go.mod", "go.sum"]
     )
 
     dockerfile_contents = "\n".join([
@@ -144,7 +147,7 @@ def capdo():
         tilt_dockerfile_header,
     ])
 
-    entrypoint = ["sh", "/start.sh", "/manager"]
+    entrypoint = ["sh", "/app/start.sh", "/app/manager"]
     extra_args = settings.get("extra_args")
     if extra_args:
         entrypoint.extend(extra_args)
@@ -159,8 +162,8 @@ def capdo():
         entrypoint = entrypoint,
         only = "manager",
         live_update = [
-            sync(".tiltbuild/manager", "/manager"),
-            run("sh /restart.sh"),
+            sync(".tiltbuild/manager", "/app/manager"),
+            run("sh /app/restart.sh"),
         ],
         ignore = ["templates"]
     )
@@ -203,7 +206,7 @@ include_user_tilt_files()
 load("ext://cert_manager", "deploy_cert_manager")
 
 if settings.get("deploy_cert_manager"):
-    deploy_cert_manager()
+    deploy_cert_manager(version=settings.get("cert_manager_version"))
 
 deploy_capi()
 
