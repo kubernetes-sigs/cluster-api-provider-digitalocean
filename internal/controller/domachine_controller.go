@@ -260,6 +260,14 @@ func (r *DOMachineReconciler) reconcile(ctx context.Context, machineScope *scope
 		return result, fmt.Errorf("failed to reconcile volumes: %w", err)
 	}
 
+	// Once a droplet is marked active, it should never switch to a different
+	// state again (other than archived, which is handled by the delete
+	// reconciler). Return early in this case to skip doing unnecessary API
+	// requests.
+	if machineScope.IsReady() {
+		return reconcile.Result{}, nil
+	}
+
 	computesvc := computes.NewService(ctx, clusterScope)
 	droplet, err := computesvc.GetDroplet(machineScope.GetInstanceID())
 	if err != nil {
