@@ -215,6 +215,22 @@ func (mr *MockDropletsServiceMockRecorder) List(arg0, arg1 any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockDropletsService)(nil).List), arg0, arg1)
 }
 
+// ListAssociatedResourcesForDeletion mocks base method.
+func (m *MockDropletsService) ListAssociatedResourcesForDeletion(arg0 context.Context, arg1 int) (*godo.DropletAssociatedResources, *godo.Response, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListAssociatedResourcesForDeletion", arg0, arg1)
+	ret0, _ := ret[0].(*godo.DropletAssociatedResources)
+	ret1, _ := ret[1].(*godo.Response)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// ListAssociatedResourcesForDeletion indicates an expected call of ListAssociatedResourcesForDeletion.
+func (mr *MockDropletsServiceMockRecorder) ListAssociatedResourcesForDeletion(arg0, arg1 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListAssociatedResourcesForDeletion", reflect.TypeOf((*MockDropletsService)(nil).ListAssociatedResourcesForDeletion), arg0, arg1)
+}
+
 // ListBackupPolicies mocks base method.
 func (m *MockDropletsService) ListBackupPolicies(arg0 context.Context, arg1 *godo.ListOptions) (map[int]*godo.DropletBackupPolicy, *godo.Response, error) {
 	m.ctrl.T.Helper()
