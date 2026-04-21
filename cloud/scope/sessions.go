@@ -18,6 +18,7 @@ package scope
 
 import (
 	"context"
+	"fmt"
 	"os"
 
 	"github.com/digitalocean/godo"
@@ -49,6 +50,13 @@ func (c *DOClients) Session() (*godo.Client, error) {
 		AccessToken: accessToken,
 	})
 
-	client := godo.NewClient(oc)
+	var opts []godo.ClientOpt
+	if apiURL := os.Getenv("DIGITALOCEAN_API_URL"); apiURL != "" {
+		opts = append(opts, godo.SetBaseURL(apiURL))
+	}
+	client, err := godo.New(oc, opts...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create godo client: %s", err)
+	}
 	return client, nil
 }
