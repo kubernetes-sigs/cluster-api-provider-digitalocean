@@ -71,29 +71,31 @@ func init() {
 }
 
 var (
-	leaderElectionLeaseDuration time.Duration
-	leaderElectionRenewDeadline time.Duration
-	leaderElectionRetryPeriod   time.Duration
-	syncPeriod                  time.Duration
-	reconcileTimeout            time.Duration
-	leaderElectionNamespace     string
-	healthAddr                  string
-	watchNamespace              string
-	profilerAddress             string
-	webhookPort                 int
-	enableLeaderElection        bool
-	restConfigQPS               float32
-	restConfigBurst             int
-	metricsAddr                 string
-	probeAddr                   string
-	webhookCertPath             string
-	metricsCertPath             string
-	metricsCertName             string
-	metricsCertKey              string
-	secureMetrics               bool
-	webhookCertName             string
-	webhookCertKey              string
-	tlsOpts                     []func(*tls.Config)
+	leaderElectionLeaseDuration    time.Duration
+	leaderElectionRenewDeadline    time.Duration
+	leaderElectionRetryPeriod      time.Duration
+	syncPeriod                     time.Duration
+	reconcileTimeout               time.Duration
+	leaderElectionNamespace        string
+	healthAddr                     string
+	watchNamespace                 string
+	profilerAddress                string
+	webhookPort                    int
+	enableLeaderElection           bool
+	restConfigQPS                  float32
+	restConfigBurst                int
+	metricsAddr                    string
+	probeAddr                      string
+	webhookCertPath                string
+	metricsCertPath                string
+	metricsCertName                string
+	metricsCertKey                 string
+	secureMetrics                  bool
+	webhookCertName                string
+	webhookCertKey                 string
+	tlsOpts                        []func(*tls.Config)
+	maxConcurrentReconcilesCluster int
+	maxConcurrentReconcilesMachine int
 )
 
 func initFlags(fs *pflag.FlagSet) {
@@ -119,6 +121,8 @@ func initFlags(fs *pflag.FlagSet) {
 	fs.BoolVar(&secureMetrics, "metrics-secure", true, "If set, the metrics endpoint is served securely via HTTPS. Use --metrics-secure=false to use HTTP instead.")
 	fs.StringVar(&webhookCertName, "webhook-cert-name", "tls.crt", "The name of the webhook certificate file.")
 	fs.StringVar(&webhookCertKey, "webhook-cert-key", "tls.key", "The name of the webhook key file.")
+	fs.IntVar(&maxConcurrentReconcilesCluster, "max-concurrent-reconciles-cluster", 2, "Maximum concurrent reconciles for clusters")
+	fs.IntVar(&maxConcurrentReconcilesMachine, "max-concurrent-reconciles-machine", 5, "Maximum concurrent reconciles for machines")
 }
 
 // Add RBAC for the authorized diagnostics endpoint.
@@ -280,7 +284,9 @@ func main() {
 		Client:           mgr.GetClient(),
 		Recorder:         mgr.GetEventRecorderFor("docluster-controller"),
 		ReconcileTimeout: reconcileTimeout,
-	}).SetupWithManager(ctx, mgr, controller.Options{}); err != nil {
+	}).SetupWithManager(ctx, mgr, controller.Options{
+		MaxConcurrentReconciles: maxConcurrentReconcilesCluster,
+	}); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "DOCluster")
 		os.Exit(1)
 	}
@@ -288,7 +294,9 @@ func main() {
 		Client:           mgr.GetClient(),
 		Recorder:         mgr.GetEventRecorderFor("domachine-controller"),
 		ReconcileTimeout: reconcileTimeout,
-	}).SetupWithManager(ctx, mgr, controller.Options{}); err != nil {
+	}).SetupWithManager(ctx, mgr, controller.Options{
+		MaxConcurrentReconciles: maxConcurrentReconcilesMachine,
+	}); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "DOMachine")
 		os.Exit(1)
 	}
