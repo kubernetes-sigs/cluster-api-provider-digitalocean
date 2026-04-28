@@ -33,7 +33,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
 	clusterv1beta2 "sigs.k8s.io/cluster-api/api/core/v1beta2"
@@ -102,7 +102,7 @@ func newCreateDropletArgs(customization *CreateDropletCustomization) *CreateDrop
 			},
 			Spec: clusterv1beta2.MachineSpec{
 				Bootstrap: clusterv1beta2.Bootstrap{
-					DataSecretName: pointer.String("bootstrap-data"),
+					DataSecretName: ptr.To("bootstrap-data"),
 				},
 			},
 		},
@@ -208,7 +208,7 @@ func TestService_GetDroplet(t *testing.T) {
 			args: args{
 				id: "",
 			},
-			expect:  func(md *mock_computesenhanced.MockDropletsServiceMockRecorder) {},
+			expect:  func(_ *mock_computesenhanced.MockDropletsServiceMockRecorder) {},
 			wantErr: false,
 		},
 		{
@@ -216,7 +216,7 @@ func TestService_GetDroplet(t *testing.T) {
 			args: args{
 				id: "aaa",
 			},
-			expect:  func(md *mock_computesenhanced.MockDropletsServiceMockRecorder) {},
+			expect:  func(_ *mock_computesenhanced.MockDropletsServiceMockRecorder) {},
 			wantErr: true,
 		},
 		{
@@ -295,13 +295,6 @@ func TestService_CreateDroplet(t *testing.T) {
 	mctrl := gomock.NewController(t)
 	defer mctrl.Finish()
 
-	type args struct {
-		cluster   *clusterv1beta2.Cluster
-		docluster *infrav1.DOCluster
-		machine   *clusterv1beta2.Machine
-		domachine *infrav1.DOMachine
-	}
-
 	tests := []struct {
 		name    string
 		args    *CreateDropletArgs
@@ -312,21 +305,20 @@ func TestService_CreateDroplet(t *testing.T) {
 		{
 			name: "default",
 			args: newCreateDropletArgs(nil),
-			expect: func(mdis *mock_computesenhanced.MockDropletsServiceMockRecorder, mk *mock_computes.MockKeysServiceMockRecorder, mi *mock_computes.MockImagesServiceMockRecorder, ms *mock_computes.MockStorageServiceMockRecorder) {
+			expect: func(mdis *mock_computesenhanced.MockDropletsServiceMockRecorder, _ *mock_computes.MockKeysServiceMockRecorder, _ *mock_computes.MockImagesServiceMockRecorder, _ *mock_computes.MockStorageServiceMockRecorder) {
 				args := &CreateDropletRequestArgs{
 					PrivateNetworking: true,
 				}
 				mdis.CreateWithAffinity(gomock.Any(), newCreateDropletRequest(args), "").Return(&computesenhanced.DropletCreateWithAntiAffinityResponse{
 					Droplet: &godo.Droplet{ID: 123456},
 				}, nil)
-
 			},
 			want: &godo.Droplet{ID: 123456},
 		},
 		{
 			name: "failed creating droplet (should return an error)",
 			args: newCreateDropletArgs(nil),
-			expect: func(mdis *mock_computesenhanced.MockDropletsServiceMockRecorder, mk *mock_computes.MockKeysServiceMockRecorder, mi *mock_computes.MockImagesServiceMockRecorder, ms *mock_computes.MockStorageServiceMockRecorder) {
+			expect: func(mdis *mock_computesenhanced.MockDropletsServiceMockRecorder, _ *mock_computes.MockKeysServiceMockRecorder, _ *mock_computes.MockImagesServiceMockRecorder, _ *mock_computes.MockStorageServiceMockRecorder) {
 				args := &CreateDropletRequestArgs{
 					PrivateNetworking: true,
 				}
@@ -339,10 +331,10 @@ func TestService_CreateDroplet(t *testing.T) {
 			args: newCreateDropletArgs(&CreateDropletCustomization{
 				customMachineSpec: &clusterv1beta2.MachineSpec{
 					Bootstrap: clusterv1beta2.Bootstrap{
-						DataSecretName: pointer.String("no-exist-bootstrap-data"),
+						DataSecretName: ptr.To("no-exist-bootstrap-data"),
 					}},
 			}),
-			expect: func(mdis *mock_computesenhanced.MockDropletsServiceMockRecorder, mk *mock_computes.MockKeysServiceMockRecorder, mi *mock_computes.MockImagesServiceMockRecorder, ms *mock_computes.MockStorageServiceMockRecorder) {
+			expect: func(_ *mock_computesenhanced.MockDropletsServiceMockRecorder, _ *mock_computes.MockKeysServiceMockRecorder, _ *mock_computes.MockImagesServiceMockRecorder, _ *mock_computes.MockStorageServiceMockRecorder) {
 			},
 			wantErr: true,
 		},
@@ -357,9 +349,9 @@ func TestService_CreateDroplet(t *testing.T) {
 					},
 				},
 			}),
-			expect: func(mdis *mock_computesenhanced.MockDropletsServiceMockRecorder, mk *mock_computes.MockKeysServiceMockRecorder, mi *mock_computes.MockImagesServiceMockRecorder, ms *mock_computes.MockStorageServiceMockRecorder) {
-			mk.GetByFingerprint(gomock.Any(), "12:f8:7e:78:61:b4:bf:e2:de:24:15:96:4e:d4:72:53").Return(&godo.Key{ID: 12345, Fingerprint: "12:f8:7e:78:61:b4:bf:e2:de:24:15:96:4e:d4:72:53"}, nil, nil)
-			args := &CreateDropletRequestArgs{
+			expect: func(mdis *mock_computesenhanced.MockDropletsServiceMockRecorder, mk *mock_computes.MockKeysServiceMockRecorder, _ *mock_computes.MockImagesServiceMockRecorder, _ *mock_computes.MockStorageServiceMockRecorder) {
+				mk.GetByFingerprint(gomock.Any(), "12:f8:7e:78:61:b4:bf:e2:de:24:15:96:4e:d4:72:53").Return(&godo.Key{ID: 12345, Fingerprint: "12:f8:7e:78:61:b4:bf:e2:de:24:15:96:4e:d4:72:53"}, nil, nil)
+				args := &CreateDropletRequestArgs{
 					PrivateNetworking: true,
 					SSHKeys: []godo.DropletCreateSSHKey{
 						{
@@ -383,10 +375,9 @@ func TestService_CreateDroplet(t *testing.T) {
 					Size:  "s-2vcpu-2gb",
 				},
 			}),
-			expect: func(mdis *mock_computesenhanced.MockDropletsServiceMockRecorder, mk *mock_computes.MockKeysServiceMockRecorder, mi *mock_computes.MockImagesServiceMockRecorder, ms *mock_computes.MockStorageServiceMockRecorder) {
-
-			mi.GetBySlug(gomock.Any(), "capi-image").Return(&godo.Image{ID: 63624555}, nil, nil)
-			args := &CreateDropletRequestArgs{
+			expect: func(mdis *mock_computesenhanced.MockDropletsServiceMockRecorder, _ *mock_computes.MockKeysServiceMockRecorder, mi *mock_computes.MockImagesServiceMockRecorder, _ *mock_computes.MockStorageServiceMockRecorder) {
+				mi.GetBySlug(gomock.Any(), "capi-image").Return(&godo.Image{ID: 63624555}, nil, nil)
+				args := &CreateDropletRequestArgs{
 					PrivateNetworking: true,
 				}
 				mdis.CreateWithAffinity(gomock.Any(), newCreateDropletRequest(args), "").Return(&computesenhanced.DropletCreateWithAntiAffinityResponse{
@@ -403,8 +394,7 @@ func TestService_CreateDroplet(t *testing.T) {
 					Size:  "s-2vcpu-2gb",
 				},
 			}),
-			expect: func(mdis *mock_computesenhanced.MockDropletsServiceMockRecorder, mk *mock_computes.MockKeysServiceMockRecorder, mi *mock_computes.MockImagesServiceMockRecorder, ms *mock_computes.MockStorageServiceMockRecorder) {
-
+			expect: func(_ *mock_computesenhanced.MockDropletsServiceMockRecorder, _ *mock_computes.MockKeysServiceMockRecorder, mi *mock_computes.MockImagesServiceMockRecorder, _ *mock_computes.MockStorageServiceMockRecorder) {
 				mi.GetBySlug(gomock.Any(), "capi-image").Return(nil, nil, errors.New("error getting image"))
 			},
 			wantErr: true,
@@ -419,7 +409,7 @@ func TestService_CreateDroplet(t *testing.T) {
 					},
 				},
 			}),
-			expect: func(mdis *mock_computesenhanced.MockDropletsServiceMockRecorder, mk *mock_computes.MockKeysServiceMockRecorder, mi *mock_computes.MockImagesServiceMockRecorder, ms *mock_computes.MockStorageServiceMockRecorder) {
+			expect: func(_ *mock_computesenhanced.MockDropletsServiceMockRecorder, mk *mock_computes.MockKeysServiceMockRecorder, _ *mock_computes.MockImagesServiceMockRecorder, _ *mock_computes.MockStorageServiceMockRecorder) {
 				mk.GetByFingerprint(gomock.Any(), "12:f8:7e:78:61:b4:bf:e2:de:24:15:96:4e:d4:72:53").Return(&godo.Key{}, nil, errors.New("error getting keys"))
 			},
 			wantErr: true,
@@ -440,9 +430,9 @@ func TestService_CreateDroplet(t *testing.T) {
 					},
 				},
 			}),
-			expect: func(mdis *mock_computesenhanced.MockDropletsServiceMockRecorder, mk *mock_computes.MockKeysServiceMockRecorder, mi *mock_computes.MockImagesServiceMockRecorder, ms *mock_computes.MockStorageServiceMockRecorder) {
-			ms.ListVolumes(gomock.Any(), &godo.ListVolumeParams{Name: "capdo-test-control-plane-nkkxn-etcd", Region: "nyc1"}).Return([]godo.Volume{{ID: "1234"}}, nil, nil)
-			args := &CreateDropletRequestArgs{
+			expect: func(mdis *mock_computesenhanced.MockDropletsServiceMockRecorder, _ *mock_computes.MockKeysServiceMockRecorder, _ *mock_computes.MockImagesServiceMockRecorder, ms *mock_computes.MockStorageServiceMockRecorder) {
+				ms.ListVolumes(gomock.Any(), &godo.ListVolumeParams{Name: "capdo-test-control-plane-nkkxn-etcd", Region: "nyc1"}).Return([]godo.Volume{{ID: "1234"}}, nil, nil)
+				args := &CreateDropletRequestArgs{
 					PrivateNetworking: true,
 					Volumes: []godo.DropletCreateVolume{
 						{
@@ -454,7 +444,6 @@ func TestService_CreateDroplet(t *testing.T) {
 				mdis.CreateWithAffinity(gomock.Any(), r, "").Return(&computesenhanced.DropletCreateWithAntiAffinityResponse{
 					Droplet: &godo.Droplet{ID: 123456},
 				}, nil)
-
 			},
 			want: &godo.Droplet{ID: 123456},
 		},
@@ -474,7 +463,7 @@ func TestService_CreateDroplet(t *testing.T) {
 					},
 				},
 			}),
-			expect: func(mdis *mock_computesenhanced.MockDropletsServiceMockRecorder, mk *mock_computes.MockKeysServiceMockRecorder, mi *mock_computes.MockImagesServiceMockRecorder, ms *mock_computes.MockStorageServiceMockRecorder) {
+			expect: func(_ *mock_computesenhanced.MockDropletsServiceMockRecorder, _ *mock_computes.MockKeysServiceMockRecorder, _ *mock_computes.MockImagesServiceMockRecorder, ms *mock_computes.MockStorageServiceMockRecorder) {
 				ms.ListVolumes(gomock.Any(), &godo.ListVolumeParams{Name: "capdo-test-control-plane-nkkxn-etcd", Region: "nyc1"}).Return([]godo.Volume{}, nil, nil)
 			},
 			wantErr: true,
@@ -495,8 +484,7 @@ func TestService_CreateDroplet(t *testing.T) {
 					},
 				},
 			}),
-			expect: func(mdis *mock_computesenhanced.MockDropletsServiceMockRecorder, mk *mock_computes.MockKeysServiceMockRecorder, mi *mock_computes.MockImagesServiceMockRecorder, ms *mock_computes.MockStorageServiceMockRecorder) {
-
+			expect: func(_ *mock_computesenhanced.MockDropletsServiceMockRecorder, _ *mock_computes.MockKeysServiceMockRecorder, _ *mock_computes.MockImagesServiceMockRecorder, ms *mock_computes.MockStorageServiceMockRecorder) {
 				ms.ListVolumes(gomock.Any(), &godo.ListVolumeParams{Name: "capdo-test-control-plane-nkkxn-etcd", Region: "nyc1"}).Return([]godo.Volume{}, nil, errors.New("error getting volume"))
 			},
 			wantErr: true,
@@ -511,18 +499,18 @@ func TestService_CreateDroplet(t *testing.T) {
 				},
 				enableAntiAffinity: true,
 			}),
-		expect: func(mdis *mock_computesenhanced.MockDropletsServiceMockRecorder, mk *mock_computes.MockKeysServiceMockRecorder, mi *mock_computes.MockImagesServiceMockRecorder, ms *mock_computes.MockStorageServiceMockRecorder) {
-			args := &CreateDropletRequestArgs{
+			expect: func(mdis *mock_computesenhanced.MockDropletsServiceMockRecorder, _ *mock_computes.MockKeysServiceMockRecorder, _ *mock_computes.MockImagesServiceMockRecorder, _ *mock_computes.MockStorageServiceMockRecorder) {
+				args := &CreateDropletRequestArgs{
 					PrivateNetworking: true,
 				}
-			mdis.CreateWithAffinity(gomock.Any(), newCreateDropletRequest(args), "capdo-test-md-0").Return(&computesenhanced.DropletCreateWithAntiAffinityResponse{
-				Droplet: &godo.Droplet{ID: 123456},
-			}, nil)
+				mdis.CreateWithAffinity(gomock.Any(), newCreateDropletRequest(args), "capdo-test-md-0").Return(&computesenhanced.DropletCreateWithAntiAffinityResponse{
+					Droplet: &godo.Droplet{ID: 123456},
+				}, nil)
+			},
+			want: &godo.Droplet{ID: 123456},
 		},
-		want: &godo.Droplet{ID: 123456},
-	},
-	{
-		name: "with HV affinity enabled - missing cluster name affinity label (control plane node)",
+		{
+			name: "with HV affinity enabled - missing cluster name affinity label (control plane node)",
 			args: newCreateDropletArgs(&CreateDropletCustomization{
 				customMachineLabels: map[string]string{
 					"cluster.x-k8s.io/control-plane":      "true",
@@ -530,7 +518,7 @@ func TestService_CreateDroplet(t *testing.T) {
 				},
 				enableAntiAffinity: true,
 			}),
-			expect: func(mdis *mock_computesenhanced.MockDropletsServiceMockRecorder, mk *mock_computes.MockKeysServiceMockRecorder, mi *mock_computes.MockImagesServiceMockRecorder, ms *mock_computes.MockStorageServiceMockRecorder) {
+			expect: func(_ *mock_computesenhanced.MockDropletsServiceMockRecorder, _ *mock_computes.MockKeysServiceMockRecorder, _ *mock_computes.MockImagesServiceMockRecorder, _ *mock_computes.MockStorageServiceMockRecorder) {
 			},
 			wantErr: true,
 		},
@@ -544,7 +532,7 @@ func TestService_CreateDroplet(t *testing.T) {
 				},
 				enableAntiAffinity: true,
 			}),
-			expect: func(mdis *mock_computesenhanced.MockDropletsServiceMockRecorder, mk *mock_computes.MockKeysServiceMockRecorder, mi *mock_computes.MockImagesServiceMockRecorder, ms *mock_computes.MockStorageServiceMockRecorder) {
+			expect: func(mdis *mock_computesenhanced.MockDropletsServiceMockRecorder, _ *mock_computes.MockKeysServiceMockRecorder, _ *mock_computes.MockImagesServiceMockRecorder, _ *mock_computes.MockStorageServiceMockRecorder) {
 				args := &CreateDropletRequestArgs{
 					PrivateNetworking: true,
 				}
@@ -563,10 +551,8 @@ func TestService_CreateDroplet(t *testing.T) {
 				},
 				enableAntiAffinity: true,
 			}),
-			expect: func(mdis *mock_computesenhanced.MockDropletsServiceMockRecorder, mk *mock_computes.MockKeysServiceMockRecorder, mi *mock_computes.MockImagesServiceMockRecorder, ms *mock_computes.MockStorageServiceMockRecorder) {
-
+			expect: func(_ *mock_computesenhanced.MockDropletsServiceMockRecorder, _ *mock_computes.MockKeysServiceMockRecorder, _ *mock_computes.MockImagesServiceMockRecorder, _ *mock_computes.MockStorageServiceMockRecorder) {
 			},
-
 			wantErr: true,
 		},
 		{
@@ -578,7 +564,7 @@ func TestService_CreateDroplet(t *testing.T) {
 				},
 				enableAntiAffinity: true,
 			}),
-			expect: func(mdis *mock_computesenhanced.MockDropletsServiceMockRecorder, mk *mock_computes.MockKeysServiceMockRecorder, mi *mock_computes.MockImagesServiceMockRecorder, ms *mock_computes.MockStorageServiceMockRecorder) {
+			expect: func(_ *mock_computesenhanced.MockDropletsServiceMockRecorder, _ *mock_computes.MockKeysServiceMockRecorder, _ *mock_computes.MockImagesServiceMockRecorder, _ *mock_computes.MockStorageServiceMockRecorder) {
 			},
 			wantErr: true,
 		},
@@ -672,7 +658,7 @@ func TestService_DeleteDroplet(t *testing.T) {
 			args: args{
 				"",
 			},
-			expect:  func(md *mock_computesenhanced.MockDropletsServiceMockRecorder) {},
+			expect:  func(_ *mock_computesenhanced.MockDropletsServiceMockRecorder) {},
 			wantErr: true,
 		},
 		{
@@ -681,7 +667,7 @@ func TestService_DeleteDroplet(t *testing.T) {
 				id: "aaa",
 			},
 			wantErr: true,
-			expect:  func(md *mock_computesenhanced.MockDropletsServiceMockRecorder) {},
+			expect:  func(_ *mock_computesenhanced.MockDropletsServiceMockRecorder) {},
 		},
 		{
 			name: "failed deleting droplet (should return an error)",
