@@ -151,7 +151,7 @@ func (s *Service) CreateDroplet(scope *scope.MachineScope) (*godo.Droplet, error
 			return nil, errors.Wrap(err, "failed constructing anti affinity key")
 		}
 	}
-	resp, err := s.scope.DOClients.Droplets.CreateWithAffinity(s.ctx, request, antiAffinityKey)
+	resp, err := s.scope.Droplets.CreateWithAffinity(s.ctx, request, antiAffinityKey)
 
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create new droplet with affinity set")

@@ -63,8 +63,8 @@ func NewClusterScope(params ClusterScopeParams) (*ClusterScope, error) {
 		params.Actions = session.Actions
 	}
 
-	if params.DOClients.Droplets == nil {
-		params.DOClients.Droplets = computesenhanced.NewDropletService(session, session.Droplets)
+	if params.Droplets == nil {
+		params.Droplets = computesenhanced.NewDropletService(session, session.Droplets)
 	}
 
 	if params.Storage == nil {
