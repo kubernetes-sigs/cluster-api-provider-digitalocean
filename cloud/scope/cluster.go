@@ -29,6 +29,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	infrav1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1beta1"
+	"sigs.k8s.io/cluster-api-provider-digitalocean/cloud/services/computesenhanced"
 )
 
 // ClusterScopeParams defines the input parameters used to create a new Scope.
@@ -62,8 +63,8 @@ func NewClusterScope(params ClusterScopeParams) (*ClusterScope, error) {
 		params.Actions = session.Actions
 	}
 
-	if params.Droplets == nil {
-		params.Droplets = session.Droplets
+	if params.DOClients.Droplets == nil {
+		params.DOClients.Droplets = computesenhanced.NewDropletService(session, session.Droplets)
 	}
 
 	if params.Storage == nil {

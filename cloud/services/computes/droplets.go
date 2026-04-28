@@ -30,6 +30,32 @@ import (
 	"sigs.k8s.io/cluster-api-provider-digitalocean/cloud/scope"
 )
 
+const clusterNameLabel = "cluster.x-k8s.io/cluster-name"
+const deploymentNameLabel = "cluster.x-k8s.io/deployment-name"
+const controlPlaneNameLabel = "cluster.x-k8s.io/control-plane-name"
+
+func constructAntiAffinityKey(labels map[string]string) (string, error) {
+	clusterName, ok := labels[clusterNameLabel]
+	if !ok {
+		// Both machine objects worker or CP should have a cluster name set - if not error out
+		return "", fmt.Errorf("%s label not set on Machine CRD needed for affinity group", clusterNameLabel)
+	}
+
+	controlPlaneName, isControlPlane := labels[controlPlaneNameLabel]
+	if isControlPlane {
+		// If a control plane label is found we can construct affinity from {clusterName}-{controlPlaneName} and
+		// finish here
+		return fmt.Sprintf("%s-%s", clusterName, controlPlaneName), nil
+	}
+
+	deploymentName, ok := labels[deploymentNameLabel]
+	if !ok {
+		// Machine must be a worker therefore throw missing label error
+		return "", fmt.Errorf("%s label not set on Machine CRD needed for affinity group", deploymentNameLabel)
+	}
+	return fmt.Sprintf("%s-%s", clusterName, deploymentName), nil
+}
+
 // GetDroplet get a droplet instance.
 func (s *Service) GetDroplet(id string) (*godo.Droplet, error) {
 	if id == "" {
@@ -118,12 +144,19 @@ func (s *Service) CreateDroplet(scope *scope.MachineScope) (*godo.Droplet, error
 		Additional:  scope.AdditionalTags(),
 	})
 
-	droplet, _, err := s.scope.Droplets.Create(s.ctx, request)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to create new droplet")
+	antiAffinityKey := ""
+	if scope.EnableAntiAffinity {
+		antiAffinityKey, err = constructAntiAffinityKey(scope.Machine.Labels)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed constructing anti affinity key")
+		}
 	}
+	resp, err := s.scope.DOClients.Droplets.CreateWithAffinity(s.ctx, request, antiAffinityKey)
 
-	return droplet, nil
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to create new droplet with affinity set")
+	}
+	return resp.Droplet, nil
 }
 
 // DeleteDroplet delete a droplet instance.

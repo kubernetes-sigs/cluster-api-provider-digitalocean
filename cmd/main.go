@@ -82,6 +82,7 @@ var (
 	profilerAddress                string
 	webhookPort                    int
 	enableLeaderElection           bool
+	enableAntiAffinity             bool
 	restConfigQPS                  float32
 	restConfigBurst                int
 	metricsAddr                    string
@@ -104,6 +105,7 @@ func initFlags(fs *pflag.FlagSet) {
 	fs.DurationVar(&leaderElectionLeaseDuration, "leader-elect-lease-duration", 15*time.Second, "Interval at which non-leader candidates will wait to force acquire leadership (duration string)")
 	fs.DurationVar(&leaderElectionRenewDeadline, "leader-elect-renew-deadline", 10*time.Second, "Duration that the leading controller manager will retry refreshing leadership before giving up (duration string)")
 	fs.DurationVar(&leaderElectionRetryPeriod, "leader-elect-retry-period", 2*time.Second, "Duration the LeaderElector clients should wait between tries of actions (duration string)")
+	fs.BoolVar(&enableAntiAffinity, "enable-anti-affinity", false, "Set anti-affinity placement groups when creating droplets. If this is set to true droplets are configured for placement on different hypervisors.")
 	fs.StringVar(&healthAddr, "health-addr", ":9440", "The address the health endpoint binds to.")
 	fs.StringVar(&watchNamespace, "namespace", "", "Namespace that the controller watches to reconcile cluster-api objects. If unspecified, the controller watches for cluster-api objects across all namespaces.")
 	fs.StringVar(&profilerAddress, "profiler-address", "", "Bind address to expose the pprof profiler (e.g. localhost:6060)")
@@ -291,9 +293,10 @@ func main() {
 		os.Exit(1)
 	}
 	if err = (&capdocontroller.DOMachineReconciler{
-		Client:           mgr.GetClient(),
-		Recorder:         mgr.GetEventRecorderFor("domachine-controller"),
-		ReconcileTimeout: reconcileTimeout,
+		Client:             mgr.GetClient(),
+		Recorder:           mgr.GetEventRecorderFor("domachine-controller"),
+		ReconcileTimeout:   reconcileTimeout,
+		EnableAntiAffinity: enableAntiAffinity,
 	}).SetupWithManager(ctx, mgr, controller.Options{
 		MaxConcurrentReconciles: maxConcurrentReconcilesMachine,
 	}); err != nil {

@@ -43,12 +43,13 @@ import (
 // MachineScopeParams defines the input parameters used to create a new MachineScope.
 type MachineScopeParams struct {
 	DOClients
-	Client    client.Client
-	Logger    logr.Logger
-	Cluster   *clusterv1beta2.Cluster
-	Machine   *clusterv1beta2.Machine
-	DOCluster *infrav1.DOCluster
-	DOMachine *infrav1.DOMachine
+	Client             client.Client
+	Logger             logr.Logger
+	Cluster            *clusterv1beta2.Cluster
+	Machine            *clusterv1beta2.Machine
+	DOCluster          *infrav1.DOCluster
+	DOMachine          *infrav1.DOMachine
+	EnableAntiAffinity bool
 }
 
 // NewMachineScope creates a new MachineScope from the supplied parameters.
@@ -80,13 +81,14 @@ func NewMachineScope(params MachineScopeParams) (*MachineScope, error) {
 		return nil, errors.Wrap(err, "failed to init patch helper")
 	}
 	return &MachineScope{
-		client:      params.Client,
-		Cluster:     params.Cluster,
-		Machine:     params.Machine,
-		DOCluster:   params.DOCluster,
-		DOMachine:   params.DOMachine,
-		Logger:      params.Logger,
-		patchHelper: helper,
+		client:             params.Client,
+		Cluster:            params.Cluster,
+		Machine:            params.Machine,
+		DOCluster:          params.DOCluster,
+		DOMachine:          params.DOMachine,
+		EnableAntiAffinity: params.EnableAntiAffinity,
+		Logger:             params.Logger,
+		patchHelper:        helper,
 	}, nil
 }
 
@@ -96,10 +98,11 @@ type MachineScope struct {
 	client      client.Client
 	patchHelper *patch.Helper
 
-	Cluster   *clusterv1beta2.Cluster
-	Machine   *clusterv1beta2.Machine
-	DOCluster *infrav1.DOCluster
-	DOMachine *infrav1.DOMachine
+	Cluster            *clusterv1beta2.Cluster
+	Machine            *clusterv1beta2.Machine
+	DOCluster          *infrav1.DOCluster
+	DOMachine          *infrav1.DOMachine
+	EnableAntiAffinity bool
 }
 
 // Close the MachineScope by updating the machine spec, machine status.
