@@ -19,12 +19,13 @@ package scope
 
 import (
 	"github.com/digitalocean/godo"
+	"sigs.k8s.io/cluster-api-provider-digitalocean/cloud/services/computesenhanced"
 )
 
 // DOClients hold all necessary clients to work with the DO API.
 type DOClients struct {
 	Actions       godo.ActionsService
-	Droplets      godo.DropletsService
+	Droplets      computesenhanced.DropletsService
 	Storage       godo.StorageService
 	Images        godo.ImagesService
 	Keys          godo.KeysService

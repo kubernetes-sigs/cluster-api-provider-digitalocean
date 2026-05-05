@@ -51,8 +51,9 @@ import (
 // DOMachineReconciler reconciles a DOMachine object.
 type DOMachineReconciler struct {
 	client.Client
-	Recorder         record.EventRecorder
-	ReconcileTimeout time.Duration
+	Recorder           record.EventRecorder
+	ReconcileTimeout   time.Duration
+	EnableAntiAffinity bool
 }
 
 func (r *DOMachineReconciler) SetupWithManager(ctx context.Context, mgr ctrl.Manager, options controller.Options) error {
@@ -186,12 +187,13 @@ func (r *DOMachineReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 	// Create the machine scope
 	machineScope, err := scope.NewMachineScope(scope.MachineScopeParams{
-		Logger:    log,
-		Client:    r.Client,
-		Cluster:   cluster,
-		Machine:   machine,
-		DOCluster: doCluster,
-		DOMachine: doMachine,
+		Logger:             log,
+		Client:             r.Client,
+		Cluster:            cluster,
+		Machine:            machine,
+		DOCluster:          doCluster,
+		DOMachine:          doMachine,
+		EnableAntiAffinity: r.EnableAntiAffinity,
 	})
 	if err != nil {
 		return reconcile.Result{}, errors.Errorf("failed to create scope: %+v", err)
