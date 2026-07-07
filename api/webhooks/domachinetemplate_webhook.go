@@ -54,7 +54,12 @@ func (w *DOMachineTemplateWebhook) SetupWebhookWithManager(mgr ctrl.Manager) err
 }
 
 // Default implements webhookutil.CustomDefaulter so a webhook will be registered for the type.
-func (w *DOMachineTemplateWebhook) Default(context.Context, runtime.Object) error {
+func (w *DOMachineTemplateWebhook) Default(_ context.Context, obj runtime.Object) error {
+	doMachineTemplate, ok := obj.(*v1beta1.DOMachineTemplate)
+	if !ok {
+		return apierrors.NewBadRequest(fmt.Sprintf("expected a DOMachineTemplate object but got a %T", obj))
+	}
+	defaultDOMachineSpec(&doMachineTemplate.Spec.Template.Spec)
 	return nil
 }
 
@@ -71,11 +76,11 @@ func (w *DOMachineTemplateWebhook) ValidateCreate(_ context.Context, obj runtime
 		allErrs = append(allErrs, field.Forbidden(field.NewPath("spec", "template", "spec", "providerID"), "cannot be set in templates"))
 	}
 
-	if len(allErrs) == 0 {
-		return nil, nil
+	if len(allErrs) != 0 {
+		return nil, apierrors.NewInvalid(doMachineTemplate.GroupVersionKind().GroupKind(), doMachineTemplate.Name, allErrs)
 	}
 
-	return nil, apierrors.NewInvalid(doMachineTemplate.GroupVersionKind().GroupKind(), doMachineTemplate.Name, allErrs)
+	return privateDropletWarnings(doMachineTemplate.Spec.Template.Spec), nil
 }
 
 // ValidateUpdate implements webhook.CustomValidator so a webhook will be registered for the type.

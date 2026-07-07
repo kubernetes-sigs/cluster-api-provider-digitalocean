@@ -57,13 +57,22 @@ func (w *DOMachineWebhook) SetupWebhookWithManager(mgr ctrl.Manager) error {
 }
 
 // Default implements webhook.CustomDefaulter so a webhook will be registered for the type.
-func (w *DOMachineWebhook) Default(context.Context, runtime.Object) error {
+func (w *DOMachineWebhook) Default(_ context.Context, obj runtime.Object) error {
+	doMachine, ok := obj.(*v1beta1.DOMachine)
+	if !ok {
+		return apierrors.NewBadRequest(fmt.Sprintf("expected a DOMachine object but got a %T", obj))
+	}
+	defaultDOMachineSpec(&doMachine.Spec)
 	return nil
 }
 
 // ValidateCreate implements webhook.CustomValidator so a webhook will be registered for the type.
-func (w *DOMachineWebhook) ValidateCreate(context.Context, runtime.Object) (admission.Warnings, error) {
-	return nil, nil
+func (w *DOMachineWebhook) ValidateCreate(_ context.Context, obj runtime.Object) (admission.Warnings, error) {
+	doMachine, ok := obj.(*v1beta1.DOMachine)
+	if !ok {
+		return nil, apierrors.NewBadRequest(fmt.Sprintf("expected a DOMachine object but got a %T", obj))
+	}
+	return privateDropletWarnings(doMachine.Spec), nil
 }
 
 // ValidateUpdate implements webhook.CustomValidator so a webhook will be registered for the type.

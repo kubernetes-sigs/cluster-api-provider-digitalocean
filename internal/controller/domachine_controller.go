@@ -291,7 +291,7 @@ func (r *DOMachineReconciler) reconcile(ctx context.Context, machineScope *scope
 	machineScope.SetVolumes(droplet.VolumeIDs)
 	machineScope.SetInstanceStatus(infrav1.DOResourceStatus(droplet.Status))
 
-	addrs, err := computesvc.GetDropletAddress(droplet)
+	addrs, err := computesvc.GetDropletAddress(droplet, ptr.Deref(machineScope.DOMachine.Spec.PublicNetworking, true))
 	if err != nil {
 		machineScope.SetFailureMessage(errors.New("failed to getting droplet address"))
 		return reconcile.Result{}, err

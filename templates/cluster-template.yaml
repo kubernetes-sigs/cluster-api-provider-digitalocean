@@ -113,3 +113,68 @@ spec:
           name: '{{ ds.meta_data.local_hostname }}'
           kubeletExtraArgs:
             cloud-provider: external
+---
+# Optional: mixed public and private worker pools in a VPC with a NAT gateway.
+# Prerequisites (not managed by CAPDO): VPC NAT gateway for outbound access, bastion for SSH.
+#
+# apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+# kind: DOCluster
+# metadata:
+#   name: "${CLUSTER_NAME}"
+# spec:
+#   region: ${DO_REGION}
+#   network:
+#     vpc:
+#       vpc_uuid: "<your-vpc-uuid>"
+# ---
+# apiVersion: cluster.x-k8s.io/v1beta1
+# kind: MachineDeployment
+# metadata:
+#   name: "${CLUSTER_NAME}-md-private"
+# spec:
+#   clusterName: "${CLUSTER_NAME}"
+#   replicas: ${WORKER_MACHINE_COUNT}
+#   selector:
+#     matchLabels:
+#   template:
+#     spec:
+#       clusterName: "${CLUSTER_NAME}"
+#       version: "${KUBERNETES_VERSION}"
+#       bootstrap:
+#         configRef:
+#           name: "${CLUSTER_NAME}-md-private"
+#           apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+#           kind: KubeadmConfigTemplate
+#       infrastructureRef:
+#         name: "${CLUSTER_NAME}-md-private"
+#         apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+#         kind: DOMachineTemplate
+# ---
+# apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+# kind: DOMachineTemplate
+# metadata:
+#   name: "${CLUSTER_NAME}-md-private"
+# spec:
+#   template:
+#     spec:
+#       publicNetworking: false
+#       size: "${DO_NODE_MACHINE_TYPE}"
+#       image: ${DO_NODE_MACHINE_IMAGE}
+#       sshKeys:
+#         - ${DO_SSH_KEY_FINGERPRINT}
+# ---
+# apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+# kind: KubeadmConfigTemplate
+# metadata:
+#   name: "${CLUSTER_NAME}-md-private"
+# spec:
+#   template:
+#     spec:
+#       preKubeadmCommands:
+#         - sed -i 's/SystemdCgroup = false/SystemdCgroup = true/' /etc/containerd/config.toml
+#         - systemctl restart containerd
+#       joinConfiguration:
+#         nodeRegistration:
+#           name: '{{ ds.meta_data.local_hostname }}'
+#           kubeletExtraArgs:
+#             cloud-provider: external

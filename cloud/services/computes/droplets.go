@@ -25,6 +25,7 @@ import (
 	"github.com/pkg/errors"
 
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/utils/ptr"
 
 	infrav1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1beta1"
 	"sigs.k8s.io/cluster-api-provider-digitalocean/cloud/scope"
@@ -136,6 +137,11 @@ func (s *Service) CreateDroplet(scope *scope.MachineScope) (*godo.Droplet, error
 		VPCUUID:           s.scope.VPC().VPCUUID,
 	}
 
+	if !ptr.Deref(scope.DOMachine.Spec.PublicNetworking, true) {
+		request.PublicNetworking = ptr.To(false)
+		request.IPv6 = false
+	}
+
 	request.Tags = infrav1.BuildTags(infrav1.BuildTagParams{
 		ClusterName: clusterName,
 		ClusterUID:  s.scope.UID(),
@@ -182,7 +188,7 @@ func (s *Service) DeleteDroplet(id string) error {
 }
 
 // GetDropletAddress convert droplet IPs to corev1.NodeAddresses.
-func (s *Service) GetDropletAddress(droplet *godo.Droplet) ([]corev1.NodeAddress, error) {
+func (s *Service) GetDropletAddress(droplet *godo.Droplet, publicNetworking bool) ([]corev1.NodeAddress, error) {
 	addresses := []corev1.NodeAddress{}
 	privatev4, err := droplet.PrivateIPv4()
 	if err != nil {
@@ -193,6 +199,10 @@ func (s *Service) GetDropletAddress(droplet *godo.Droplet) ([]corev1.NodeAddress
 		Type:    corev1.NodeInternalIP,
 		Address: privatev4,
 	})
+
+	if !publicNetworking {
+		return addresses, nil
+	}
 
 	publicv4, err := droplet.PublicIPv4()
 	if err != nil {
