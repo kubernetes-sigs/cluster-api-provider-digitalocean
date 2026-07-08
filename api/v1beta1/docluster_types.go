@@ -40,7 +40,7 @@ type DOClusterSpec struct {
 	// control plane. If ControlPlaneDNS is unset, the DO load-balancer IP
 	// of the Kubernetes API Server is used.
 	// +optional
-	ControlPlaneEndpoint clusterv1beta2.APIEndpoint `json:"controlPlaneEndpoint"`
+	ControlPlaneEndpoint clusterv1beta2.APIEndpoint `json:"controlPlaneEndpoint,omitempty,omitzero"`
 	// ControlPlaneDNS is a managed DNS name that points to the load-balancer
 	// IP used for the ControlPlaneEndpoint.
 	// +optional
