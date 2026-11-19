@@ -8,12 +8,7 @@ aliases:
     - hakman
     - sbueringer
 
-  cluster-api-admins:
-    - CecileRobertMichon
-    - sbueringer
-
   cluster-api-maintainers:
-    - CecileRobertMichon
     - chrischdi
     - fabriziopandini
     - JoelSpeed
