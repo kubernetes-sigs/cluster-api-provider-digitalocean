@@ -5,22 +5,16 @@ aliases:
     - fabriziopandini
     - justinsb
     - neolit123
-    - timothysc
-
-  cluster-api-admins:
-    - CecileRobertMichon
-    - vincepri
+    - hakman
+    - sbueringer
 
   cluster-api-maintainers:
-    - CecileRobertMichon
-    - enxebre
+    - chrischdi
     - fabriziopandini
+    - JoelSpeed
     - sbueringer
-    - vincepri
 
   cluster-api-do-maintainers:
     - cpanato
     - gottwald
-    - prksu
     - timoreimann
-    - sreeram-venkitesh
