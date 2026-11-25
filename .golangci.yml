@@ -89,15 +89,21 @@ linters:
         text: (Expect directory permissions to be 0750 or less|Expect file permissions to be 0600 or less)
       - path: (.+)\.go$
         text: (G104|G307)
-      # Ignore Cluster API v1beta1 deprecations
+      # Ignore Cluster API v1beta1 deprecations until the v1beta2 migration.
+      # Newer staticcheck versions print the package path without quotes, so the quotes are optional.
       - linters:
         - staticcheck
         path: .*\.go$
-        text: 'SA1019: "sigs.k8s.io\/cluster-api/api/core/v1beta1" is deprecated: This package is deprecated and is going to be removed when support for v1beta1 will be dropped.'
+        text: 'SA1019: "?sigs.k8s.io/cluster-api/(api/core/v1beta1|util/deprecated/.*)"? is deprecated: This package is deprecated and is going to be removed when support for v1beta1 will be dropped.'
+      # Repeated literals in test fixtures are clearer inline than as constants.
       - linters:
-        - staticcheck
-        path: .*\.go$
-        text: 'SA1019: "sigs.k8s.io/cluster-api/util/deprecated/.*" is deprecated: This package is deprecated and is going to be removed when support for v1beta1 will be dropped.'
+          - goconst
+        path: _test\.go
+      # The janitor only logs resource names from the CI DigitalOcean account.
+      - linters:
+          - gosec
+        path: hack/do-janitor/
+        text: 'G706: Log injection via taint analysis'
     paths:
       - zz_generated.*\.go$
       - .*conversion.*\.go$
