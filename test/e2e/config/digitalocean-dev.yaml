@@ -46,7 +46,7 @@ providers:
   - name: digitalocean
     type: InfrastructureProvider
     versions:
-      - name: v1.11.5 # Use manifest from source files
+      - name: v1.7.99 # Use manifest from source files; next CAPDO release series
         value: ${PWD}/config/default
         replacements:
           - old: gcr.io/k8s-staging-cluster-api-do/cluster-api-do-controller:dev
@@ -54,7 +54,7 @@ providers:
           - old: "imagePullPolicy: Always"
             new: "imagePullPolicy: IfNotPresent"
         files:
-          - sourcePath: "${PWD}/test/e2e/data/metadata/cluster-api-provider-digitalocean/metadata.yaml"
+          - sourcePath: "${PWD}/metadata.yaml"
             targetName: "metadata.yaml"
           - sourcePath: "${PWD}/test/e2e/data/infrastructure-digitalocean/cluster-template.yaml"
             targetName: "cluster-template.yaml"
