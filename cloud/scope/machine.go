@@ -149,7 +149,7 @@ func (m *MachineScope) SetProviderID(dropletID string) {
 
 // SetVolumes sets the DOMachine volume IDs from droplet in status.
 func (m *MachineScope) SetVolumes(volumeIDs []string) {
-	volumes := []infrav1.DOVolume{}
+	volumes := make([]infrav1.DOVolume, 0, len(volumeIDs))
 	for _, vID := range volumeIDs {
 		volumes = append(volumes, infrav1.DOVolume{ID: vID})
 	}

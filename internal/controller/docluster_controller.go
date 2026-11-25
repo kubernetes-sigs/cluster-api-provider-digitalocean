@@ -235,7 +235,7 @@ func (r *DOClusterReconciler) reconcile(ctx context.Context, clusterScope *scope
 	return reconcile.Result{}, nil
 }
 
-func (r *DOClusterReconciler) reconcileDelete(ctx context.Context, clusterScope *scope.ClusterScope) (reconcile.Result, error) { //nolint: unparam
+func (r *DOClusterReconciler) reconcileDelete(ctx context.Context, clusterScope *scope.ClusterScope) (reconcile.Result, error) {
 	clusterScope.Info("Reconciling delete DOCluster")
 	docluster := clusterScope.DOCluster
 	networkingsvc := networking.NewService(ctx, clusterScope)

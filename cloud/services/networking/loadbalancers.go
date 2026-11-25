@@ -24,6 +24,9 @@ import (
 	infrav1 "sigs.k8s.io/cluster-api-provider-digitalocean/api/v1beta1"
 )
 
+// protocolTCP is the protocol used for the API server load balancer and its health check.
+const protocolTCP = "tcp"
+
 // GetLoadBalancer get a LB by LB ID.
 func (s *Service) GetLoadBalancer(id string) (*godo.LoadBalancer, error) {
 	if id == "" {
@@ -51,14 +54,14 @@ func (s *Service) CreateLoadBalancer(spec *infrav1.DOLoadBalancer) (*godo.LoadBa
 		Region:    s.scope.Region(),
 		ForwardingRules: []godo.ForwardingRule{
 			{
-				EntryProtocol:  "tcp",
+				EntryProtocol:  protocolTCP,
 				EntryPort:      int(spec.Port),
-				TargetProtocol: "tcp",
+				TargetProtocol: protocolTCP,
 				TargetPort:     int(spec.Port),
 			},
 		},
 		HealthCheck: &godo.HealthCheck{
-			Protocol:               "tcp",
+			Protocol:               protocolTCP,
 			Port:                   int(spec.Port),
 			CheckIntervalSeconds:   spec.HealthCheck.Interval,
 			ResponseTimeoutSeconds: spec.HealthCheck.Timeout,

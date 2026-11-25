@@ -264,7 +264,9 @@ func main() {
 		},
 		WebhookServer:          webhookServer,
 		HealthProbeBindAddress: healthProbeBindAddress,
-		EventBroadcaster:       broadcaster,
+		// The manager runs for the lifetime of the process, so the goroutine leak this option is
+		// deprecated for does not apply. Keep it for the higher event burst size configured above.
+		EventBroadcaster: broadcaster, //nolint:staticcheck
 	})
 	if err != nil {
 		setupLog.Error(err, "unable to start manager")

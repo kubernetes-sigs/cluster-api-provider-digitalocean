@@ -73,7 +73,7 @@ type BuildTagParams struct {
 
 // BuildTags builds tags including the cluster tag and returns them in map form.
 func BuildTags(params BuildTagParams) Tags {
-	var tags Tags
+	tags := make(Tags, 0, 4+len(params.Additional))
 	tags = append(tags, ClusterNameTag(params.ClusterName))
 	tags = append(tags, ClusterNameRoleTag(params.ClusterName, params.Role))
 	tags = append(tags, ClusterNameUIDRoleTag(params.ClusterName, params.ClusterUID, params.Role))
