@@ -46,6 +46,11 @@ type DOMachineSpec struct {
 	// AdditionalTags is an optional set of tags to add to DigitalOcean resources managed by the DigitalOcean provider.
 	// +optional
 	AdditionalTags Tags `json:"additionalTags,omitempty"`
+	// PublicNetworking enables public IPv4 on the droplet. Defaults to true.
+	// When false, creates a DO Private Droplet (VPC-only, no public IP). Immutable after create.
+	// +kubebuilder:default=true
+	// +optional
+	PublicNetworking *bool `json:"publicNetworking,omitempty"`
 }
 
 // DOMachineStatus defines the observed state of DOMachine.

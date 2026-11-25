@@ -52,6 +52,7 @@ var (
 type CreateDropletRequestArgs struct {
 	SSHKeys           []godo.DropletCreateSSHKey
 	PrivateNetworking bool
+	PublicNetworking  *bool
 	Volumes           []godo.DropletCreateVolume
 }
 
@@ -161,6 +162,9 @@ func newCreateDropletRequest(args *CreateDropletRequestArgs) *godo.DropletCreate
 	}
 	if args.Volumes != nil {
 		r.Volumes = args.Volumes
+	}
+	if args.PublicNetworking != nil {
+		r.PublicNetworking = args.PublicNetworking
 	}
 	return r
 }
@@ -308,6 +312,26 @@ func TestService_CreateDroplet(t *testing.T) {
 			expect: func(mdis *mock_computesenhanced.MockDropletsServiceMockRecorder, _ *mock_computes.MockKeysServiceMockRecorder, _ *mock_computes.MockImagesServiceMockRecorder, _ *mock_computes.MockStorageServiceMockRecorder) {
 				args := &CreateDropletRequestArgs{
 					PrivateNetworking: true,
+				}
+				mdis.CreateWithAffinity(gomock.Any(), newCreateDropletRequest(args), "").Return(&computesenhanced.DropletCreateWithAntiAffinityResponse{
+					Droplet: &godo.Droplet{ID: 123456},
+				}, nil)
+			},
+			want: &godo.Droplet{ID: 123456},
+		},
+		{
+			name: "private droplet",
+			args: newCreateDropletArgs(&CreateDropletCustomization{
+				customDOMachineSpec: &infrav1.DOMachineSpec{
+					Image:            intstr.FromInt(63624555),
+					Size:             "s-2vcpu-2gb",
+					PublicNetworking: ptr.To(false),
+				},
+			}),
+			expect: func(mdis *mock_computesenhanced.MockDropletsServiceMockRecorder, _ *mock_computes.MockKeysServiceMockRecorder, _ *mock_computes.MockImagesServiceMockRecorder, _ *mock_computes.MockStorageServiceMockRecorder) {
+				args := &CreateDropletRequestArgs{
+					PrivateNetworking: true,
+					PublicNetworking:  ptr.To(false),
 				}
 				mdis.CreateWithAffinity(gomock.Any(), newCreateDropletRequest(args), "").Return(&computesenhanced.DropletCreateWithAntiAffinityResponse{
 					Droplet: &godo.Droplet{ID: 123456},
@@ -710,7 +734,8 @@ func TestService_GetDropletAddress(t *testing.T) {
 	defer os.Unsetenv("DIGITALOCEAN_ACCESS_TOKEN") //nolint:errcheck
 
 	type args struct {
-		droplet *godo.Droplet
+		droplet          *godo.Droplet
+		publicNetworking bool
 	}
 	tests := []struct {
 		name    string
@@ -719,9 +744,9 @@ func TestService_GetDropletAddress(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "default",
+			name: "public droplet",
 			args: args{
-				&godo.Droplet{
+				droplet: &godo.Droplet{
 					ID:   1234,
 					Name: "capdo-test",
 					Networks: &godo.Networks{
@@ -737,6 +762,7 @@ func TestService_GetDropletAddress(t *testing.T) {
 						},
 					},
 				},
+				publicNetworking: true,
 			},
 			want: []corev1.NodeAddress{
 				{
@@ -746,6 +772,30 @@ func TestService_GetDropletAddress(t *testing.T) {
 				{
 					Type:    corev1.NodeExternalIP,
 					Address: "192.168.1.1",
+				},
+			},
+		},
+		{
+			name: "private droplet",
+			args: args{
+				droplet: &godo.Droplet{
+					ID:   1234,
+					Name: "capdo-test",
+					Networks: &godo.Networks{
+						V4: []godo.NetworkV4{
+							{
+								Type:      "private",
+								IPAddress: "10.0.0.1",
+							},
+						},
+					},
+				},
+				publicNetworking: false,
+			},
+			want: []corev1.NodeAddress{
+				{
+					Type:    corev1.NodeInternalIP,
+					Address: "10.0.0.1",
 				},
 			},
 		},
@@ -763,7 +813,7 @@ func TestService_GetDropletAddress(t *testing.T) {
 			}
 
 			s := NewService(ctx, cscope)
-			got, err := s.GetDropletAddress(tt.args.droplet)
+			got, err := s.GetDropletAddress(tt.args.droplet, tt.args.publicNetworking)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Service.GetDropletAddress() error = %v, wantErr %v", err, tt.wantErr)
 				return

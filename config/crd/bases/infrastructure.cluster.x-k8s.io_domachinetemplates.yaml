@@ -99,6 +99,12 @@ spec:
                         description: ProviderID is the unique identifier as specified
                           by the cloud provider.
                         type: string
+                      publicNetworking:
+                        default: true
+                        description: |-
+                          PublicNetworking enables public IPv4 on the droplet. Defaults to true.
+                          When false, creates a DO Private Droplet (VPC-only, no public IP). Immutable after create.
+                        type: boolean
                       size:
                         description: Droplet size. It must be known DigitalOcean droplet
                           size. See https://developers.digitalocean.com/documentation/v2/#list-all-sizes
@@ -210,6 +216,12 @@ spec:
                         description: ProviderID is the unique identifier as specified
                           by the cloud provider.
                         type: string
+                      publicNetworking:
+                        default: true
+                        description: |-
+                          PublicNetworking enables public IPv4 on the droplet. Defaults to true.
+                          When false, creates a DO Private Droplet (VPC-only, no public IP). Immutable after create.
+                        type: boolean
                       size:
                         description: Droplet size. It must be known DigitalOcean droplet
                           size. See https://developers.digitalocean.com/documentation/v2/#list-all-sizes
