@@ -37,8 +37,8 @@ import (
 // log is for logging in this package.
 var _ = logf.Log.WithName("domachine-resource")
 
-// +kubebuilder:webhook:verbs=create;update,path=/validate-infrastructure-cluster-x-k8s-io-v1beta1-domachine,mutating=false,failurePolicy=fail,matchPolicy=Equivalent,groups=infrastructure.cluster.x-k8s.io,resources=domachines,versions=v1beta1,name=validation.domachine.infrastructure.cluster.x-k8s.io,sideEffects=None,admissionReviewVersions=v1beta1
-// +kubebuilder:webhook:verbs=create;update,path=/mutate-infrastructure-cluster-x-k8s-io-v1beta1-domachine,mutating=true,failurePolicy=fail,matchPolicy=Equivalent,groups=infrastructure.cluster.x-k8s.io,resources=domachines,versions=v1beta1,name=default.domachine.infrastructure.cluster.x-k8s.io,sideEffects=None,admissionReviewVersions=v1beta1
+// +kubebuilder:webhook:verbs=create;update,path=/validate-infrastructure-cluster-x-k8s-io-v1beta1-domachine,mutating=false,failurePolicy=fail,matchPolicy=Equivalent,groups=infrastructure.cluster.x-k8s.io,resources=domachines,versions=v1beta1,name=validation.domachine.infrastructure.cluster.x-k8s.io,sideEffects=None,admissionReviewVersions=v1
+// +kubebuilder:webhook:verbs=create;update,path=/mutate-infrastructure-cluster-x-k8s-io-v1beta1-domachine,mutating=true,failurePolicy=fail,matchPolicy=Equivalent,groups=infrastructure.cluster.x-k8s.io,resources=domachines,versions=v1beta1,name=default.domachine.infrastructure.cluster.x-k8s.io,sideEffects=None,admissionReviewVersions=v1
 
 // DOMachineWebhook is a collection of webhooks for DOMachine objects.
 type DOMachineWebhook struct{}

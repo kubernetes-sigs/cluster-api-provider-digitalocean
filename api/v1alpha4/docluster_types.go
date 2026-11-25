@@ -66,7 +66,7 @@ type DOClusterStatus struct {
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="Cluster",type="string",JSONPath=".metadata.labels.cluster\\.x-k8s\\.io/cluster-name",description="Cluster to which this DOCluster belongs"
 // +kubebuilder:printcolumn:name="Ready",type="string",JSONPath=".status.ready",description="Cluster infrastructure is ready for DigitalOcean droplet instances"
-// +kubebuilder:printcolumn:name="Endpoint",type="string",JSONPath=".spec.ControlPlaneEndpoint",description="API Endpoint",priority=1
+// +kubebuilder:printcolumn:name="Endpoint",type="string",JSONPath=".spec.controlPlaneEndpoint",description="API Endpoint",priority=1
 
 // DOCluster is the Schema for the DOClusters API.
 type DOCluster struct {
