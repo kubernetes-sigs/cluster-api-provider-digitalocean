@@ -169,7 +169,7 @@ func (r *DOMachineReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	}
 
 	// Return early if the object or Cluster is paused.
-	if annotations.IsPaused(cluster, doCluster) {
+	if annotations.IsPaused(cluster, doMachine) {
 		log.Info("DOMachine or linked Cluster is marked as paused. Won't reconcile")
 		return ctrl.Result{}, nil
 	}
