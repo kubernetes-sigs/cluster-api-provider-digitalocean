@@ -110,7 +110,7 @@ func initFlags(fs *pflag.FlagSet) {
 	fs.StringVar(&watchNamespace, "namespace", "", "Namespace that the controller watches to reconcile cluster-api objects. If unspecified, the controller watches for cluster-api objects across all namespaces.")
 	fs.StringVar(&profilerAddress, "profiler-address", "", "Bind address to expose the pprof profiler (e.g. localhost:6060)")
 	fs.DurationVar(&syncPeriod, "sync-period", 10*time.Minute, "The minimum interval at which watched resources are reconciled (e.g. 10m)")
-	fs.IntVar(&webhookPort, "webhook-port", 9443, "Webhook Server port, disabled by default. When enabled, the manager will only work as webhook server, no reconcilers are installed.")
+	fs.IntVar(&webhookPort, "webhook-port", 9443, "The port the webhook server listens on.")
 	fs.DurationVar(&reconcileTimeout, "reconcile-timeout", reconciler.DefaultLoopTimeout, "The maximum duration a reconcile loop can run (e.g. 90m)")
 	fs.Float32Var(&restConfigQPS, "kube-api-qps", 20, "Maximum queries per second from the controller client to the Kubernetes API server.")
 	fs.IntVar(&restConfigBurst, "kube-api-burst", 30, "Maximum number of queries that should be allowed in one burst from the controller client to the Kubernetes API server.")
@@ -125,6 +125,19 @@ func initFlags(fs *pflag.FlagSet) {
 	fs.StringVar(&webhookCertKey, "webhook-cert-key", "tls.key", "The name of the webhook key file.")
 	fs.IntVar(&maxConcurrentReconcilesCluster, "max-concurrent-reconciles-cluster", 2, "Maximum concurrent reconciles for clusters")
 	fs.IntVar(&maxConcurrentReconcilesMachine, "max-concurrent-reconciles-machine", 5, "Maximum concurrent reconciles for machines")
+
+	_ = fs.MarkDeprecated("health-addr", "use --health-probe-bind-address instead")
+}
+
+// resolveHealthProbeBindAddress returns the address the health probe endpoint binds to.
+// --health-probe-bind-address takes precedence. The deprecated --health-addr is only
+// honored when it is set explicitly and --health-probe-bind-address is not, so existing
+// command lines that only pass --health-addr keep working.
+func resolveHealthProbeBindAddress(fs *pflag.FlagSet) string {
+	if fs.Changed("health-addr") && !fs.Changed("health-probe-bind-address") {
+		return healthAddr
+	}
+	return probeAddr
 }
 
 // Add RBAC for the authorized diagnostics endpoint.
@@ -203,7 +216,7 @@ func main() {
 
 	webhookServer := webhook.NewServer(webhook.Options{
 		TLSOpts: webhookTLSOpts,
-		Port:    9443,
+		Port:    webhookPort,
 	})
 
 	// Metrics endpoint is enabled in 'config/default/kustomization.yaml'. The Metrics options configure the server.
@@ -243,10 +256,7 @@ func main() {
 		})
 	}
 
-	healthProbeBindAddress := healthAddr
-	if probeAddr != "" {
-		healthProbeBindAddress = probeAddr
-	}
+	healthProbeBindAddress := resolveHealthProbeBindAddress(pflag.CommandLine)
 
 	mgr, err := ctrl.NewManager(restConfig, ctrl.Options{
 		Scheme:                     scheme,
