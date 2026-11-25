@@ -26,7 +26,7 @@ spec:
       name: Ready
       type: string
     - description: API Endpoint
-      jsonPath: .spec.ControlPlaneEndpoint
+      jsonPath: .spec.controlPlaneEndpoint
       name: Endpoint
       priority: 1
       type: string
@@ -215,7 +215,7 @@ spec:
       name: Ready
       type: string
     - description: API Endpoint
-      jsonPath: .spec.ControlPlaneEndpoint
+      jsonPath: .spec.controlPlaneEndpoint
       name: Endpoint
       priority: 1
       type: string
