@@ -273,7 +273,17 @@ generate-go: $(CONTROLLER_GEN) $(CONVERSION_GEN) $(MOCKGEN) ## Runs Go related g
 		paths=./... \
 		paths=./$(EXP_DIR)/api/... \
 		object:headerFile=./hack/boilerplate/boilerplate.generatego.txt
+	$(MAKE) generate-go-conversions
 	go generate ./...
+
+.PHONY: generate-go-conversions
+generate-go-conversions: $(CONVERSION_GEN) ## Generate conversion code for older API versions
+	# Remove the previous output first; otherwise conversion-gen treats its functions as manual conversions.
+	rm -f ./api/v1alpha4/zz_generated.conversion.go
+	$(CONVERSION_GEN) \
+		--output-file=zz_generated.conversion.go \
+		--go-header-file=./hack/boilerplate/boilerplate.generatego.txt \
+		./api/v1alpha4
 
 .PHONY: generate-manifests
 generate-manifests: $(CONTROLLER_GEN) ## Generate manifests e.g. CRD, RBAC etc.
