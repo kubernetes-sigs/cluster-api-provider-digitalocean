@@ -82,8 +82,6 @@ variables:
   CONFORMANCE_WORKER_MACHINE_COUNT: "2"
   CONFORMANCE_CONTROL_PLANE_MACHINE_COUNT: "1"
   KUBETEST_CONFIGURATION: "${PWD}/test/e2e/data/kubetest/conformance.yaml"
-  ETCD_VERSION_UPGRADE_TO: "3.5.1-0"
-  COREDNS_VERSION_UPGRADE_TO: "v1.8.6"
   # Cluster API Kubernetes v1.28.9 on Ubuntu 22.04
   KUBERNETES_IMAGE_UPGRADE_FROM: "154711472"
   # Cluster API Kubernetes v1.32.4 on Ubuntu 24.04
@@ -101,6 +99,8 @@ intervals:
   default/wait-worker-nodes: ["30m", "10s"]
   default/wait-delete-cluster: ["20m", "10s"]
   default/wait-machine-upgrade: ["50m", "10s"]
+  default/wait-control-plane-upgrade: ["50m", "10s"]
+  default/wait-machine-deployment-upgrade: ["50m", "10s"]
   default/wait-machine-remediation: ["30m", "10s"]
   default/wait-deployment: ["5m", "10s"]
   default/wait-job: ["5m", "10s"]

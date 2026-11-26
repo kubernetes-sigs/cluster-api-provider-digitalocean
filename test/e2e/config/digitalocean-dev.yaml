@@ -83,6 +83,8 @@ intervals:
   default/wait-worker-nodes: ["30m", "10s"]
   default/wait-delete-cluster: ["20m", "10s"]
   default/wait-machine-upgrade: ["50m", "10s"]
+  default/wait-control-plane-upgrade: ["50m", "10s"]
+  default/wait-machine-deployment-upgrade: ["50m", "10s"]
   default/wait-machine-remediation: ["30m", "10s"]
   default/wait-deployment: ["5m", "10s"]
   default/wait-job: ["5m", "10s"]
