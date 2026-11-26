@@ -145,9 +145,6 @@ MOCKGEN_VER := v0.6.0
 MOCKGEN_BIN := mockgen
 MOCKGEN := $(TOOLS_BIN_DIR)/$(MOCKGEN_BIN)-$(MOCKGEN_VER)
 
-RELEASE_NOTES_VER := v0.11.0
-RELEASE_NOTES_BIN := release-notes
-RELEASE_NOTES := $(TOOLS_BIN_DIR)/$(RELEASE_NOTES_BIN)-$(RELEASE_NOTES_VER)
 
 GINKGO_VER := v2.26.0
 GINKGO_BIN := ginkgo
@@ -169,7 +166,7 @@ $(ARTIFACTS):
 
 .PHONY: test
 test: generate ## Run tests
-	source ./scripts/fetch_ext_bins.sh; fetch_tools; setup_envs; go test -v -covermode=atomic -coverprofile=coverage.tmp.out ./api/... ./internal/controller/... ./cloud/...
+	source ./scripts/fetch_ext_bins.sh; fetch_tools; setup_envs; go test -v -covermode=atomic -coverprofile=coverage.tmp.out ./api/... ./cloud/... ./cmd/... ./internal/... ./util/...
 	@cat coverage.tmp.out | grep -v "generated" > coverage.out
 	@rm coverage.tmp.out
 
@@ -225,9 +222,6 @@ $(KUSTOMIZE): ## Build kustomize from tools folder.
 
 $(MOCKGEN): ## Build mockgen from tools folder.
 	GOBIN=$(TOOLS_BIN_DIR) $(GO_INSTALL) go.uber.org/mock/mockgen $(MOCKGEN_BIN) $(MOCKGEN_VER)
-
-$(RELEASE_NOTES): ## Build release notes.
-	GOBIN=$(TOOLS_BIN_DIR) $(GO_INSTALL) k8s.io/release/cmd/release-notes $(RELEASE_NOTES_BIN) $(RELEASE_NOTES_VER)
 
 $(GINKGO): ## Build ginkgo.
 	GOBIN=$(TOOLS_BIN_DIR) $(GO_INSTALL) $(GINKGO_PKG) $(GINKGO_BIN) $(GINKGO_VER)
@@ -381,24 +375,11 @@ release: clean-release  ## Builds and push container images using the latest git
 .PHONY: release-manifests
 release-manifests: $(KUSTOMIZE) $(RELEASE_DIR) ## Builds the manifests to publish with a release
 	cp metadata.yaml $(RELEASE_DIR)/metadata.yaml
-	kustomize build config/default > $(RELEASE_DIR)/infrastructure-components.yaml
+	$(KUSTOMIZE) build config/default > $(RELEASE_DIR)/infrastructure-components.yaml
 
 .PHONY: release-templates
 release-templates: $(RELEASE_DIR)
 	cp templates/cluster-template* $(RELEASE_DIR)/
-
-.PHONY: release-binary
-release-binary: $(RELEASE_DIR)
-	docker run \
-		--rm \
-		-e CGO_ENABLED=0 \
-		-e GOOS=$(GOOS) \
-		-e GOARCH=$(GOARCH) \
-		-v "$$(pwd):/workspace" \
-		-w /workspace \
-		golang:1.20.8 \
-		go build -a -trimpath -ldflags '-extldflags "-static"' \
-		-o $(RELEASE_DIR)/$(notdir $(RELEASE_BINARY))-$(GOOS)-$(GOARCH) $(RELEASE_BINARY)
 
 .PHONY: release-staging
 release-staging: ## Builds and push container images to the staging bucket.
@@ -411,8 +392,13 @@ release-alias-tag: # Adds the tag to the last build tag.
 	gcloud container images add-tag $(CONTROLLER_IMG):$(TAG) $(CONTROLLER_IMG):$(RELEASE_ALIAS_TAG)
 
 .PHONY: release-notes
-release-notes: $(RELEASE_NOTES)
-	$(RELEASE_NOTES)
+release-notes: $(RELEASE_DIR) ## Generate release notes with GitHub's generator. Requires gh, PREVIOUS_VERSION and RELEASE_TAG.
+	@if [ -z "$(RELEASE_TAG)" ] || [ -z "$(PREVIOUS_VERSION)" ]; then echo "RELEASE_TAG and PREVIOUS_VERSION must be set"; exit 1; fi
+	gh api repos/kubernetes-sigs/cluster-api-provider-digitalocean/releases/generate-notes \
+		-f tag_name=$(RELEASE_TAG) \
+		-f previous_tag_name=$(PREVIOUS_VERSION) \
+		--jq .body > $(RELEASE_DIR)/RELEASE_NOTES.md
+	@echo "Release notes written to $(RELEASE_DIR)/RELEASE_NOTES.md"
 
 ## --------------------------------------
 ##@ Development
@@ -520,7 +506,7 @@ verify-boilerplate: ## Verify boilerplate
 
 .PHONY: verify-modules
 verify-modules: modules ## Verify go module files
-	@if !(git diff --quiet HEAD -- go.sum go.mod hack/tools/go.mod hack/tools/go.sum); then \
+	@if !(git diff --quiet HEAD -- go.sum go.mod); then \
 		echo "go module files are out of date"; exit 1; \
 	fi
 
