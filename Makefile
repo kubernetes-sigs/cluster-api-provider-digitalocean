@@ -512,11 +512,21 @@ delete-cluster: delete-workload-cluster  ## Deletes the example kind cluster "ca
 ## --------------------------------------
 
 .PHONY: verify ## Verify all
-verify: verify-boilerplate verify-modules verify-gen
+verify: verify-boilerplate verify-modules verify-gen verify-go-version
 
 .PHONY: verify-boilerplate
 verify-boilerplate: ## Verify boilerplate
 	./hack/verify-boilerplate.sh
+
+# Go version: the `go` directive in go.mod is the Go version we build and release with.
+# The Dockerfile builder image must use the same version; bump both together.
+.PHONY: verify-go-version
+verify-go-version: ## Verify the Dockerfile builder image uses the go.mod Go version
+	@mod_go=$$(go mod edit -json | sed -n 's/.*"Go": "\(.*\)".*/\1/p'); \
+	dockerfile_go=$$(sed -n 's/^FROM golang:\([^@ ]*\).*/\1/p' Dockerfile | head -n1); \
+	if [ -z "$$mod_go" ] || [ "$$mod_go" != "$$dockerfile_go" ]; then \
+		echo "Go version mismatch: go.mod has go $$mod_go, Dockerfile builder is golang:$$dockerfile_go"; exit 1; \
+	fi
 
 .PHONY: verify-modules
 verify-modules: modules ## Verify go module files
