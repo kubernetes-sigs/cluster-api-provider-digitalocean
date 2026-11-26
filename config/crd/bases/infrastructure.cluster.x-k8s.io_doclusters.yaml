@@ -3,7 +3,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.17.1
+    controller-gen.kubebuilder.io/version: v0.19.0
   name: doclusters.infrastructure.cluster.x-k8s.io
 spec:
   group: infrastructure.cluster.x-k8s.io
@@ -90,9 +90,6 @@ spec:
                     description: port is the port on which the API server is serving.
                     format: int32
                     type: integer
-                required:
-                - host
-                - port
                 type: object
               network:
                 description: Network configurations
@@ -279,9 +276,6 @@ spec:
                     description: port is the port on which the API server is serving.
                     format: int32
                     type: integer
-                required:
-                - host
-                - port
                 type: object
               network:
                 description: Network configurations

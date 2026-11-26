@@ -121,11 +121,11 @@ help:  ## Display this help
 ## --------------------------------------
 
 # Binaries.
-CONTROLLER_GEN_VER := v0.17.1
+CONTROLLER_GEN_VER := v0.19.0
 CONTROLLER_GEN_BIN := controller-gen
 CONTROLLER_GEN := $(TOOLS_BIN_DIR)/$(CONTROLLER_GEN_BIN)-$(CONTROLLER_GEN_VER)
 
-CONVERSION_GEN_VER := v0.33.3
+CONVERSION_GEN_VER := v0.34.0
 CONVERSION_GEN_BIN := conversion-gen
 CONVERSION_GEN := $(TOOLS_BIN_DIR)/$(CONVERSION_GEN_BIN)-$(CONVERSION_GEN_VER)
 
@@ -144,6 +144,11 @@ KUSTOMIZE := $(TOOLS_BIN_DIR)/$(KUSTOMIZE_BIN)-$(KUSTOMIZE_VER)
 MOCKGEN_VER := v0.6.0
 MOCKGEN_BIN := mockgen
 MOCKGEN := $(TOOLS_BIN_DIR)/$(MOCKGEN_BIN)-$(MOCKGEN_VER)
+
+SETUP_ENVTEST_VER := release-0.22
+SETUP_ENVTEST_BIN := setup-envtest
+SETUP_ENVTEST := $(abspath $(TOOLS_BIN_DIR)/$(SETUP_ENVTEST_BIN)-$(SETUP_ENVTEST_VER))
+export KUBEBUILDER_ENVTEST_KUBERNETES_VERSION ?= 1.35.0
 
 
 GINKGO_VER := v2.34.0
@@ -165,8 +170,8 @@ $(ARTIFACTS):
 	mkdir -p $@
 
 .PHONY: test
-test: generate ## Run tests
-	source ./scripts/fetch_ext_bins.sh; fetch_tools; setup_envs; go test -v -covermode=atomic -coverprofile=coverage.tmp.out ./api/... ./cloud/... ./cmd/... ./internal/... ./util/...
+test: generate $(SETUP_ENVTEST) ## Run tests
+	KUBEBUILDER_ASSETS="$$($(SETUP_ENVTEST) use --use-env -p path $(KUBEBUILDER_ENVTEST_KUBERNETES_VERSION))" go test -v -covermode=atomic -coverprofile=coverage.tmp.out ./api/... ./cloud/... ./cmd/... ./internal/... ./util/...
 	@cat coverage.tmp.out | grep -v "generated" > coverage.out
 	@rm coverage.tmp.out
 
@@ -222,6 +227,9 @@ $(KUSTOMIZE): ## Build kustomize from tools folder.
 
 $(MOCKGEN): ## Build mockgen from tools folder.
 	GOBIN=$(TOOLS_BIN_DIR) $(GO_INSTALL) go.uber.org/mock/mockgen $(MOCKGEN_BIN) $(MOCKGEN_VER)
+
+$(SETUP_ENVTEST): ## Build setup-envtest from tools folder.
+	GOBIN=$(TOOLS_BIN_DIR) $(GO_INSTALL) sigs.k8s.io/controller-runtime/tools/setup-envtest $(SETUP_ENVTEST_BIN) $(SETUP_ENVTEST_VER)
 
 $(GINKGO): ## Build ginkgo.
 	GOBIN=$(TOOLS_BIN_DIR) $(GO_INSTALL) $(GINKGO_PKG) $(GINKGO_BIN) $(GINKGO_VER)
