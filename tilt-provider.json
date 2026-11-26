@@ -2,14 +2,17 @@
   "name": "digitalocean",
   "config": {
     "image": "gcr.io/k8s-staging-cluster-api-do/cluster-api-do-controller",
+    "go_main": "cmd/main.go",
     "live_reload_deps": [
-      "main.go",
       "go.mod",
       "go.sum",
       "api",
       "cloud",
-      "controllers",
-      "pkg"
-    ]
+      "cmd",
+      "internal",
+      "util",
+      "version"
+    ],
+    "label": "CAPDO"
   }
 }
