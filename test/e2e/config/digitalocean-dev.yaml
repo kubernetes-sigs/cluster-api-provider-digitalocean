@@ -67,7 +67,7 @@ variables:
   CNI: "${PWD}/test/e2e/data/cni/calico/calico.yaml"
   CCM: "${PWD}/test/e2e/data/ccm/digitalocean-cloud-controller-manager.yaml"
   # Following CAPDO variables should be set before testing
-  DO_REGION: "nyc1"
+  DO_REGION: "sfo2"
   DO_CONTROL_PLANE_MACHINE_TYPE: "s-2vcpu-2gb"
   # DO_CONTROL_PLANE_MACHINE_IMAGE: ""
   DO_NODE_MACHINE_TYPE: "s-2vcpu-2gb"
