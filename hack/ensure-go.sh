@@ -31,7 +31,8 @@ EOF
   local go_version
   IFS=" " read -ra go_version <<< "$(go version)"
   local minimum_go_version
-  minimum_go_version=go1.20
+  # The minimum Go version is the go directive in go.mod.
+  minimum_go_version="go$(go mod edit -json "$(dirname "${BASH_SOURCE[0]}")/../go.mod" | grep -m1 '"Go":' | sed -E 's/.*"Go": "([^"]+)".*/\1/')"
   if [[ "${minimum_go_version}" != $(echo -e "${minimum_go_version}\n${go_version[2]}" | sort -s -t. -k 1,1 -k 2,2n -k 3,3n | head -n1) && "${go_version[2]}" != "devel" ]]; then
     cat <<EOF
 Detected go version: ${go_version[*]}.
