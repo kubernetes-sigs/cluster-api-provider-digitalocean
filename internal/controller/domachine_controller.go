@@ -35,7 +35,7 @@ import (
 	"sigs.k8s.io/cluster-api-provider-digitalocean/cloud/services/computes"
 	"sigs.k8s.io/cluster-api-provider-digitalocean/util/reconciler"
 	clusterv1beta2 "sigs.k8s.io/cluster-api/api/core/v1beta2"
-	capierrors "sigs.k8s.io/cluster-api/errors" //nolint:staticcheck
+	capierrors "sigs.k8s.io/cluster-api/api/deprecated/errors" //nolint:staticcheck
 	"sigs.k8s.io/cluster-api/util"
 	"sigs.k8s.io/cluster-api/util/annotations"
 	"sigs.k8s.io/cluster-api/util/predicates"

@@ -36,7 +36,6 @@ import (
 	cgrecord "k8s.io/client-go/tools/record"
 	"k8s.io/klog/v2"
 	clusterv1beta2 "sigs.k8s.io/cluster-api/api/core/v1beta2"
-	"sigs.k8s.io/cluster-api/util/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/certwatcher"
@@ -282,9 +281,6 @@ func main() {
 		setupLog.Error(err, "unable to start manager")
 		os.Exit(1)
 	}
-
-	// Initialize event recorder.
-	record.InitFromRecorder(mgr.GetEventRecorderFor("digitalocean-controller"))
 
 	dnsresolver, err := dnsresolver.NewDNSResolver()
 	if err != nil {
