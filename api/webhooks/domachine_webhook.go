@@ -18,7 +18,6 @@ package webhooks
 
 import (
 	"context"
-	"fmt"
 	"reflect"
 
 	"github.com/pkg/errors"
@@ -30,7 +29,6 @@ import (
 	"sigs.k8s.io/cluster-api-provider-digitalocean/api/v1beta1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
-	"sigs.k8s.io/controller-runtime/pkg/webhook"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
@@ -44,52 +42,38 @@ var _ = logf.Log.WithName("domachine-resource")
 type DOMachineWebhook struct{}
 
 var (
-	_ webhook.CustomDefaulter = &DOMachineWebhook{}
-	_ webhook.CustomValidator = &DOMachineWebhook{}
+	_ admission.Defaulter[*v1beta1.DOMachine] = &DOMachineWebhook{}
+	_ admission.Validator[*v1beta1.DOMachine] = &DOMachineWebhook{}
 )
 
 func (w *DOMachineWebhook) SetupWebhookWithManager(mgr ctrl.Manager) error {
-	return ctrl.NewWebhookManagedBy(mgr).
-		For(&v1beta1.DOMachine{}).
-		WithDefaulter(&DOMachineWebhook{}).
-		WithValidator(&DOMachineWebhook{}).
+	return ctrl.NewWebhookManagedBy(mgr, &v1beta1.DOMachine{}).
+		WithDefaulter(w).
+		WithValidator(w).
 		Complete()
 }
 
-// Default implements webhook.CustomDefaulter so a webhook will be registered for the type.
-func (w *DOMachineWebhook) Default(_ context.Context, obj runtime.Object) error {
-	doMachine, ok := obj.(*v1beta1.DOMachine)
-	if !ok {
-		return apierrors.NewBadRequest(fmt.Sprintf("expected a DOMachine object but got a %T", obj))
-	}
+// Default implements admission.Defaulter so a webhook will be registered for the type.
+func (w *DOMachineWebhook) Default(_ context.Context, doMachine *v1beta1.DOMachine) error {
 	defaultDOMachineSpec(&doMachine.Spec)
 	return nil
 }
 
-// ValidateCreate implements webhook.CustomValidator so a webhook will be registered for the type.
-func (w *DOMachineWebhook) ValidateCreate(_ context.Context, obj runtime.Object) (admission.Warnings, error) {
-	doMachine, ok := obj.(*v1beta1.DOMachine)
-	if !ok {
-		return nil, apierrors.NewBadRequest(fmt.Sprintf("expected a DOMachine object but got a %T", obj))
-	}
+// ValidateCreate implements admission.Validator so a webhook will be registered for the type.
+func (w *DOMachineWebhook) ValidateCreate(_ context.Context, doMachine *v1beta1.DOMachine) (admission.Warnings, error) {
 	return privateDropletWarnings(doMachine.Spec), nil
 }
 
-// ValidateUpdate implements webhook.CustomValidator so a webhook will be registered for the type.
-func (w *DOMachineWebhook) ValidateUpdate(_ context.Context, objOld, objNew runtime.Object) (admission.Warnings, error) {
+// ValidateUpdate implements admission.Validator so a webhook will be registered for the type.
+func (w *DOMachineWebhook) ValidateUpdate(_ context.Context, oldDOMachine, newDOMachine *v1beta1.DOMachine) (admission.Warnings, error) {
 	var allErrs field.ErrorList
 
-	newDOMachine, ok := objNew.(*v1beta1.DOMachine)
-	if !ok {
-		return nil, apierrors.NewBadRequest(fmt.Sprintf("expected an DOMachine new object but got a %T", objNew))
-	}
-
-	newDOMachineUnstr, err := runtime.DefaultUnstructuredConverter.ToUnstructured(objNew)
+	newDOMachineUnstr, err := runtime.DefaultUnstructuredConverter.ToUnstructured(newDOMachine)
 	if err != nil {
 		return nil, apierrors.NewInternalError(errors.Wrap(err, "failed to convert new DOMachine to unstructured object"))
 	}
 
-	oldDOMachineUnstr, err := runtime.DefaultUnstructuredConverter.ToUnstructured(objOld)
+	oldDOMachineUnstr, err := runtime.DefaultUnstructuredConverter.ToUnstructured(oldDOMachine)
 	if err != nil {
 		return nil, apierrors.NewInternalError(errors.Wrap(err, "failed to convert old DOMachine to unstructured object"))
 	}
@@ -116,7 +100,7 @@ func (w *DOMachineWebhook) ValidateUpdate(_ context.Context, objOld, objNew runt
 	return nil, apierrors.NewInvalid(newDOMachine.GroupVersionKind().GroupKind(), newDOMachine.Name, allErrs)
 }
 
-// ValidateDelete implements webhook.CustomValidator so a webhook will be registered for the type.
-func (w *DOMachineWebhook) ValidateDelete(context.Context, runtime.Object) (admission.Warnings, error) {
+// ValidateDelete implements admission.Validator so a webhook will be registered for the type.
+func (w *DOMachineWebhook) ValidateDelete(context.Context, *v1beta1.DOMachine) (admission.Warnings, error) {
 	return nil, nil
 }

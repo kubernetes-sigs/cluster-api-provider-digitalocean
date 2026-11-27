@@ -18,16 +18,13 @@ package webhooks
 
 import (
 	"context"
-	"fmt"
 	"reflect"
 
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	"sigs.k8s.io/cluster-api-provider-digitalocean/api/v1beta1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
-	"sigs.k8s.io/controller-runtime/pkg/webhook"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
@@ -41,36 +38,26 @@ var _ = logf.Log.WithName("domachinetemplate-resource")
 type DOMachineTemplateWebhook struct{}
 
 var (
-	_ webhook.CustomDefaulter = &DOMachineTemplateWebhook{}
-	_ webhook.CustomValidator = &DOMachineTemplateWebhook{}
+	_ admission.Defaulter[*v1beta1.DOMachineTemplate] = &DOMachineTemplateWebhook{}
+	_ admission.Validator[*v1beta1.DOMachineTemplate] = &DOMachineTemplateWebhook{}
 )
 
 func (w *DOMachineTemplateWebhook) SetupWebhookWithManager(mgr ctrl.Manager) error {
-	return ctrl.NewWebhookManagedBy(mgr).
-		For(&v1beta1.DOMachineTemplate{}).
-		WithDefaulter(&DOMachineTemplateWebhook{}).
-		WithValidator(&DOMachineTemplateWebhook{}).
+	return ctrl.NewWebhookManagedBy(mgr, &v1beta1.DOMachineTemplate{}).
+		WithDefaulter(w).
+		WithValidator(w).
 		Complete()
 }
 
-// Default implements webhookutil.CustomDefaulter so a webhook will be registered for the type.
-func (w *DOMachineTemplateWebhook) Default(_ context.Context, obj runtime.Object) error {
-	doMachineTemplate, ok := obj.(*v1beta1.DOMachineTemplate)
-	if !ok {
-		return apierrors.NewBadRequest(fmt.Sprintf("expected a DOMachineTemplate object but got a %T", obj))
-	}
+// Default implements admission.Defaulter so a webhook will be registered for the type.
+func (w *DOMachineTemplateWebhook) Default(_ context.Context, doMachineTemplate *v1beta1.DOMachineTemplate) error {
 	defaultDOMachineSpec(&doMachineTemplate.Spec.Template.Spec)
 	return nil
 }
 
-// ValidateCreate implements webhook.CustomValidator so a webhook will be registered for the type.
-func (w *DOMachineTemplateWebhook) ValidateCreate(_ context.Context, obj runtime.Object) (admission.Warnings, error) {
+// ValidateCreate implements admission.Validator so a webhook will be registered for the type.
+func (w *DOMachineTemplateWebhook) ValidateCreate(_ context.Context, doMachineTemplate *v1beta1.DOMachineTemplate) (admission.Warnings, error) {
 	var allErrs field.ErrorList
-
-	doMachineTemplate, ok := obj.(*v1beta1.DOMachineTemplate)
-	if !ok {
-		return nil, apierrors.NewBadRequest(fmt.Sprintf("expected an DOMachineTemplate object but got a %T", obj))
-	}
 
 	if doMachineTemplate.Spec.Template.Spec.ProviderID != nil {
 		allErrs = append(allErrs, field.Forbidden(field.NewPath("spec", "template", "spec", "providerID"), "cannot be set in templates"))
@@ -83,19 +70,9 @@ func (w *DOMachineTemplateWebhook) ValidateCreate(_ context.Context, obj runtime
 	return privateDropletWarnings(doMachineTemplate.Spec.Template.Spec), nil
 }
 
-// ValidateUpdate implements webhook.CustomValidator so a webhook will be registered for the type.
-func (w *DOMachineTemplateWebhook) ValidateUpdate(_ context.Context, objOld, objNew runtime.Object) (admission.Warnings, error) {
+// ValidateUpdate implements admission.Validator so a webhook will be registered for the type.
+func (w *DOMachineTemplateWebhook) ValidateUpdate(_ context.Context, oldDOMachineTemplate, newDOMachineTemplate *v1beta1.DOMachineTemplate) (admission.Warnings, error) {
 	var allErrs field.ErrorList
-
-	oldDOMachineTemplate, ok := objOld.(*v1beta1.DOMachineTemplate)
-	if !ok {
-		return nil, apierrors.NewBadRequest(fmt.Sprintf("expected an DOMachineTemplate old object but got a %T", objOld))
-	}
-
-	newDOMachineTemplate, ok := objNew.(*v1beta1.DOMachineTemplate)
-	if !ok {
-		return nil, apierrors.NewBadRequest(fmt.Sprintf("expected an DOMachineTemplate new object but got a %T", objNew))
-	}
 
 	if !reflect.DeepEqual(newDOMachineTemplate.Spec, oldDOMachineTemplate.Spec) {
 		allErrs = append(allErrs, field.Forbidden(field.NewPath("spec"), "DOMachineTemplateSpec is immutable"))
@@ -108,7 +85,7 @@ func (w *DOMachineTemplateWebhook) ValidateUpdate(_ context.Context, objOld, obj
 	return nil, apierrors.NewInvalid(newDOMachineTemplate.GroupVersionKind().GroupKind(), newDOMachineTemplate.Name, allErrs)
 }
 
-// ValidateDelete implements webhook.CustomValidator so a webhook will be registered for the type.
-func (w *DOMachineTemplateWebhook) ValidateDelete(context.Context, runtime.Object) (admission.Warnings, error) {
+// ValidateDelete implements admission.Validator so a webhook will be registered for the type.
+func (w *DOMachineTemplateWebhook) ValidateDelete(context.Context, *v1beta1.DOMachineTemplate) (admission.Warnings, error) {
 	return nil, nil
 }
