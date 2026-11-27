@@ -47,5 +47,5 @@ type DOMachineTemplateList struct {
 }
 
 func init() {
-	SchemeBuilder.Register(&DOMachineTemplate{}, &DOMachineTemplateList{})
+	objectTypes = append(objectTypes, &DOMachineTemplate{}, &DOMachineTemplateList{})
 }

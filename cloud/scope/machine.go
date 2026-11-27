@@ -32,7 +32,7 @@ import (
 	"k8s.io/utils/ptr"
 
 	clusterv1beta2 "sigs.k8s.io/cluster-api/api/core/v1beta2"
-	capierrors "sigs.k8s.io/cluster-api/errors" //nolint:staticcheck
+	capierrors "sigs.k8s.io/cluster-api/api/deprecated/errors" //nolint:staticcheck
 	"sigs.k8s.io/cluster-api/util"
 	"sigs.k8s.io/cluster-api/util/deprecated/v1beta1/patch"
 	"sigs.k8s.io/controller-runtime/pkg/client"

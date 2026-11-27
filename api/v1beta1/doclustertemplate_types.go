@@ -52,5 +52,5 @@ type DOClusterTemplateList struct {
 }
 
 func init() {
-	SchemeBuilder.Register(&DOClusterTemplate{}, &DOClusterTemplateList{})
+	objectTypes = append(objectTypes, &DOClusterTemplate{}, &DOClusterTemplateList{})
 }

@@ -20,7 +20,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
-	"sigs.k8s.io/cluster-api/errors" //nolint:staticcheck
+	"sigs.k8s.io/cluster-api/api/deprecated/errors" //nolint:staticcheck
 )
 
 const (
@@ -137,5 +137,5 @@ type DOMachineList struct {
 }
 
 func init() {
-	SchemeBuilder.Register(&DOMachine{}, &DOMachineList{})
+	objectTypes = append(objectTypes, &DOMachine{}, &DOMachineList{})
 }
