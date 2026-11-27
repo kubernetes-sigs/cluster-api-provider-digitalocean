@@ -23,6 +23,7 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	"sigs.k8s.io/cluster-api-provider-digitalocean/api/v1beta1"
+	"sigs.k8s.io/cluster-api/util/topology"
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
@@ -71,10 +72,17 @@ func (w *DOMachineTemplateWebhook) ValidateCreate(_ context.Context, doMachineTe
 }
 
 // ValidateUpdate implements admission.Validator so a webhook will be registered for the type.
-func (w *DOMachineTemplateWebhook) ValidateUpdate(_ context.Context, oldDOMachineTemplate, newDOMachineTemplate *v1beta1.DOMachineTemplate) (admission.Warnings, error) {
+func (w *DOMachineTemplateWebhook) ValidateUpdate(ctx context.Context, oldDOMachineTemplate, newDOMachineTemplate *v1beta1.DOMachineTemplate) (admission.Warnings, error) {
 	var allErrs field.ErrorList
 
-	if !reflect.DeepEqual(newDOMachineTemplate.Spec, oldDOMachineTemplate.Spec) {
+	// The Cluster API topology controller sends server-side apply dry-run requests to work out
+	// whether a template changed. The InfraMachineTemplate contract requires them to be accepted;
+	// the spec stays immutable for every other update. Without an admission request in the
+	// context (only when called directly), treat it as a normal update.
+	req, err := admission.RequestFromContext(ctx)
+	topologyDryRun := err == nil && topology.IsDryRunRequest(req, newDOMachineTemplate)
+
+	if !topologyDryRun && !reflect.DeepEqual(newDOMachineTemplate.Spec, oldDOMachineTemplate.Spec) {
 		allErrs = append(allErrs, field.Forbidden(field.NewPath("spec"), "DOMachineTemplateSpec is immutable"))
 	}
 
