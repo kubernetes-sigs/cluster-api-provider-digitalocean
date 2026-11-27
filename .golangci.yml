@@ -95,6 +95,10 @@ linters:
         - staticcheck
         path: .*\.go$
         text: 'SA1019: "?sigs.k8s.io/cluster-api/(api/core/v1beta1|util/deprecated/.*)"? is deprecated: This package is deprecated and is going to be removed when support for v1beta1 will be dropped.'
+      # Cluster API's util/record still takes the old record.EventRecorder (Cluster API excludes this too).
+      - linters:
+        - staticcheck
+        text: 'SA1019: \(sigs.k8s.io/controller-runtime/pkg/manager.Manager\).GetEventRecorderFor is deprecated'
       # Repeated literals in test fixtures are clearer inline than as constants.
       - linters:
           - goconst
